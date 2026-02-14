@@ -1,0 +1,45 @@
+-- Seed Data (Optional, for testing)
+
+-- Note: Passwords cannot be seeded directly as they are handled by Supabase Auth (GoTrue).
+-- You will need to create a user manually in the dashboard or use the signup flow first.
+-- Assuming a user with ID '00000000-0000-0000-0000-000000000000' exists for reference (replace with real ID after signup)
+
+-- 1. Create a Test Studio
+-- INSERT INTO studios (id, owner_user_id, name, description, location)
+-- VALUES (
+--   uuid_generate_v4(),
+--   'REPLACE_WITH_YOUR_USER_ID', 
+--   'Clay Space Berlin',
+--   'A community pottery studio in the heart of Kreuzberg.',
+--   'Kreuzberg, Berlin'
+-- );
+
+-- 2. Create Events (Run this after you have a user and studio)
+-- INSERT INTO events (title, description, price, capacity, start_time, end_time, location_type, city, category, status, creator_user_id)
+-- VALUES 
+-- (
+--   'Intro to Wheel Throwing',
+--   'Learn the basics of throwing on the potter''s wheel. We will cover centering, opening, pulling walls, and shaping.',
+--   45.00,
+--   8,
+--   NOW() + INTERVAL '2 days',
+--   NOW() + INTERVAL '2 days 2 hours',
+--   'studio',
+--   'Kreuzberg',
+--   'Arts & Crafts',
+--   'approved',
+--   'REPLACE_WITH_YOUR_USER_ID'
+-- ),
+-- (
+--   'Handbuilding Mug Workshop',
+--   'Create your own ceramic mug using handbuilding techniques like pinching and slab building. No experience needed.',
+--   35.00,
+--   12,
+--   NOW() + INTERVAL '5 days',
+--   NOW() + INTERVAL '5 days 3 hours',
+--   'studio',
+--   'Neukölln',
+--   'Arts & Crafts',
+--   'approved',
+--   'REPLACE_WITH_YOUR_USER_ID'
+-- );
