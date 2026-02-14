@@ -72,10 +72,36 @@ export default function CreateEventPage() {
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <label htmlFor="image_url" className="text-sm font-semibold text-stone-700">Cover Image URL (Optional)</label>
-                        <Input id="image_url" name="image_url" placeholder="https://images.unsplash.com/..." />
-                        <p className="text-xs text-stone-500">Paste a direct link to an image. If empty, we'll use a placeholder.</p>
+                    <div className="space-y-4">
+                        <label htmlFor="image" className="text-sm font-semibold text-stone-700">Event Cover Photo</label>
+                        <div className="flex flex-col gap-4">
+                            <Input
+                                id="image"
+                                name="image"
+                                type="file"
+                                accept="image/*"
+                                className="cursor-pointer"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        const reader = new FileReader();
+                                        reader.onloadend = () => {
+                                            const preview = document.getElementById('image-preview') as HTMLImageElement;
+                                            if (preview) preview.src = reader.result as string;
+                                            document.getElementById('preview-container')?.classList.remove('hidden');
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }
+                                }}
+                            />
+                            <div id="preview-container" className="hidden">
+                                <p className="text-xs text-stone-500 mb-2">Preview:</p>
+                                <div className="relative aspect-[16/9] w-full max-w-sm rounded-lg overflow-hidden border border-stone-200 bg-stone-100">
+                                    <img id="image-preview" src="" alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
+                                </div>
+                            </div>
+                            <p className="text-xs text-stone-500 italic">Square or landscape images work best.</p>
+                        </div>
                     </div>
                 </div>
 

@@ -17,6 +17,33 @@ export async function createEvent(prevState: any, formData: FormData) {
         redirect('/login')
     }
 
+    // Handle Image Upload if provided
+    let imageUrl = null;
+    const imageFile = formData.get('image') as File;
+
+    if (imageFile && imageFile.size > 0) {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('event-images')
+            .upload(filePath, imageFile);
+
+        if (uploadError) {
+            console.error('STORAGE ERROR uploading image:', uploadError);
+            // We can choose to fail the whole creation or just proceed without image
+            // Failing is safer for UX clarity
+            return { message: `Failed to upload image: ${uploadError.message}` };
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('event-images')
+            .getPublicUrl(filePath);
+
+        imageUrl = publicUrl;
+    }
+
     // Basic validation could go here
     const rawData = {
         creator_user_id: user.id,
@@ -29,7 +56,7 @@ export async function createEvent(prevState: any, formData: FormData) {
         location_type: formData.get('location_type') as 'home' | 'studio' | 'partner_venue',
         city: formData.get('city') as string,
         category: formData.get('category') as string,
-        image_url: (formData.get('image_url') as string) || null,
+        image_url: imageUrl,
         status: 'pending' // Default to pending for approval flow, or 'approved' for MVP
     }
 
