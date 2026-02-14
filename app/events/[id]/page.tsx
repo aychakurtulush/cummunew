@@ -24,48 +24,6 @@ const formatTime = (dateString?: string) => {
     return new Intl.DateTimeFormat('en-DE', { hour: '2-digit', minute: '2-digit' }).format(date);
 }
 
-// Mock Data for Demo
-const MOCK_EVENTS = [
-    {
-        id: "demo-1",
-        title: "Intro to Wheel Throwing",
-        host: "Clay Space Berlin",
-        category: "Arts",
-        start_time: new Date(Date.now() + 86400000).toISOString(),
-        end_time: new Date(Date.now() + 95400000).toISOString(),
-        price: 45,
-        city: "Kreuzberg",
-        description: "Join us for a 2.5-hour introduction to the pottery wheel. Perfect for beginners.",
-        capacity: 8,
-        location_type: "studio",
-    },
-    {
-        id: "demo-2",
-        title: "Italian Pasta Masterclass",
-        host: "Cucina Maria",
-        category: "Food",
-        start_time: new Date(Date.now() + 172800000).toISOString(),
-        end_time: new Date(Date.now() + 183600000).toISOString(),
-        price: 65,
-        city: "Mitte",
-        description: "Learn to make authentic pasta from scratch.",
-        capacity: 12,
-        location_type: "studio",
-    },
-    {
-        id: "demo-3",
-        title: "Morning Flow Yoga",
-        host: "Urban Zen",
-        category: "Sports",
-        start_time: new Date(Date.now() + 259200000).toISOString(),
-        end_time: new Date(Date.now() + 262800000).toISOString(),
-        price: 15,
-        city: "Tempelhof",
-        description: "Start your day with a grounding yoga flow in the park.",
-        capacity: 20,
-        location_type: "partner_venue",
-    },
-];
 
 
 export default async function EventPage({ params }: { params: Promise<{ id: string }> }) {
@@ -74,9 +32,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 
     let event = null;
 
-    if (id.startsWith('demo-')) {
-        event = MOCK_EVENTS.find(e => e.id === id);
-    } else if (supabase) {
+    if (supabase) {
         try {
             const { data, error } = await supabase
                 .from('events')
@@ -217,8 +173,8 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                             <div className="space-y-3">
                                 <form action={bookEvent}>
                                     <input type="hidden" name="eventId" value={event.id} />
-                                    <Button type="submit" disabled={id.startsWith('demo-')} className="w-full h-12 text-base bg-moss-600 hover:bg-moss-700 shadow-md disabled:opacity-70 disabled:cursor-not-allowed">
-                                        {id.startsWith('demo-') ? "Booking Disabled (Demo)" : "Request to Book"}
+                                    <Button type="submit" className="w-full h-12 text-base bg-moss-600 hover:bg-moss-700 shadow-md">
+                                        Request to Book
                                     </Button>
                                 </form>
                                 <p className="text-xs text-center text-stone-500">
