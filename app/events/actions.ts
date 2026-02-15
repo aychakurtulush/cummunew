@@ -285,20 +285,46 @@ export async function deleteEvent(eventId: string) {
         return { error: "Unauthorized: You do not own this event" }
     }
 
-    // Use Service Role to bypass RLS (in case migration wasn't applied)
-    const { createServiceRoleClient } = await import('@/lib/supabase/service');
-    const adminSupabase = createServiceRoleClient();
+    try {
+        // 1. Try with Service Role (Admin) Client first
+        // This bypasses RLS if the migration wasn't applied
+        const { createServiceRoleClient } = await import('@/lib/supabase/service');
+        const adminSupabase = createServiceRoleClient();
 
-    const { error } = await adminSupabase
+        console.log('[deleteEvent] Attempting delete with Admin Client...');
+        const { error: adminError } = await adminSupabase
+            .from('events')
+            .delete()
+            .eq('id', eventId)
+
+        if (!adminError) {
+            console.log('[deleteEvent] Admin delete successful');
+            revalidatePath('/host/events')
+            revalidatePath('/')
+            return { success: true }
+        }
+
+        console.error('[deleteEvent] Admin delete failed:', adminError);
+        // If admin delete fails (e.g. key missing/invalid), fall through to standard delete
+    } catch (e) {
+        console.error('[deleteEvent] Service role client init failed (likely missing SUPABASE_SERVICE_ROLE_KEY):', e);
+        // Fall through to standard delete
+    }
+
+    // 2. Fallback to Standard User Client
+    // This works if the RLS policy is correctly set (e.g. via migration 012)
+    console.log('[deleteEvent] Falling back to Standard User Client...');
+    const { error } = await supabase
         .from('events')
         .delete()
         .eq('id', eventId)
 
     if (error) {
-        console.error('Delete event error:', error)
-        return { error: error.message }
+        console.error('[deleteEvent] Standard delete error:', error)
+        return { error: `Delete failed: ${error.message}` }
     }
 
+    console.log('[deleteEvent] Standard delete successful');
     revalidatePath('/host/events')
     revalidatePath('/')
     return { success: true }
