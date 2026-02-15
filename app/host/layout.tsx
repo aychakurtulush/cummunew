@@ -1,3 +1,5 @@
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
@@ -21,11 +23,18 @@ const HOST_SIDEBAR_ITEMS = [
     { icon: Settings, label: "Settings", href: "/host/settings" },
 ];
 
-export default function HostLayout({
+export default async function HostLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const supabase = await createClient();
+    const { data: { user } } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
+
+    if (!user) {
+        redirect("/login");
+    }
+
     return (
         <div className="min-h-screen bg-stone-50 flex flex-col">
             <Navbar />
