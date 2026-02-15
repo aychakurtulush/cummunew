@@ -53,7 +53,7 @@ export default async function HostDashboardOverview() {
             {/* Welcome */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-serif font-bold text-stone-900">Host Dashboard [LIVE]</h1>
+                    <h1 className="text-2xl font-serif font-bold text-stone-900">Host Dashboard</h1>
                     <p className="text-stone-500">Welcome back, {user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'Host'}.</p>
                 </div>
                 <Button size="sm" variant="outline" asChild>
