@@ -134,11 +134,28 @@ export default function CreateEventPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <label htmlFor="start_time" className="text-sm font-semibold text-stone-700">Start Time</label>
-                            <Input id="start_time" name="start_time" type="datetime-local" required />
+                            <Input
+                                id="start_time"
+                                name="start_time"
+                                type="datetime-local"
+                                required
+                                onChange={(e) => {
+                                    const endTimeInput = document.getElementById('end_time') as HTMLInputElement;
+                                    if (endTimeInput) {
+                                        endTimeInput.min = e.target.value;
+                                    }
+                                }}
+                            />
                         </div>
                         <div className="space-y-2">
                             <label htmlFor="end_time" className="text-sm font-semibold text-stone-700">End Time</label>
-                            <Input id="end_time" name="end_time" type="datetime-local" required />
+                            <Input
+                                id="end_time"
+                                name="end_time"
+                                type="datetime-local"
+                                required
+                            />
+                            <p className="text-[10px] text-stone-400">Must be after the start time.</p>
                         </div>
                     </div>
                 </div>

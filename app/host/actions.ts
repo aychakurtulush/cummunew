@@ -17,6 +17,14 @@ export async function createEvent(prevState: any, formData: FormData) {
         redirect('/login')
     }
 
+    const startTime = new Date(formData.get('start_time') as string);
+    const endTime = formData.get('end_time') ? new Date(formData.get('end_time') as string) : new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
+
+    // Validation: End time must be after start time
+    if (endTime <= startTime) {
+        return { message: "End time must be after the start time." };
+    }
+
     // Handle Image Upload if provided
     let imageUrl = null;
     const imageFile = formData.get('image') as File;
@@ -51,8 +59,8 @@ export async function createEvent(prevState: any, formData: FormData) {
         description: formData.get('description') as string,
         price: parseFloat(formData.get('price') as string),
         capacity: parseInt(formData.get('capacity') as string),
-        start_time: new Date(formData.get('start_time') as string).toISOString(),
-        end_time: formData.get('end_time') ? new Date(formData.get('end_time') as string).toISOString() : new Date(new Date(formData.get('start_time') as string).getTime() + 2 * 60 * 60 * 1000).toISOString(),
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
         location_type: formData.get('location_type') as 'home' | 'studio' | 'partner_venue',
         city: formData.get('city') as string,
         category: formData.get('category') as string,
