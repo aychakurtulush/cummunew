@@ -177,7 +177,7 @@ export async function cancelBooking(bookingId: string) {
     return { success: true }
 }
 
-export async function updateBookingStatus(bookingId: string, status: 'approved' | 'rejected') {
+export async function updateBookingStatus(bookingId: string, status: 'confirmed' | 'declined') {
     const supabase = await createClient()
 
     if (!supabase) return { error: "Database connection failed" }

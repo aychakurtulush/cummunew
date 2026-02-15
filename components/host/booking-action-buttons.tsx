@@ -11,7 +11,7 @@ export function BookingActionButtons({ bookingId }: { bookingId: string }) {
     const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
 
-    const handleAction = async (status: 'approved' | 'rejected') => {
+    const handleAction = async (status: 'confirmed' | 'declined') => {
         setIsLoading(true)
         try {
             const result = await updateBookingStatus(bookingId, status)
@@ -34,9 +34,9 @@ export function BookingActionButtons({ bookingId }: { bookingId: string }) {
                 size="sm"
                 variant="outline"
                 className="border-rose-200 hover:bg-rose-50 hover:text-rose-700 text-rose-600 h-8 w-8 p-0"
-                onClick={() => handleAction('rejected')}
+                onClick={() => handleAction('declined')}
                 disabled={isLoading}
-                title="Reject"
+                title="Decline"
             >
                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
             </Button>
@@ -44,9 +44,9 @@ export function BookingActionButtons({ bookingId }: { bookingId: string }) {
                 size="sm"
                 variant="outline"
                 className="border-moss-200 hover:bg-moss-50 hover:text-moss-700 text-moss-600 h-8 w-8 p-0"
-                onClick={() => handleAction('approved')}
+                onClick={() => handleAction('confirmed')}
                 disabled={isLoading}
-                title="Approve"
+                title="Confirm"
             >
                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
             </Button>

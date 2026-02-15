@@ -43,7 +43,7 @@ export default async function HostDashboardOverview() {
     // Calculate stats
     const totalRevenue = 0; // We don't have payments yet
 
-    const totalBookings = bookings?.filter(b => b.status === 'approved').length || 0;
+    const totalBookings = bookings?.filter(b => b.status === 'confirmed').length || 0;
     const pendingBookings = bookings?.filter(b => b.status === 'pending') || [];
     const upcomingEventsCount = events?.filter(e => new Date(e.start_time) > new Date()).length || 0;
 
