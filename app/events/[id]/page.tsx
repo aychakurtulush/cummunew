@@ -27,6 +27,7 @@ const formatTime = (dateString?: string) => {
 
 
 import { WishlistButton } from "@/components/event/wishlist-button";
+import { BookingButton } from "@/components/event/booking-button";
 
 export default async function EventPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -209,12 +210,11 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                         </Button>
                                     </Link>
                                 ) : (
-                                    <form action={bookEvent}>
-                                        <input type="hidden" name="eventId" value={event.id} />
-                                        <Button type="submit" className="w-full h-12 text-base bg-moss-600 hover:bg-moss-700 shadow-md">
-                                            Request to Book
-                                        </Button>
-                                    </form>
+                                    <BookingButton
+                                        eventId={event.id}
+                                        price={event.price}
+                                        hasAuth={!!supabase && await supabase.auth.getUser().then(r => !!r.data.user)}
+                                    />
                                 )}
                                 <p className="text-xs text-center text-stone-500">
                                     {bookingStatus ? "View your bookings" : "No immediate charge. Host will confirm."}

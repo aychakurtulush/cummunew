@@ -6,29 +6,37 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function bookEvent(formData: FormData) {
     const eventId = formData.get('eventId') as string
+    console.log('[bookEvent] Request for event:', eventId);
+
     const supabase = await createClient()
 
     if (!supabase) {
-        redirect(`/login?error=Demo Mode: Backend not configured&next=/events/${eventId}`)
+        console.error('[bookEvent] Supabase client failed');
+        return { error: "Demo Mode: Backend not configured" }
     }
 
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-        redirect(`/login?next=/events/${eventId}`)
+        console.log('[bookEvent] No user logged in');
+        return { error: "Not authenticated" }
     }
 
     // Check if already booked
-    const { data: existingBooking } = await supabase
+    const { data: existingBooking, error: checkError } = await supabase
         .from('bookings')
         .select('id')
         .eq('event_id', eventId)
         .eq('user_id', user.id)
         .single()
 
+    if (checkError && checkError.code !== 'PGRST116') {
+        console.error('[bookEvent] Check error:', checkError);
+    }
+
     if (existingBooking) {
-        // Already booked, just redirect
-        redirect('/bookings')
+        console.log('[bookEvent] Already booked');
+        return { success: true, message: "Already booked" }
     }
 
     const { error } = await supabase
@@ -40,12 +48,14 @@ export async function bookEvent(formData: FormData) {
         })
 
     if (error) {
-        console.error('Booking error:', error)
-        redirect(`/events/${eventId}?error=Failed to book event`)
+        console.error('[bookEvent] Insert error:', error);
+        return { error: error.message }
     }
 
+    console.log('[bookEvent] Booking successful');
     revalidatePath('/bookings')
-    redirect('/bookings')
+    revalidatePath(`/events/${eventId}`)
+    return { success: true }
 }
 
 export async function toggleWishlist(eventId: string) {
