@@ -15,38 +15,38 @@ export async function Navbar() {
         <header className="sticky top-0 z-50 w-full border-b border-stone-200 bg-white/90 backdrop-blur-md supports-[backdrop-filter]:bg-white/60">
             <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
                 {/* Left: Logo */}
-                <div className="flex items-center gap-8">
+                <div className="flex items-center gap-4 md:gap-6">
                     <Link href="/" className="text-2xl font-serif font-bold tracking-tight text-stone-900">
                         Communew.
                     </Link>
                     <NavLinks />
                 </div>
 
-                {/* Center: Search */}
-                <div className="hidden md:flex items-center justify-center flex-1 max-w-md mx-4">
+                {/* Center: Search - Enforce min-width */}
+                <div className="hidden md:flex items-center justify-center flex-1 max-w-md mx-2 md:mx-4 min-w-[280px]">
                     <Suspense fallback={<div className="w-full h-9 bg-stone-100 rounded-full animate-pulse" />}>
                         <SearchInput />
                     </Suspense>
                 </div>
 
                 {/* Right: Actions */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 md:gap-4">
                     <Link href="/host">
-                        <Button variant="ghost" className="text-stone-600 hover:text-moss-700 hidden sm:inline-flex">
+                        <Button variant="ghost" className="text-stone-600 hover:text-moss-700 hidden lg:inline-flex">
                             Host Dashboard
                         </Button>
                     </Link>
                     <div className="h-6 w-px bg-stone-200 hidden sm:block" />
 
                     {user ? (
-                        <div className="flex items-center gap-4">
-                            <div className="hidden lg:block text-sm text-stone-600">
+                        <div className="flex items-center gap-2 md:gap-4">
+                            <div className="hidden xl:block text-sm text-stone-600">
                                 Welcome, <span className="font-semibold text-stone-900">{user.user_metadata?.full_name?.split(' ')[0] || "there"}!</span>
                             </div>
                             <Link href="/dashboard">
                                 <Button variant="ghost" size="sm" className="font-medium text-stone-900 gap-2">
                                     <User className="h-4 w-4" />
-                                    Dashboard
+                                    <span className="hidden lg:inline">Dashboard</span>
                                 </Button>
                             </Link>
                             <form action={signout}>
