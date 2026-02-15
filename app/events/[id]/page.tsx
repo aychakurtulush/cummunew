@@ -32,8 +32,9 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
     const { id } = await params;
     const supabase = await createClient();
 
-    let event = null;
+    let event: any = null;
     let isLiked = false;
+    let bookingStatus: string | null = null;
 
     if (supabase) {
         try {
@@ -55,6 +56,18 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                     .single();
 
                 isLiked = !!wishlistEntry;
+
+                // Check booking status
+                const { data: booking } = await supabase
+                    .from('bookings')
+                    .select('status')
+                    .eq('user_id', user.id)
+                    .eq('event_id', id)
+                    .single();
+
+                if (booking) {
+                    bookingStatus = booking.status;
+                }
             }
         } catch (e) {
             // Ignore
@@ -187,14 +200,24 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                             </div>
 
                             <div className="space-y-3">
-                                <form action={bookEvent}>
-                                    <input type="hidden" name="eventId" value={event.id} />
-                                    <Button type="submit" className="w-full h-12 text-base bg-moss-600 hover:bg-moss-700 shadow-md">
-                                        Request to Book
-                                    </Button>
-                                </form>
+                                {bookingStatus ? (
+                                    <Link href="/bookings">
+                                        <Button className="w-full h-12 text-base bg-emerald-600 hover:bg-emerald-700 shadow-md">
+                                            {bookingStatus === 'approved' ? 'Booking Confirmed' :
+                                                bookingStatus === 'rejected' ? 'Booking Rejected' :
+                                                    'Request Sent'}
+                                        </Button>
+                                    </Link>
+                                ) : (
+                                    <form action={bookEvent}>
+                                        <input type="hidden" name="eventId" value={event.id} />
+                                        <Button type="submit" className="w-full h-12 text-base bg-moss-600 hover:bg-moss-700 shadow-md">
+                                            Request to Book
+                                        </Button>
+                                    </form>
+                                )}
                                 <p className="text-xs text-center text-stone-500">
-                                    You won't be charged yet.
+                                    {bookingStatus ? "View your bookings" : "You won't be charged yet."}
                                 </p>
                             </div>
 

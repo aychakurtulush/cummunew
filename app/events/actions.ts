@@ -18,20 +18,30 @@ export async function bookEvent(formData: FormData) {
         redirect(`/login?next=/events/${eventId}`)
     }
 
-    // Check if already booked? (Optional for MVP)
+    // Check if already booked
+    const { data: existingBooking } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('event_id', eventId)
+        .eq('user_id', user.id)
+        .single()
+
+    if (existingBooking) {
+        // Already booked, just redirect
+        redirect('/bookings')
+    }
 
     const { error } = await supabase
         .from('bookings')
         .insert({
             event_id: eventId,
             user_id: user.id,
-            status: 'pending' // Host needs to approve
+            status: 'pending'
         })
 
     if (error) {
         console.error('Booking error:', error)
-        // redirect to error or show message
-        return
+        redirect(`/events/${eventId}?error=Failed to book event`)
     }
 
     revalidatePath('/bookings')
