@@ -1,11 +1,19 @@
-'use client';
-
 import { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, ArrowRight, Filter, Plus } from "lucide-react";
+import { MapPin, Calendar, ArrowRight, Filter, Plus, Check } from "lucide-react";
 import { AtmosphereBackground } from "@/components/ui/atmosphere-background";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+    DropdownMenuCheckboxItem,
+} from "@/components/ui/dropdown-menu";
 
 // Helper to format date
 const formatDate = (dateString?: string) => {
@@ -20,10 +28,43 @@ import { WishlistButton } from "@/components/event/wishlist-button";
 
 export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [] }: { initialEvents: any[], isDemo: boolean, wishlistEventIds?: string[] }) {
     const [selectedCategory, setSelectedCategory] = useState("All");
+    const [priceFilter, setPriceFilter] = useState<"any" | "free" | "under-20">("any");
+    const [dateFilter, setDateFilter] = useState<"any" | "today" | "this-weekend">("any");
 
-    const filteredEvents = selectedCategory === "All"
-        ? initialEvents
-        : initialEvents.filter(event => (event.category || "General") === selectedCategory);
+    const filteredEvents = initialEvents.filter(event => {
+        // 1. Category Filter
+        if (selectedCategory !== "All" && (event.category || "General") !== selectedCategory) {
+            return false;
+        }
+
+        // 2. Price Filter
+        if (priceFilter === "free" && event.price > 0) return false;
+        if (priceFilter === "under-20" && event.price >= 20) return false;
+
+        // 3. Date Filter
+        if (dateFilter !== "any") {
+            const eventDate = new Date(event.start_time);
+            const today = new Date();
+            const isToday = eventDate.toDateString() === today.toDateString();
+
+            if (dateFilter === "today" && !isToday) return false;
+
+            if (dateFilter === "this-weekend") {
+                // Simple weekend logic: Friday evening to Sunday night
+                const day = eventDate.getDay(); // 0 is Sunday, 6 is Saturday, 5 is Friday
+                const diff = eventDate.getDate() - today.getDate();
+                // This is a naive check, for production use date-fns or similar
+                // For now, let's just assume "weekend" means upcoming Friday/Saturday/Sunday
+                const isWeekendDay = day === 0 || day === 6 || day === 5;
+                // Ensure it's active or future
+                if (!isWeekendDay || eventDate < today) return false;
+            }
+        }
+
+        return true;
+    });
+
+    const activeFilterCount = (priceFilter !== "any" ? 1 : 0) + (dateFilter !== "any" ? 1 : 0);
 
     return (
         <div className="space-y-12 pb-20">
@@ -45,11 +86,67 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [] }: 
 
                     {/* Filters */}
                     <div className="flex flex-wrap items-center gap-2">
-                        <Button variant="outline" size="sm" className="h-10 rounded-full gap-2 border-stone-300 text-stone-700 bg-white hover:bg-stone-50 px-5">
-                            <Filter className="h-3.5 w-3.5" />
-                            <span>Filters</span>
-                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className={`h-10 rounded-full gap-2 border-stone-300 px-5 transition-colors ${activeFilterCount > 0 ? 'bg-stone-900 text-white hover:bg-stone-800' : 'bg-white text-stone-700 hover:bg-stone-50'}`}
+                                >
+                                    <Filter className="h-3.5 w-3.5" />
+                                    <span>Filters</span>
+                                    {activeFilterCount > 0 && (
+                                        <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px] font-bold ml-1">
+                                            {activeFilterCount}
+                                        </span>
+                                    )}
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start" className="w-56">
+                                <DropdownMenuLabel>Price</DropdownMenuLabel>
+                                <DropdownMenuGroup>
+                                    <DropdownMenuCheckboxItem checked={priceFilter === "any"} onCheckedChange={() => setPriceFilter("any")}>
+                                        Any Price
+                                    </DropdownMenuCheckboxItem>
+                                    <DropdownMenuCheckboxItem checked={priceFilter === "free"} onCheckedChange={() => setPriceFilter("free")}>
+                                        Free
+                                    </DropdownMenuCheckboxItem>
+                                    <DropdownMenuCheckboxItem checked={priceFilter === "under-20"} onCheckedChange={() => setPriceFilter("under-20")}>
+                                        Under €20
+                                    </DropdownMenuCheckboxItem>
+                                </DropdownMenuGroup>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuLabel>Date</DropdownMenuLabel>
+                                <DropdownMenuGroup>
+                                    <DropdownMenuCheckboxItem checked={dateFilter === "any"} onCheckedChange={() => setDateFilter("any")}>
+                                        Any Date
+                                    </DropdownMenuCheckboxItem>
+                                    <DropdownMenuCheckboxItem checked={dateFilter === "today"} onCheckedChange={() => setDateFilter("today")}>
+                                        Today
+                                    </DropdownMenuCheckboxItem>
+                                    <DropdownMenuCheckboxItem checked={dateFilter === "this-weekend"} onCheckedChange={() => setDateFilter("this-weekend")}>
+                                        This Weekend
+                                    </DropdownMenuCheckboxItem>
+                                </DropdownMenuGroup>
+                                {(activeFilterCount > 0) && (
+                                    <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            className="text-red-600 focus:text-red-600 cursor-pointer justify-center font-medium"
+                                            onSelect={() => {
+                                                setPriceFilter("any");
+                                                setDateFilter("any");
+                                            }}
+                                        >
+                                            Reset Filters
+                                        </DropdownMenuItem>
+                                    </>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
                         <div className="h-8 w-px bg-stone-200 mx-2 hidden sm:block" />
+
                         {FILTER_CATEGORIES.map((cat) => (
                             <button
                                 key={cat}
@@ -76,7 +173,10 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [] }: 
                                 <Badge variant="outline" className="text-stone-400 border-dashed border-stone-300">Demo Mode</Badge>
                             )}
                         </div>
-                        <p className="text-stone-500">Explore what's happening around you.</p>
+                        <p className="text-stone-500">
+                            Showing {filteredEvents.length} {filteredEvents.length === 1 ? 'event' : 'events'}
+                            {selectedCategory !== "All" && ` in ${selectedCategory}`}
+                        </p>
                     </div>
                     <Link href="/host/events/create">
                         <Button variant="ghost" className="text-moss-700 hover:text-moss-800 hover:bg-moss-50 hidden sm:flex">
@@ -154,7 +254,16 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [] }: 
 
                     {filteredEvents.length === 0 && (
                         <div className="col-span-full py-12 text-center text-stone-500">
-                            No events found in this category.
+                            No events found matching your filters.
+                            <div className="mt-4">
+                                <Button variant="link" onClick={() => {
+                                    setSelectedCategory("All");
+                                    setPriceFilter("any");
+                                    setDateFilter("any");
+                                }}>
+                                    Clear all filters
+                                </Button>
+                            </div>
                         </div>
                     )}
                 </div>
