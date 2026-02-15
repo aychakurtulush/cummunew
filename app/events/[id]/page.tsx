@@ -155,7 +155,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 
                         {/* Amenities (Hardcoded for MVP) */}
                         <div>
-                            <h3 className="text-lg font-serif font-semibold text-stone-900 mb-4">What's included</h3>
+                            <h3 className="text-lg font-serif font-semibold text-stone-900 mb-4">Everything you need</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="flex items-center gap-2 text-stone-600">
                                     <Check className="h-4 w-4 text-moss-600" />
@@ -217,7 +217,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                     </form>
                                 )}
                                 <p className="text-xs text-center text-stone-500">
-                                    {bookingStatus ? "View your bookings" : "You won't be charged yet."}
+                                    {bookingStatus ? "View your bookings" : "No immediate charge. Host will confirm."}
                                 </p>
                             </div>
 

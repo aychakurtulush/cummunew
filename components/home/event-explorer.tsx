@@ -27,24 +27,23 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [] }: 
     return (
         <div className="space-y-12 pb-20">
             {/* Hero & Filters */}
-            <section className="bg-gradient-to-b from-white to-stone-50 pt-8 pb-12 border-b border-stone-100">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-                    <div className="space-y-4 max-w-3xl">
-                        <Badge variant="outline" className="bg-white/50 backdrop-blur text-stone-600 border-stone-200">
+            <section className="bg-gradient-to-b from-white to-stone-50 pt-12 pb-16 border-b border-stone-100">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+                    <div className="space-y-6 max-w-3xl">
+                        <Badge variant="outline" className="bg-white/50 backdrop-blur text-stone-600 border-stone-200 px-3 py-1 text-xs uppercase tracking-wider font-semibold">
                             Berlin Community Platform
                         </Badge>
-                        <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-stone-900 tracking-tight leading-[1.1]">
-                            Discover local hobbies <br className="hidden sm:block" />
-                            <span className="text-stone-500">in your neighborhood.</span>
+                        <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif font-bold text-stone-900 tracking-tight leading-[1.05]">
+                            Find your people.
                         </h1>
                         <p className="text-stone-600 text-lg sm:text-xl max-w-2xl leading-relaxed">
-                            Join workshops, classes, and regular meetups hosted by local studios and passionate neighbors.
+                            Discover the local community where you belong. Join workshops, classes, and gatherings hosted by neighbors who share your passions.
                         </p>
                     </div>
 
                     {/* Filters */}
-                    <div className="flex flex-wrap items-center gap-2 pt-2">
-                        <Button variant="outline" size="sm" className="h-10 rounded-full gap-2 border-stone-300 text-stone-700 bg-white hover:bg-stone-50 px-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Button variant="outline" size="sm" className="h-10 rounded-full gap-2 border-stone-300 text-stone-700 bg-white hover:bg-stone-50 px-5">
                             <Filter className="h-3.5 w-3.5" />
                             <span>Filters</span>
                         </Button>
@@ -54,7 +53,7 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [] }: 
                                 key={cat}
                                 onClick={() => setSelectedCategory(cat)}
                                 className={`h-10 px-5 rounded-full text-sm font-medium transition-all ${selectedCategory === cat
-                                    ? "bg-moss-600 text-white shadow-md shadow-moss-900/10"
+                                    ? "bg-moss-700 text-white shadow-md shadow-moss-900/10"
                                     : "bg-white text-stone-600 border border-stone-200 hover:border-moss-300 hover:bg-moss-50/50 hover:text-moss-800"
                                     }`}
                             >
