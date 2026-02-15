@@ -61,7 +61,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
   const isDemo = false;
 
   return (
-    <div className="min-h-screen bg-stone-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-stone-50 flex flex-col font-sans relative">
       <Navbar />
 
       <main className="flex-1">

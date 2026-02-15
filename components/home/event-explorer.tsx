@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Calendar, ArrowRight, Filter, Plus } from "lucide-react";
+import { AtmosphereBackground } from "@/components/ui/atmosphere-background";
 
 // Helper to format date
 const formatDate = (dateString?: string) => {
@@ -27,8 +28,9 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [] }: 
     return (
         <div className="space-y-12 pb-20">
             {/* Hero & Filters */}
-            <section className="bg-stone-texture pt-12 pb-16 border-b border-stone-200">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+            <section className="relative bg-stone-50/50 pt-12 pb-16 border-b border-stone-200 overflow-hidden">
+                <AtmosphereBackground intensity="medium" />
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-10 relative z-10">
                     <div className="space-y-6 max-w-3xl">
                         <Badge variant="outline" className="bg-white/50 backdrop-blur text-stone-600 border-stone-200 px-3 py-1 text-xs uppercase tracking-wider font-semibold">
                             Berlin Community Platform
