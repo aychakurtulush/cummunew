@@ -53,6 +53,27 @@ export async function bookEvent(formData: FormData) {
     }
 
     console.log('[bookEvent] Booking successful');
+
+    // --- Email Notification Start ---
+    try {
+        // Fetch event details for the email
+        const { data: eventData } = await supabase
+            .from('events')
+            .select('title')
+            .eq('id', eventId)
+            .single();
+
+        if (eventData && user.email) {
+            // Dynamically import to avoid build issues if file missing (though we just created it)
+            const { sendBookingNotification } = await import('@/lib/email');
+            await sendBookingNotification(user.email, eventData.title, eventId);
+        }
+    } catch (emailError) {
+        console.error('[bookEvent] Email failed (non-critical):', emailError);
+        // Don't fail the booking if email fails
+    }
+    // --- Email Notification End ---
+
     revalidatePath('/bookings')
     revalidatePath(`/events/${eventId}`)
     return { success: true }
