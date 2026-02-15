@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button"
 import { Search, User } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { signout } from "@/app/(auth)/actions"
+import { SearchInput } from "./search-input"
+import { Suspense } from "react"
 
 export async function Navbar() {
     const supabase = await createClient()
@@ -26,16 +28,11 @@ export async function Navbar() {
                     </nav>
                 </div>
 
-                {/* Center: Search (Optional / Minimal) */}
+                {/* Center: Search */}
                 <div className="hidden md:flex items-center justify-center flex-1 max-w-md mx-4">
-                    <div className="relative w-full">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
-                        <input
-                            type="text"
-                            placeholder="Search events in Berlin..."
-                            className="w-full h-9 rounded-full bg-stone-100 border-none pl-9 pr-4 text-sm focus:ring-1 focus:ring-moss-600 placeholder:text-stone-500"
-                        />
-                    </div>
+                    <Suspense fallback={<div className="w-full h-9 bg-stone-100 rounded-full animate-pulse" />}>
+                        <SearchInput />
+                    </Suspense>
                 </div>
 
                 {/* Right: Actions */}

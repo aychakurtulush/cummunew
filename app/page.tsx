@@ -14,8 +14,9 @@ const formatDate = (dateString?: string) => {
 
 const FILTER_CATEGORIES = ["All", "Arts & Crafts", "Food & Drink", "Sports & Wellness", "Social & Games", "Language Exchange"];
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const supabase = await createClient();
+  const { q } = await searchParams;
 
   let events = [];
   let wishlistEventIds: string[] = [];
@@ -24,11 +25,17 @@ export default async function Home() {
     if (supabase) {
       const { data: { user } } = await supabase.auth.getUser();
 
-      const { data: eventsData, error: eventsError } = await supabase
+      let query = supabase
         .from('events')
         .select('*')
         .eq('status', 'approved')
         .order('start_time', { ascending: true });
+
+      if (q) {
+        query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%`);
+      }
+
+      const { data: eventsData, error: eventsError } = await query;
 
       if (!eventsError && eventsData) {
         events = eventsData;
