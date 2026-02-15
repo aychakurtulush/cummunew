@@ -1,8 +1,10 @@
+"use client";
+
 import { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, ArrowRight, Filter, Plus, Check } from "lucide-react";
+import { MapPin, Calendar, ArrowRight, Filter, Plus } from "lucide-react";
 import { AtmosphereBackground } from "@/components/ui/atmosphere-background";
 import {
     DropdownMenu,
