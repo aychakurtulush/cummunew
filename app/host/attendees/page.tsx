@@ -89,8 +89,8 @@ export default async function AttendeesPage() {
                                     </td>
                                     <td className="px-6 py-4 font-medium">{booking.events?.title}</td>
                                     <td className="px-6 py-4">
-                                        <Badge variant={booking.status === 'approved' ? 'default' : 'secondary'}
-                                            className={booking.status === 'approved' ? 'bg-moss-100 text-moss-800' : 'bg-terracotta-100 text-terracotta-800'}>
+                                        <Badge variant={booking.status === 'confirmed' ? 'default' : 'secondary'}
+                                            className={booking.status === 'confirmed' ? 'bg-moss-100 text-moss-800' : 'bg-terracotta-100 text-terracotta-800'}>
                                             {booking.status}
                                         </Badge>
                                     </td>

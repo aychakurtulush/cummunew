@@ -76,10 +76,10 @@ export default async function BookingsPage() {
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
                                     <Badge variant={
-                                        booking.status === 'approved' ? 'default' :
-                                            booking.status === 'rejected' ? 'destructive' : 'secondary'
+                                        booking.status === 'confirmed' ? 'default' :
+                                            booking.status === 'declined' ? 'destructive' : 'secondary'
                                     } className={
-                                        booking.status === 'approved' ? 'bg-moss-600 hover:bg-moss-700' :
+                                        booking.status === 'confirmed' ? 'bg-moss-600 hover:bg-moss-700' :
                                             booking.status === 'pending' ? 'bg-amber-100 text-amber-800 hover:bg-amber-200 border-amber-200' : ''
                                     }>
                                         {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
