@@ -18,16 +18,31 @@ export default async function Home() {
   const supabase = await createClient();
 
   let events = [];
+  let wishlistEventIds: string[] = [];
+
   try {
     if (supabase) {
-      const { data, error } = await supabase
+      const { data: { user } } = await supabase.auth.getUser();
+
+      const { data: eventsData, error: eventsError } = await supabase
         .from('events')
         .select('*')
         .eq('status', 'approved')
         .order('start_time', { ascending: true });
 
-      if (!error && data) {
-        events = data;
+      if (!eventsError && eventsData) {
+        events = eventsData;
+      }
+
+      if (user) {
+        const { data: wishlistData } = await supabase
+          .from('wishlist')
+          .select('event_id')
+          .eq('user_id', user.id);
+
+        if (wishlistData) {
+          wishlistEventIds = wishlistData.map(w => w.event_id);
+        }
       }
     }
   } catch (e) {
@@ -43,7 +58,11 @@ export default async function Home() {
       <Navbar />
 
       <main className="flex-1">
-        <EventExplorer initialEvents={displayEvents} isDemo={isDemo} />
+        <EventExplorer
+          initialEvents={displayEvents}
+          isDemo={isDemo}
+          wishlistEventIds={wishlistEventIds}
+        />
       </main>
       <Footer />
     </div>

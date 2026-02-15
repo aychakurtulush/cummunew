@@ -15,7 +15,9 @@ const formatDate = (dateString?: string) => {
 
 const FILTER_CATEGORIES = ["All", "Arts & Crafts", "Food & Drink", "Sports & Wellness", "Social & Games", "Language Exchange"];
 
-export function EventExplorer({ initialEvents, isDemo }: { initialEvents: any[], isDemo: boolean }) {
+import { WishlistButton } from "@/components/event/wishlist-button";
+
+export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [] }: { initialEvents: any[], isDemo: boolean, wishlistEventIds?: string[] }) {
     const [selectedCategory, setSelectedCategory] = useState("All");
 
     const filteredEvents = selectedCategory === "All"
@@ -103,6 +105,13 @@ export function EventExplorer({ initialEvents, isDemo }: { initialEvents: any[],
                                         <span className="px-2 py-1 rounded-md text-xs font-semibold backdrop-blur-md shadow-sm bg-white/90 text-stone-700 border border-stone-200">
                                             {event.category || "General"}
                                         </span>
+                                    </div>
+
+                                    <div className="absolute top-3 right-3 z-20">
+                                        <WishlistButton
+                                            eventId={event.id}
+                                            initialIsLiked={wishlistEventIds.includes(event.id)}
+                                        />
                                     </div>
 
                                     <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

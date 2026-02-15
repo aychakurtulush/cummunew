@@ -6,6 +6,7 @@ import { MapPin, Calendar, ArrowRight, Heart } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { WishlistButton } from "@/components/event/wishlist-button";
 
 // Mock Data for Demo
 const MOCK_SAVED = [
@@ -41,16 +42,25 @@ const formatDate = (dateString?: string) => {
 
 export default async function SavedPage() {
     const supabase = await createClient();
-    let savedEvents = [];
+    let savedEvents: any[] = [];
+    const wishlistEventIds: string[] = [];
 
     if (supabase) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) redirect('/login');
-        // In a real app, we would fetch from a 'saved_events' table here
-        // For now, we will just use the mock data even if logged in, as migration for 'saved' isn't applied yet
-        savedEvents = MOCK_SAVED;
-    } else {
-        savedEvents = MOCK_SAVED;
+
+        const { data: wishlistData, error } = await supabase
+            .from('wishlist')
+            .select(`
+                event_id,
+                events (*)
+            `)
+            .eq('user_id', user.id);
+
+        if (!error && wishlistData) {
+            savedEvents = wishlistData.map(w => w.events).filter(Boolean);
+            wishlistData.forEach(w => wishlistEventIds.push(w.event_id));
+        }
     }
 
     return (
@@ -73,10 +83,11 @@ export default async function SavedPage() {
                                     <div className="absolute inset-0 flex items-center justify-center bg-stone-100 text-stone-400 text-sm font-medium">
                                         [{event.category}]
                                     </div>
-                                    <div className="absolute top-3 right-3">
-                                        <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full bg-white/90 text-red-500 hover:text-red-600 hover:bg-white">
-                                            <Heart className="h-4 w-4 fill-current" />
-                                        </Button>
+                                    <div className="absolute top-3 right-3 z-20">
+                                        <WishlistButton
+                                            eventId={event.id}
+                                            initialIsLiked={true}
+                                        />
                                     </div>
                                 </div>
 

@@ -26,20 +26,36 @@ const formatTime = (dateString?: string) => {
 
 
 
+import { WishlistButton } from "@/components/event/wishlist-button";
+
 export default async function EventPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const supabase = await createClient();
 
     let event = null;
+    let isLiked = false;
 
     if (supabase) {
         try {
+            const { data: { user } } = await supabase.auth.getUser();
+
             const { data, error } = await supabase
                 .from('events')
                 .select('*')
                 .eq('id', id)
                 .single();
             if (!error) event = data;
+
+            if (user && event) {
+                const { data: wishlistEntry } = await supabase
+                    .from('wishlist')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .eq('event_id', id)
+                    .single();
+
+                isLiked = !!wishlistEntry;
+            }
         } catch (e) {
             // Ignore
         }
@@ -186,6 +202,11 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 
                             <div className="flex gap-4 justify-center">
                                 <ShareButton title={event.title} description={event.description} />
+                                <WishlistButton
+                                    eventId={event.id}
+                                    initialIsLiked={isLiked}
+                                    variant="full"
+                                />
                             </div>
 
                         </div>
