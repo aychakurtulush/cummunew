@@ -99,56 +99,62 @@ export async function createStudio(prevState: any, formData: FormData) {
         redirect('/login')
     }
 
-    // Handle Image Upload
-    let imageUrls: string[] = [];
-    const imageFile = formData.get('image') as File;
+    try {
+        // Handle Image Upload
+        let imageUrls: string[] = [];
+        const imageFile = formData.get('image') as File;
 
-    if (imageFile && imageFile.size > 0) {
-        const fileExt = imageFile.name.split('.').pop();
-        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-        const filePath = `${fileName}`;
+        if (imageFile && imageFile.size > 0) {
+            const fileExt = imageFile.name.split('.').pop();
+            const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+            const filePath = `${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
-            .from('studio-images')
-            .upload(filePath, imageFile);
+            const { error: uploadError } = await supabase.storage
+                .from('studio-images')
+                .upload(filePath, imageFile);
 
-        if (uploadError) {
-            console.error('STORAGE ERROR uploading studio image:', uploadError);
-            return { message: `Failed to upload image: ${uploadError.message}` };
+            if (uploadError) {
+                console.error('STORAGE ERROR uploading studio image:', uploadError);
+                return { message: `Failed to upload image: ${uploadError.message}` };
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('studio-images')
+                .getPublicUrl(filePath);
+
+            imageUrls.push(publicUrl);
         }
 
-        const { data: { publicUrl } } = supabase.storage
-            .from('studio-images')
-            .getPublicUrl(filePath);
+        // Parse Amenities (comma separated string to array)
+        const amenitiesString = formData.get('amenities') as string;
+        const amenities = amenitiesString
+            ? amenitiesString.split(',').map(s => s.trim()).filter(s => s.length > 0)
+            : [];
 
-        imageUrls.push(publicUrl);
-    }
+        const rawData = {
+            owner_user_id: user.id,
+            name: formData.get('name') as string,
+            description: formData.get('description') as string,
+            location: formData.get('location') as string,
+            price_per_hour: parseFloat(formData.get('price_per_hour') as string),
+            capacity: parseInt(formData.get('capacity') as string),
+            amenities: amenities,
+            images: imageUrls,
+            status: 'active' // Auto-active for MVP
+        }
 
-    // Parse Amenities (comma separated string to array)
-    const amenitiesString = formData.get('amenities') as string;
-    const amenities = amenitiesString
-        ? amenitiesString.split(',').map(s => s.trim()).filter(s => s.length > 0)
-        : [];
+        const { error } = await supabase
+            .from('studios')
+            .insert(rawData)
 
-    const rawData = {
-        owner_user_id: user.id,
-        name: formData.get('name') as string,
-        description: formData.get('description') as string,
-        location: formData.get('location') as string,
-        price_per_hour: parseFloat(formData.get('price_per_hour') as string),
-        capacity: parseInt(formData.get('capacity') as string),
-        amenities: amenities,
-        images: imageUrls,
-        status: 'active' // Auto-active for MVP
-    }
+        if (error) {
+            console.error('SERVER ERROR creating studio:', error)
+            return { message: `Failed to create studio: ${error.message}` }
+        }
 
-    const { error } = await supabase
-        .from('studios')
-        .insert(rawData)
-
-    if (error) {
-        console.error('SERVER ERROR creating studio:', error)
-        return { message: `Failed to create studio: ${error.message}` }
+    } catch (e: any) {
+        console.error('UNEXPECTED ERROR in createStudio:', e);
+        return { message: `An unexpected error occurred: ${e.message}` }
     }
 
     revalidatePath('/host/studios');
