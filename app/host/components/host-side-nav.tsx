@@ -11,9 +11,11 @@ import {
     Settings,
     PlusCircle,
     User,
+    Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 const HOST_SIDEBAR_ITEMS = [
     { icon: LayoutDashboard, label: "Overview", href: "/host" },
@@ -63,6 +65,20 @@ export function HostSideNav() {
                         </Link>
                     );
                 })}
+                {/* Studios link added after the mapped HOST_SIDEBAR_ITEMS */}
+                <Link href="/host/studios">
+                    <Button
+                        variant={pathname.startsWith("/host/studios") ? "secondary" : "ghost"}
+                        className={cn(
+                            "w-full justify-start gap-2",
+                            pathname.startsWith("/host/studios") ? "font-semibold text-moss-900 bg-moss-50" : "text-stone-600 hover:text-stone-900"
+                        )}
+                    >
+                        <Building2 className="h-4 w-4" />
+                        Studios
+                        <Badge className="ml-auto bg-stone-100 text-stone-600 hover:bg-stone-200" variant="secondary">New</Badge>
+                    </Button>
+                </Link>
             </nav>
 
             <Separator className="my-4" />
