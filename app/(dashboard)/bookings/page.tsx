@@ -4,6 +4,7 @@ import { Calendar, MapPin, Clock } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CancelBookingButton } from "@/components/event/cancel-booking-button";
 
 const formatDate = (dateString?: string) => {
     if (!dateString) return "Date TBD";
@@ -101,9 +102,14 @@ export default async function BookingsPage() {
                             </div>
 
                             {/* Action */}
-                            <Link href={`/events/${booking.events.id}`}>
-                                <Button variant="ghost" size="sm">View Event</Button>
-                            </Link>
+                            <div className="flex flex-col items-end gap-2">
+                                <Link href={`/events/${booking.events.id}`}>
+                                    <Button variant="ghost" size="sm">View Event</Button>
+                                </Link>
+                                {booking.status === 'pending' && (
+                                    <CancelBookingButton bookingId={booking.id} />
+                                )}
+                            </div>
                         </div>
                     ))}
                 </div>

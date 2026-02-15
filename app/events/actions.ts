@@ -142,3 +142,37 @@ export async function toggleWishlist(eventId: string) {
 
     return { success: true, isLiked: !existing }
 }
+
+export async function cancelBooking(bookingId: string) {
+    const supabase = await createClient()
+
+    if (!supabase) return { error: "Database connection failed" }
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: "Not authenticated" }
+
+    // Verify ownership
+    const { data: booking } = await supabase
+        .from('bookings')
+        .select('user_id')
+        .eq('id', bookingId)
+        .single()
+
+    if (!booking || booking.user_id !== user.id) {
+        return { error: "Unauthorized" }
+    }
+
+    const { error } = await supabase
+        .from('bookings')
+        .delete()
+        .eq('id', bookingId)
+
+    if (error) {
+        console.error('Cancel error:', error)
+        return { error: error.message }
+    }
+
+    revalidatePath('/bookings')
+    return { success: true }
+}
