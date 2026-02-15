@@ -52,10 +52,18 @@ export default async function SavedPage() {
                     {savedEvents.map((event: any) => (
                         <Link href={`/events/${event.id}`} key={event.id} className="group block focus:outline-none">
                             <article className="flex flex-col h-full bg-white rounded-xl border border-stone-200 overflow-hidden hover:shadow-md transition-all">
-                                <div className="aspect-[4/3] w-full bg-stone-200 relative">
-                                    <div className="absolute inset-0 flex items-center justify-center bg-stone-100 text-stone-400 text-sm font-medium">
-                                        [{event.category}]
-                                    </div>
+                                <div className="aspect-[4/3] w-full bg-stone-200 relative group-hover:opacity-90 transition-opacity">
+                                    {event.image_url ? (
+                                        <img
+                                            src={event.image_url}
+                                            alt={event.title}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-stone-100 text-stone-400 text-sm font-medium">
+                                            [{event.category}]
+                                        </div>
+                                    )}
                                     <div className="absolute top-3 right-3 z-20">
                                         <WishlistButton
                                             eventId={event.id}
