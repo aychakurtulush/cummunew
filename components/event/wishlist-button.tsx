@@ -5,6 +5,7 @@ import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toggleWishlist } from "@/app/events/actions";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface WishlistButtonProps {
     eventId: string;
@@ -14,6 +15,7 @@ interface WishlistButtonProps {
 }
 
 export function WishlistButton({ eventId, initialIsLiked, className, variant = "icon" }: WishlistButtonProps) {
+    // console.log(`[WishlistButton] Render ${eventId}, initialIsLiked:`, initialIsLiked);
     const [isLiked, setIsLiked] = useState(initialIsLiked);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
@@ -34,19 +36,26 @@ export function WishlistButton({ eventId, initialIsLiked, className, variant = "
         setIsLiked(newLikedState);
         setIsLoading(true);
 
+
         try {
             const result = await toggleWishlist(eventId);
             if (result.error) {
                 // Revert on error (e.g. not logged in)
                 setIsLiked(isLiked);
                 if (result.error === "Not authenticated") {
+                    toast.error("Please log in to save events");
                     router.push(`/login?next=/events/${eventId}`);
+                } else {
+                    toast.error("Failed to update wishlist");
                 }
             } else if (result.success) {
                 setIsLiked(result.isLiked!);
+                toast.success(result.isLiked ? "Added to wishlist" : "Removed from wishlist");
+                router.refresh();
             }
         } catch (error) {
             setIsLiked(isLiked);
+            toast.error("Something went wrong");
         } finally {
             setIsLoading(false);
         }
