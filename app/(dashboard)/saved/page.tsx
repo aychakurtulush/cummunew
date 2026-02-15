@@ -36,6 +36,7 @@ export default async function SavedPage() {
         if (!error && wishlistData) {
             savedEvents = wishlistData.map(w => w.events).filter(Boolean);
             wishlistData.forEach(w => wishlistEventIds.push(w.event_id));
+            console.log('[SavedPage] Loaded events:', JSON.stringify(savedEvents, null, 2));
         }
     }
 
