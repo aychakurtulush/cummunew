@@ -133,7 +133,7 @@ export default async function HostDashboardOverview() {
                                         <Badge className="bg-amber-100 text-amber-800 border-amber-200">Pending</Badge>
 
                                         {/* Action Buttons Component */}
-                                        <BookingActionButtons bookingId={booking.id} />
+                                        <BookingActionButtons bookingId={booking.id} status={booking.status} />
                                     </div>
                                 </div>
                             ))}
