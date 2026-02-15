@@ -15,7 +15,7 @@ export async function sendBookingNotification(
     try {
         console.log(`[Email] Sending notification to ${userEmail} for event ${eventTitle}`);
         await resend.emails.send({
-            from: 'Communew <onboarding@resend.dev>', // Default sender for testing
+            from: 'Communew <noreply@communew.com>',
             to: userEmail, // Sending to the booker (current user) to bypass Free Tier verify limits
             subject: `Request Sent: ${eventTitle}`,
             html: `
