@@ -1,11 +1,33 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Heart, MessageSquare } from "lucide-react";
+import { CalendarDays, Heart, MessageSquare, PartyPopper } from "lucide-react";
 import Link from "next/link";
 
-export default function DashboardPage() {
+export default async function DashboardPage(props: any) {
+    const searchParams = await props.searchParams;
+    const isWelcome = searchParams?.welcome === 'true';
+
     return (
         <div className="space-y-8">
+            {isWelcome && (
+                <div className="bg-moss-600 rounded-2xl p-6 md:p-8 text-white shadow-lg shadow-moss-900/20 relative overflow-hidden group">
+                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
+                        <div className="h-16 w-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shrink-0">
+                            <PartyPopper className="h-8 w-8 text-white" />
+                        </div>
+                        <div className="text-center md:text-left">
+                            <h2 className="text-2xl md:text-3xl font-serif font-bold mb-2">Welcome to Communew.!</h2>
+                            <p className="text-moss-100 text-lg max-w-xl">
+                                We're so glad you're here. Start exploring Berlin's best local hobbies and meet your neighbors.
+                            </p>
+                        </div>
+                    </div>
+                    {/* Decorative Background Elements */}
+                    <div className="absolute -top-24 -right-24 h-64 w-64 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-colors duration-500" />
+                    <div className="absolute -bottom-24 -left-24 h-64 w-64 bg-moss-900/20 rounded-full blur-3xl" />
+                </div>
+            )}
+
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-serif font-bold text-stone-900">Dashboard</h1>
                 <Link href="/">

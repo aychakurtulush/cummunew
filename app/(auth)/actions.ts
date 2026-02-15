@@ -23,7 +23,7 @@ export async function login(formData: FormData) {
     }
 
     revalidatePath('/', 'layout')
-    redirect('/dashboard') // Default to dashboard after login
+    redirect('/dashboard?welcome=true') // Default to dashboard after login
 }
 
 export async function signup(formData: FormData) {
@@ -50,7 +50,7 @@ export async function signup(formData: FormData) {
     }
 
     revalidatePath('/', 'layout')
-    redirect('/dashboard') // Or /verify-email if email confirmation is on
+    redirect('/dashboard?welcome=true') // Or /verify-email if email confirmation is on
 }
 
 export async function signout() {

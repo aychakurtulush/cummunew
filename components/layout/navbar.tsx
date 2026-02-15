@@ -49,6 +49,9 @@ export async function Navbar() {
 
                     {user ? (
                         <div className="flex items-center gap-4">
+                            <div className="hidden lg:block text-sm text-stone-600">
+                                Welcome, <span className="font-semibold text-stone-900">{user.user_metadata?.full_name?.split(' ')[0] || "there"}!</span>
+                            </div>
                             <Link href="/dashboard">
                                 <Button variant="ghost" size="sm" className="font-medium text-stone-900 gap-2">
                                     <User className="h-4 w-4" />
