@@ -2,6 +2,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function AboutPage() {
     return (
@@ -20,7 +21,14 @@ export default function AboutPage() {
 
                 {/* Mission */}
                 <section className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                    <div className="bg-stone-200 rounded-2xl aspect-square w-full"></div>
+                    <div className="relative aspect-square w-full rounded-2xl overflow-hidden">
+                        <Image
+                            src="/images/about_mission.jpg"
+                            alt="Collage of community activities: pottery, coffee making, painting, yoga, and dining"
+                            fill
+                            className="object-cover"
+                        />
+                    </div>
                     <div className="space-y-4">
                         <h2 className="text-2xl font-serif font-bold text-stone-900">Our Mission</h2>
                         <p className="text-stone-600 leading-relaxed">
