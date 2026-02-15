@@ -27,7 +27,7 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [] }: 
     return (
         <div className="space-y-12 pb-20">
             {/* Hero & Filters */}
-            <section className="bg-gradient-to-b from-white to-stone-50 pt-12 pb-16 border-b border-stone-100">
+            <section className="bg-stone-texture pt-12 pb-16 border-b border-stone-200">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
                     <div className="space-y-6 max-w-3xl">
                         <Badge variant="outline" className="bg-white/50 backdrop-blur text-stone-600 border-stone-200 px-3 py-1 text-xs uppercase tracking-wider font-semibold">

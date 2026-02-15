@@ -65,18 +65,22 @@ export async function toggleWishlist(eventId: string) {
 
     if (existing) {
         // Remove
-        await supabase
+        const { error } = await supabase
             .from('wishlist')
             .delete()
             .eq('id', existing.id)
+
+        if (error) return { error: error.message }
     } else {
         // Add
-        await supabase
+        const { error } = await supabase
             .from('wishlist')
             .insert({
                 user_id: user.id,
                 event_id: eventId
             })
+
+        if (error) return { error: error.message }
     }
 
     revalidatePath('/')

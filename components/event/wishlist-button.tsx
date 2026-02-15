@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toggleWishlist } from "@/app/events/actions";
@@ -17,6 +17,11 @@ export function WishlistButton({ eventId, initialIsLiked, className, variant = "
     const [isLiked, setIsLiked] = useState(initialIsLiked);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+
+    // Sync state with server prop to fix "amnesia" on revalidation
+    useEffect(() => {
+        setIsLiked(initialIsLiked);
+    }, [initialIsLiked]);
 
     const handleToggle = async (e: React.MouseEvent) => {
         e.preventDefault();
