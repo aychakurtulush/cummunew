@@ -46,7 +46,8 @@ export function WishlistButton({ eventId, initialIsLiked, className, variant = "
                     toast.error("Please log in to save events");
                     router.push(`/login?next=/events/${eventId}`);
                 } else {
-                    toast.error("Failed to update wishlist");
+                    // Show specific error for debugging
+                    toast.error(`Error: ${result.error}`);
                 }
             } else if (result.success) {
                 setIsLiked(result.isLiked!);
