@@ -29,14 +29,26 @@ export default async function SavedPage() {
             .from('wishlist')
             .select(`
                 event_id,
-                events (*)
+                events (
+                    id,
+                    title,
+                    description,
+                    start_time,
+                    price,
+                    city,
+                    category,
+                    image_url
+                )
             `)
             .eq('user_id', user.id);
 
         if (!error && wishlistData) {
             savedEvents = wishlistData.map(w => w.events).filter(Boolean);
             wishlistData.forEach(w => wishlistEventIds.push(w.event_id));
-            console.log('[SavedPage] Loaded events:', JSON.stringify(savedEvents, null, 2));
+            if (savedEvents.length > 0) {
+                console.log('[SavedPage] First event keys:', Object.keys(savedEvents[0]));
+                console.log('[SavedPage] First event image_url:', savedEvents[0].image_url);
+            }
         }
     }
 
