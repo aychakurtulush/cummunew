@@ -6,6 +6,10 @@ import { revalidatePath } from "next/cache";
 export async function updateProfile(prevState: any, formData: FormData) {
     const supabase = await createClient();
 
+    if (!supabase) {
+        return { message: 'Backend not configured' };
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
