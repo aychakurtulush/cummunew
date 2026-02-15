@@ -23,6 +23,8 @@ function SubmitButton() {
 
 export function ProfileForm({ user, initialProfile }: { user: any, initialProfile: any }) {
 
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
     async function action(formData: FormData) {
         const result = await updateProfile(null, formData);
 
@@ -33,13 +35,22 @@ export function ProfileForm({ user, initialProfile }: { user: any, initialProfil
         }
     }
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            setPreviewUrl(url);
+            toast.info(`Selected: ${file.name}`);
+        }
+    };
+
     return (
         <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm space-y-6">
             <form action={action} className="space-y-6">
                 {/* Avatar Section */}
                 <div className="flex items-center gap-6">
                     <Avatar className="h-20 w-20 border-2 border-white shadow-md">
-                        <AvatarImage src={initialProfile.avatar_url} alt="Profile" className="object-cover" />
+                        <AvatarImage src={previewUrl || initialProfile.avatar_url} alt="Profile" className="object-cover" />
                         <AvatarFallback className="bg-moss-100 text-moss-700 text-2xl">
                             {(initialProfile.full_name || user.email || '?').charAt(0).toUpperCase()}
                         </AvatarFallback>
@@ -54,11 +65,7 @@ export function ProfileForm({ user, initialProfile }: { user: any, initialProfil
                             name="avatar"
                             accept="image/*"
                             className="hidden"
-                            onChange={(e) => {
-                                if (e.target.files?.[0]) {
-                                    toast.info(`Selected: ${e.target.files[0].name}`);
-                                }
-                            }}
+                            onChange={handleFileChange}
                         />
                         <p className="text-xs text-stone-400">JPG, GIF or PNG. Max 1MB.</p>
                     </div>
