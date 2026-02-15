@@ -216,31 +216,33 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                         hasAuth={!!supabase && await supabase.auth.getUser().then(r => !!r.data.user)}
                                     />
                                 )}
-                                {bookingStatus ? "View your bookings" : "Pay on arrival. No card needed today."}
-                            </p>
-                            <div className="text-xs text-center text-stone-400">
-                                Flexible cancellation: Cancel up to 24h before.
+                                <p className="text-xs text-center text-stone-500">
+                                    {bookingStatus ? "View your bookings" : "Pay on arrival. No card needed today."}
+                                </p>
+                                <div className="text-xs text-center text-stone-400">
+                                    Flexible cancellation: Cancel up to 24h before.
+                                </div>
                             </div>
+
+                            <Separator />
+
+                            <div className="flex gap-4 justify-center">
+                                <ShareButton title={event.title} description={event.description} />
+                                <WishlistButton
+                                    eventId={event.id}
+                                    initialIsLiked={isLiked}
+                                    variant="full"
+                                />
+                            </div>
+
                         </div>
-
-                        <Separator />
-
-                        <div className="flex gap-4 justify-center">
-                            <ShareButton title={event.title} description={event.description} />
-                            <WishlistButton
-                                eventId={event.id}
-                                initialIsLiked={isLiked}
-                                variant="full"
-                            />
-                        </div>
-
                     </div>
+
                 </div>
 
-        </div>
             </main >
 
-        <Footer />
+            <Footer />
         </div >
     )
 }
