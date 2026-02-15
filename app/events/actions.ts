@@ -285,7 +285,11 @@ export async function deleteEvent(eventId: string) {
         return { error: "Unauthorized: You do not own this event" }
     }
 
-    const { error } = await supabase
+    // Use Service Role to bypass RLS (in case migration wasn't applied)
+    const { createServiceRoleClient } = await import('@/lib/supabase/service');
+    const adminSupabase = createServiceRoleClient();
+
+    const { error } = await adminSupabase
         .from('events')
         .delete()
         .eq('id', eventId)
