@@ -1,3 +1,14 @@
+-- 0. Ensure 'studios' table exists (Robust Fix)
+CREATE TABLE IF NOT EXISTS studios (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    owner_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    description TEXT,
+    location TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- 1. Enhance 'studios' table
 ALTER TABLE studios 
 ADD COLUMN IF NOT EXISTS capacity INTEGER,
@@ -20,19 +31,23 @@ CREATE TABLE IF NOT EXISTS studio_requests (
 );
 
 -- 3. Enable RLS
+ALTER TABLE studios ENABLE ROW LEVEL SECURITY;
 ALTER TABLE studio_requests ENABLE ROW LEVEL SECURITY;
 
 -- 4. Policies for studio_requests
 
 -- Requester can view their own requests
+DROP POLICY IF EXISTS "Requesters can view own requests" ON studio_requests;
 CREATE POLICY "Requesters can view own requests" ON studio_requests
     FOR SELECT USING (auth.uid() = host_user_id);
 
 -- Requester can insert requests
+DROP POLICY IF EXISTS "Requesters can create requests" ON studio_requests;
 CREATE POLICY "Requesters can create requests" ON studio_requests
     FOR INSERT WITH CHECK (auth.uid() = host_user_id);
 
 -- Studio Owners can view requests for their studios
+DROP POLICY IF EXISTS "Studio Owners can view requests" ON studio_requests;
 CREATE POLICY "Studio Owners can view requests" ON studio_requests
     FOR SELECT USING (
         EXISTS (
@@ -43,6 +58,7 @@ CREATE POLICY "Studio Owners can view requests" ON studio_requests
     );
 
 -- Studio Owners can update requests (to approve/reject)
+DROP POLICY IF EXISTS "Studio Owners can update requests" ON studio_requests;
 CREATE POLICY "Studio Owners can update requests" ON studio_requests
     FOR UPDATE USING (
         EXISTS (
@@ -53,6 +69,12 @@ CREATE POLICY "Studio Owners can update requests" ON studio_requests
     );
 
 -- 5. Trigger for updated_at
-CREATE TRIGGER update_studio_requests_updated_at 
-    BEFORE UPDATE ON studio_requests 
-    FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+-- Build robust check/creation for trigger
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_studio_requests_updated_at') THEN
+        CREATE TRIGGER update_studio_requests_updated_at 
+        BEFORE UPDATE ON studio_requests 
+        FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+    END IF;
+END $$;
