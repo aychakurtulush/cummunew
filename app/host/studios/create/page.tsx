@@ -5,16 +5,27 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, Upload, Building2, MapPin, Users, Coins, Sparkles } from "lucide-react"
 import Link from "next/link"
-import { useActionState, useState } from 'react'
+import { useActionState, useState, useEffect } from 'react'
 import { Badge } from "@/components/ui/badge"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 const initialState = {
     message: '',
+    success: false,
 }
 
 export default function CreateStudioPage() {
     const [state, formAction] = useActionState(createStudio, initialState)
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const router = useRouter();
+
+    useEffect(() => {
+        if (state?.success) {
+            toast.success("Studio created successfully! 🎉");
+            router.push("/host/studios");
+        }
+    }, [state?.success, router]);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];

@@ -159,5 +159,9 @@ export async function createStudio(prevState: any, formData: FormData) {
 
     revalidatePath('/host/studios');
     revalidatePath('/');
-    redirect('/host/studios');
+
+    return {
+        message: 'Success',
+        success: true
+    };
 }
