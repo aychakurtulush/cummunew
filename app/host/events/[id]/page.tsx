@@ -31,11 +31,26 @@ export default async function ManageEventPage({ params }: { params: Promise<{ id
     }
 
     // Fetch bookings for this event
-    const { data: bookings } = await supabase
+    const { data: bookingsData } = await supabase
         .from('bookings')
-        .select('*, profiles(full_name, email)')
+        .select('*')
         .eq('event_id', id)
         .order('created_at', { ascending: false });
+
+    // Fetch profiles manually
+    let bookings: any[] = [];
+    if (bookingsData && bookingsData.length > 0) {
+        const userIds = Array.from(new Set(bookingsData.map((b: any) => b.user_id)));
+        const { data: profiles } = await supabase
+            .from('profiles')
+            .select('user_id, full_name, email')
+            .in('user_id', userIds);
+
+        bookings = bookingsData.map((b: any) => ({
+            ...b,
+            profiles: profiles?.find((p: any) => p.user_id === b.user_id) || { full_name: 'Guest' }
+        }));
+    }
 
     return (
         <div className="space-y-6">

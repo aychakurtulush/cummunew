@@ -33,16 +33,35 @@ export default async function AttendeesPage() {
     // 2. Get Bookings
     let realBookings: any[] = [];
     if (eventIds.length > 0) {
-        const { data } = await supabase
+        const { data: bookingsData, error: bookingsError } = await supabase
             .from('bookings')
             .select(`
                 id,
                 status,
-                events (title),
-                profiles (full_name)
+                user_id,
+                event_id,
+                events (title)
             `)
             .in('event_id', eventIds);
-        if (data) realBookings = data;
+
+        if (bookingsData) {
+            // 3. Fetch Profiles for these bookings
+            const userIds = Array.from(new Set(bookingsData.map((b: any) => b.user_id)));
+            const { data: profiles } = await supabase
+                .from('profiles')
+                .select('user_id, full_name, email')
+                .in('user_id', userIds);
+
+            // 4. Merge
+            realBookings = bookingsData.map((b: any) => ({
+                ...b,
+                profiles: profiles?.find((p: any) => p.user_id === b.user_id) || { full_name: 'Guest' }
+            }));
+        }
+
+        if (bookingsError) {
+            console.error("Error fetching bookings:", bookingsError);
+        }
     }
 
     return (
