@@ -2,26 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import {
-    LayoutDashboard,
-    Calendar,
-    DollarSign,
-    Users,
-    Settings,
-    PlusCircle,
-    LogOut,
-} from "lucide-react";
-import Link from "next/link";
-
-const HOST_SIDEBAR_ITEMS = [
-    { icon: LayoutDashboard, label: "Overview", href: "/host" },
-    { icon: Calendar, label: "Manage Events", href: "/host/events" },
-    { icon: Users, label: "Attendees", href: "/host/attendees" },
-    { icon: DollarSign, label: "Earnings", href: "/host/earnings" },
-    { icon: Settings, label: "Settings", href: "/host/settings" },
-];
+import { HostSideNav } from "./components/host-side-nav";
 
 export default async function HostLayout({
     children,
@@ -48,35 +29,7 @@ export default async function HostLayout({
 
                     {/* Sidebar Navigation */}
                     <aside className="hidden md:block col-span-1 space-y-6">
-                        <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4">
-                            <div className="mb-6 px-2">
-                                <Link href="/host/events/create">
-                                    <Button className="w-full bg-moss-600 hover:bg-moss-700 text-white gap-2 shadow-sm">
-                                        <PlusCircle className="h-4 w-4" />
-                                        Create Event
-                                    </Button>
-                                </Link>
-                            </div>
-
-                            <nav className="space-y-1">
-                                {HOST_SIDEBAR_ITEMS.map((item) => (
-                                    <Link
-                                        key={item.href}
-                                        href={item.href}
-                                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 transition-colors"
-                                    >
-                                        <item.icon className="h-4 w-4" />
-                                        {item.label}
-                                    </Link>
-                                ))}
-                            </nav>
-
-                            <Separator className="my-4" />
-
-                            <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-stone-500 hover:text-stone-900 transition-colors">
-                                Switch to User View
-                            </Link>
-                        </div>
+                        <HostSideNav />
                     </aside>
 
                     {/* Main Content Area */}

@@ -29,7 +29,7 @@ export function AtmosphereBackground({
         >
             <div className={cn("absolute inset-0 w-full h-full mix-blend-multiply transition-opacity duration-700", opacityMap[intensity])}>
                 <Image
-                    src="/textures/marble.jpg"
+                    src="/textures/white-quartz.jpg"
                     alt=""
                     fill
                     className="object-cover grayscale-[0.2]"
