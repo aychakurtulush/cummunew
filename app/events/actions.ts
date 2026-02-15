@@ -264,3 +264,38 @@ export async function rejectEvent(eventId: string) {
     revalidatePath('/')
     return { success: true }
 }
+
+export async function deleteEvent(eventId: string) {
+    const supabase = await createClient()
+    if (!supabase) return { error: "Database connection failed" }
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: "Not authenticated" }
+
+    // Verify ownership
+    const { data: event } = await supabase
+        .from('events')
+        .select('creator_user_id')
+        .eq('id', eventId)
+        .single()
+
+    if (!event) return { error: "Event not found" }
+
+    if (event.creator_user_id !== user.id) {
+        return { error: "Unauthorized: You do not own this event" }
+    }
+
+    const { error } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', eventId)
+
+    if (error) {
+        console.error('Delete event error:', error)
+        return { error: error.message }
+    }
+
+    revalidatePath('/host/events')
+    revalidatePath('/')
+    return { success: true }
+}

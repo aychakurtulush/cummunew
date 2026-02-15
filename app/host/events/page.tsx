@@ -11,6 +11,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DeleteEventMenuItem } from "./components/delete-event-menu-item";
 
 export default async function HostEventsPage() {
     const supabase = await createClient();
@@ -94,9 +95,7 @@ export default async function HostEventsPage() {
                                                 </Link>
                                             </DropdownMenuItem>
                                             <DropdownMenuSeparator />
-                                            <DropdownMenuItem className="text-red-600 focus:text-red-600">
-                                                Delete Event
-                                            </DropdownMenuItem>
+                                            <DeleteEventMenuItem eventId={event.id} />
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </td>
