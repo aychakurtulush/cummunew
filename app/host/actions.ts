@@ -87,17 +87,21 @@ export async function createEvent(prevState: any, formData: FormData) {
 }
 
 export async function createStudio(prevState: any, formData: FormData) {
+    console.log('[createStudio] Action started');
     const supabase = await createClient()
 
     if (!supabase) {
-        return { message: "Demo Mode: Backend not configured" }
+        console.error('[createStudio] No supabase client');
+        return { message: "Demo Mode: Backend not configured", success: false }
     }
 
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
+        console.error('[createStudio] No user');
         redirect('/login')
     }
+    console.log('[createStudio] User authenticated:', user.id);
 
     try {
         // Handle Image Upload
@@ -105,6 +109,7 @@ export async function createStudio(prevState: any, formData: FormData) {
         const imageFile = formData.get('image') as File;
 
         if (imageFile && imageFile.size > 0) {
+            console.log('[createStudio] Uploading image:', imageFile.name);
             const fileExt = imageFile.name.split('.').pop();
             const fileName = `${user.id}/${Date.now()}.${fileExt}`;
             const filePath = `${fileName}`;
@@ -114,8 +119,8 @@ export async function createStudio(prevState: any, formData: FormData) {
                 .upload(filePath, imageFile);
 
             if (uploadError) {
-                console.error('STORAGE ERROR uploading studio image:', uploadError);
-                return { message: `Failed to upload image: ${uploadError.message}` };
+                console.error('[createStudio] STORAGE ERROR:', uploadError);
+                return { message: `Failed to upload image: ${uploadError.message}`, success: false };
             }
 
             const { data: { publicUrl } } = supabase.storage
@@ -123,9 +128,10 @@ export async function createStudio(prevState: any, formData: FormData) {
                 .getPublicUrl(filePath);
 
             imageUrls.push(publicUrl);
+            console.log('[createStudio] Image uploaded:', publicUrl);
         }
 
-        // Parse Amenities (comma separated string to array)
+        // Parse Amenities
         const amenitiesString = formData.get('amenities') as string;
         const amenities = amenitiesString
             ? amenitiesString.split(',').map(s => s.trim()).filter(s => s.length > 0)
@@ -136,32 +142,34 @@ export async function createStudio(prevState: any, formData: FormData) {
             name: formData.get('name') as string,
             description: formData.get('description') as string,
             location: formData.get('location') as string,
-            price_per_hour: parseFloat(formData.get('price_per_hour') as string),
-            capacity: parseInt(formData.get('capacity') as string),
+            price_per_hour: parseFloat(formData.get('price_per_hour') as string) || 0,
+            capacity: parseInt(formData.get('capacity') as string) || 0,
             amenities: amenities,
             images: imageUrls,
-            status: 'active' // Auto-active for MVP
+            status: 'active'
         }
+        console.log('[createStudio] Inserting data:', rawData);
 
         const { error } = await supabase
             .from('studios')
             .insert(rawData)
 
         if (error) {
-            console.error('SERVER ERROR creating studio:', error)
-            return { message: `Failed to create studio: ${error.message}` }
+            console.error('[createStudio] DB INSERT ERROR:', error)
+            return { message: `Failed to create studio: ${error.message}`, success: false }
         }
 
+        console.log('[createStudio] Insert success. Revalidating...');
+        revalidatePath('/host/studios');
+        // revalidatePath('/'); // Commenting out to isolate issues
+
+        return {
+            message: 'Success',
+            success: true
+        };
+
     } catch (e: any) {
-        console.error('UNEXPECTED ERROR in createStudio:', e);
-        return { message: `An unexpected error occurred: ${e.message}` }
+        console.error('[createStudio] UNEXPECTED FATAL ERROR:', e);
+        return { message: `An unexpected error occurred: ${e.message}`, success: false }
     }
-
-    revalidatePath('/host/studios');
-    revalidatePath('/');
-
-    return {
-        message: 'Success',
-        success: true
-    };
 }
