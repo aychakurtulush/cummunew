@@ -1,4 +1,13 @@
--- 0. Ensure 'studios' table exists (Robust Fix)
+-- 0. Ensure utility function exists (Robust Fix)
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- 1. Ensure 'studios' table exists (Robust Fix)
 CREATE TABLE IF NOT EXISTS studios (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     owner_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -9,7 +18,7 @@ CREATE TABLE IF NOT EXISTS studios (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 1. Enhance 'studios' table
+-- 2. Enhance 'studios' table
 ALTER TABLE studios 
 ADD COLUMN IF NOT EXISTS capacity INTEGER,
 ADD COLUMN IF NOT EXISTS price_per_hour DECIMAL(10, 2),
@@ -17,7 +26,7 @@ ADD COLUMN IF NOT EXISTS amenities TEXT[],
 ADD COLUMN IF NOT EXISTS images TEXT[],
 ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'active' CHECK (status IN ('active', 'pending_approval', 'archived'));
 
--- 2. Create 'studio_requests' table
+-- 3. Create 'studio_requests' table
 CREATE TABLE IF NOT EXISTS studio_requests (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     studio_id UUID NOT NULL REFERENCES studios(id) ON DELETE CASCADE,
@@ -30,11 +39,11 @@ CREATE TABLE IF NOT EXISTS studio_requests (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. Enable RLS
+-- 4. Enable RLS
 ALTER TABLE studios ENABLE ROW LEVEL SECURITY;
 ALTER TABLE studio_requests ENABLE ROW LEVEL SECURITY;
 
--- 4. Policies for studio_requests
+-- 5. Policies for studio_requests
 
 -- Requester can view their own requests
 DROP POLICY IF EXISTS "Requesters can view own requests" ON studio_requests;
@@ -68,13 +77,8 @@ CREATE POLICY "Studio Owners can update requests" ON studio_requests
         )
     );
 
--- 5. Trigger for updated_at
--- Build robust check/creation for trigger
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_studio_requests_updated_at') THEN
-        CREATE TRIGGER update_studio_requests_updated_at 
-        BEFORE UPDATE ON studio_requests 
-        FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
-    END IF;
-END $$;
+-- 6. Trigger for updated_at
+DROP TRIGGER IF EXISTS update_studio_requests_updated_at ON studio_requests;
+CREATE TRIGGER update_studio_requests_updated_at 
+    BEFORE UPDATE ON studio_requests 
+    FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
