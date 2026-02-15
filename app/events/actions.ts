@@ -314,14 +314,20 @@ export async function deleteEvent(eventId: string) {
     // 2. Fallback to Standard User Client
     // This works if the RLS policy is correctly set (e.g. via migration 012)
     console.log('[deleteEvent] Falling back to Standard User Client...');
-    const { error } = await supabase
+    const { data, error } = await supabase
         .from('events')
         .delete()
         .eq('id', eventId)
+        .select()
 
     if (error) {
         console.error('[deleteEvent] Standard delete error:', error)
         return { error: `Delete failed: ${error.message}` }
+    }
+
+    if (!data || data.length === 0) {
+        console.error('[deleteEvent] No rows deleted. Likely RLS permission issue.');
+        return { error: "Delete failed: Permission denied. Please ensure migration '012_allow_event_deletion.sql' is applied to your database." }
     }
 
     console.log('[deleteEvent] Standard delete successful');
