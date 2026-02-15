@@ -30,6 +30,14 @@ export default function CreateStudioPage() {
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            // Check file size (max 4MB)
+            if (file.size > 4 * 1024 * 1024) {
+                toast.error("Image too large. Please select an image under 4MB.");
+                e.target.value = ""; // Reset input
+                setImagePreview(null);
+                return;
+            }
+
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImagePreview(reader.result as string);
