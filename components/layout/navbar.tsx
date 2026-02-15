@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server"
 import { signout } from "@/app/(auth)/actions"
 import { SearchInput } from "./search-input"
 import { Suspense } from "react"
+import { NavLinks } from "./nav-links"
 
 export async function Navbar() {
     const supabase = await createClient()
@@ -18,14 +19,7 @@ export async function Navbar() {
                     <Link href="/" className="text-2xl font-serif font-bold tracking-tight text-stone-900">
                         Communew.
                     </Link>
-                    <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-stone-600">
-                        <Link href="/" className="hover:text-stone-900 transition-colors">
-                            Explore
-                        </Link>
-                        <Link href="/about" className="hover:text-stone-900 transition-colors">
-                            About
-                        </Link>
-                    </nav>
+                    <NavLinks />
                 </div>
 
                 {/* Center: Search */}
