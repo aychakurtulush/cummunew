@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { updateProfile } from "./actions"; // Import the server action
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -39,10 +39,10 @@ export function ProfileForm({ user, initialProfile }: { user: any, initialProfil
                 {/* Avatar Section */}
                 <div className="flex items-center gap-6">
                     <Avatar className="h-20 w-20 border-2 border-white shadow-md">
+                        <AvatarImage src={initialProfile.avatar_url} alt="Profile" className="object-cover" />
                         <AvatarFallback className="bg-moss-100 text-moss-700 text-2xl">
                             {(initialProfile.full_name || user.email || '?').charAt(0).toUpperCase()}
                         </AvatarFallback>
-                        {initialProfile.avatar_url && <img src={initialProfile.avatar_url} alt="Profile" className="w-full h-full object-cover" />}
                     </Avatar>
                     <div className="flex flex-col gap-2">
                         <Button variant="outline" size="sm" type="button" onClick={() => document.getElementById('avatar-upload')?.click()}>
