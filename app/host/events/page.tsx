@@ -8,21 +8,13 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-// Mock Events
-const MOCK_EVENTS = [
-    { id: 1, title: "Intro to Wheel Throwing", date: "Sat, 24 Feb", status: "Active", sold: 8, capacity: 10, revenue: 360 },
-    { id: 2, title: "Open Studio Session", date: "Sun, 25 Feb", status: "Active", sold: 5, capacity: 15, revenue: 75 },
-    { id: 3, title: "Glazing Workshop", date: "Sat, 02 Mar", status: "Draft", sold: 0, capacity: 8, revenue: 0 },
-];
-
 export default async function HostEventsPage() {
     const supabase = await createClient();
-    let events = MOCK_EVENTS;
+    let events: any[] = [];
 
     if (supabase) {
         const { data: { user } } = await supabase.auth.getUser();
@@ -31,15 +23,14 @@ export default async function HostEventsPage() {
         // Fetch real events
         const { data } = await supabase.from('events').select('*').eq('creator_user_id', user.id);
         if (data && data.length > 0) {
-            // optimize later
             events = data.map((e: any) => ({
                 id: e.id,
                 title: e.title,
                 date: new Date(e.start_time).toLocaleDateString(),
                 status: e.status === 'approved' ? 'Active' : 'Draft',
-                sold: 0, // Mock for now
+                sold: 0, // Implement real booking count later
                 capacity: e.capacity,
-                revenue: 0 // Mock for now
+                revenue: 0 // Implement real revenue later
             }));
         }
     }

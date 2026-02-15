@@ -7,56 +7,49 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, Globe, Instagram, Mail } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { notFound } from "next/navigation";
 
-// Mock Studio Data
 async function getStudio(id: string) {
+    const supabase = await createClient();
+
+    if (!supabase) {
+        return null;
+    }
+
+    // Attempt to fetch studio
+    const { data: studio, error } = await supabase
+        .from('studios')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (!studio || error) {
+        // Fallback: Check if it's a user profile acting as a studio (simplified logic)
+        // For now, if no studio found, return null
+        return null;
+    }
+
+    // Fetch studio events
+    const { data: events } = await supabase
+        .from('events')
+        .select('*')
+        .eq('studio_id', id) // Assuming events have studio_id, or we link via creator_user_id
+        .eq('status', 'approved');
+
     return {
-        id,
-        name: "Clay Space Berlin",
-        handle: "@clayspace",
-        avatar: "/avatars/clay-space.jpg",
-        cover: "/images/studio-cover.jpg",
-        bio: "We are a community-run pottery studio in Kreuzberg. Our mission is to make ceramics accessible to everyone. We offer courses, memberships, and open studio hours.",
-        location: "Oranienstraße 12, 10999 Berlin",
-        website: "clayspace.berlin",
-        instagram: "clayspace_berlin",
-        stats: {
-            followers: 1240,
-            eventsHosted: 45,
-            rating: 4.9,
-        },
-        upcomingEvents: [
-            {
-                id: "1",
-                title: "Intro to Wheel Throwing",
-                date: "Sat, 24 Feb • 14:00",
-                price: 45,
-                imagePart: "Hands molding clay",
-                tags: ["Workshop"],
-            },
-            {
-                id: "7",
-                title: "Open Studio Session",
-                date: "Sun, 25 Feb • 10:00",
-                price: 15,
-                imagePart: "Studio shelves",
-                tags: ["Self-led"],
-            },
-            {
-                id: "8",
-                title: "Glazing Workshop",
-                date: "Sat, 02 Mar • 15:00",
-                price: 35,
-                imagePart: "Colorful glazes",
-                tags: ["Intermediate"],
-            },
-        ]
+        ...studio,
+        upcomingEvents: events || []
     };
 }
 
 export default async function StudioPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const studio = await getStudio(id);
+
+    if (!studio) {
+        return notFound();
+    }
 
     return (
         <div className="min-h-screen bg-stone-50 flex flex-col">
@@ -75,8 +68,8 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
 
                         {/* Avatar */}
                         <Avatar className="h-32 w-32 border-4 border-white shadow-md -mt-16 md:-mt-20 bg-stone-100">
-                            <AvatarImage src={studio.avatar} />
-                            <AvatarFallback className="text-3xl">{studio.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                            <AvatarImage src={studio.avatar_url} />
+                            <AvatarFallback className="text-3xl">{studio.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
                         </Avatar>
 
                         {/* Info */}
@@ -96,18 +89,16 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
                             </div>
 
                             <p className="text-stone-600 max-w-2xl leading-relaxed">
-                                {studio.bio}
+                                {studio.description}
                             </p>
 
                             <div className="flex gap-6 text-sm">
-                                <div className="flex items-center gap-2 text-stone-600 hover:text-stone-900 cursor-pointer transition-colors">
-                                    <Globe className="h-4 w-4" />
-                                    <span className="font-medium underline decoration-stone-300 underline-offset-4">{studio.website}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-stone-600 hover:text-stone-900 cursor-pointer transition-colors">
-                                    <Instagram className="h-4 w-4" />
-                                    <span className="font-medium">{studio.instagram}</span>
-                                </div>
+                                {studio.website && (
+                                    <div className="flex items-center gap-2 text-stone-600 hover:text-stone-900 cursor-pointer transition-colors">
+                                        <Globe className="h-4 w-4" />
+                                        <span className="font-medium underline decoration-stone-300 underline-offset-4">{studio.website}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -124,27 +115,31 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
                             <Button variant="link" className="text-moss-600">View Calendar</Button>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {studio.upcomingEvents.map((event) => (
-                                <Link href={`/events/${event.id}`} key={event.id} className="group block focus:outline-none">
-                                    <Card className="h-full cursor-pointer overflow-hidden border-stone-200 bg-white hover:border-moss-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                                        <div className="aspect-[3/2] w-full bg-stone-200 relative">
-                                            <div className="absolute inset-0 flex items-center justify-center text-xs text-stone-500">
-                                                [{event.imagePart}]
+                        {studio.upcomingEvents.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {studio.upcomingEvents.map((event: any) => (
+                                    <Link href={`/events/${event.id}`} key={event.id} className="group block focus:outline-none">
+                                        <Card className="h-full cursor-pointer overflow-hidden border-stone-200 bg-white hover:border-moss-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                                            <div className="aspect-[3/2] w-full bg-stone-200 relative">
+                                                <div className="absolute inset-0 flex items-center justify-center text-xs text-stone-500">
+                                                    Event Image
+                                                </div>
+                                                <Badge className="absolute top-3 left-3 bg-white/90 text-stone-900 shadow-sm">{event.category || 'Event'}</Badge>
                                             </div>
-                                            <Badge className="absolute top-3 left-3 bg-white/90 text-stone-900 shadow-sm">{event.tags[0]}</Badge>
-                                        </div>
-                                        <CardHeader className="p-4 pb-2">
-                                            <span className="text-xs font-bold uppercase tracking-wider text-moss-700">{event.date}</span>
-                                            <CardTitle className="text-lg mt-1">{event.title}</CardTitle>
-                                        </CardHeader>
-                                        <CardFooter className="p-4 pt-2 border-t border-stone-100 mt-auto">
-                                            <span className="font-semibold text-stone-900">€{event.price}</span>
-                                        </CardFooter>
-                                    </Card>
-                                </Link>
-                            ))}
-                        </div>
+                                            <CardHeader className="p-4 pb-2">
+                                                <span className="text-xs font-bold uppercase tracking-wider text-moss-700">{new Date(event.start_time).toLocaleDateString()}</span>
+                                                <CardTitle className="text-lg mt-1">{event.title}</CardTitle>
+                                            </CardHeader>
+                                            <CardFooter className="p-4 pt-2 border-t border-stone-100 mt-auto">
+                                                <span className="font-semibold text-stone-900">€{event.price}</span>
+                                            </CardFooter>
+                                        </Card>
+                                    </Link>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-stone-500 italic">No upcoming events scheduled.</p>
+                        )}
                     </section>
 
                 </div>

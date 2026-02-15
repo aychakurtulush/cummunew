@@ -8,31 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { WishlistButton } from "@/components/event/wishlist-button";
 
-// Mock Data for Demo
-const MOCK_SAVED = [
-    {
-        id: "demo-1",
-        title: "Intro to Wheel Throwing",
-        host: "Clay Space Berlin",
-        category: "Arts",
-        start_time: new Date(Date.now() + 86400000).toISOString(),
-        price: 45,
-        city: "Kreuzberg",
-        imagePart: "Hands molding clay",
-        tags: ["Workshop"],
-    },
-    {
-        id: "demo-3",
-        title: "Morning Flow Yoga",
-        host: "Urban Zen",
-        category: "Sports",
-        start_time: new Date(Date.now() + 259200000).toISOString(),
-        price: 15,
-        city: "Tempelhof",
-        imagePart: "Yoga in park",
-        tags: ["Outdoor"],
-    },
-];
+// Mock Data removed.
 
 const formatDate = (dateString?: string) => {
     if (!dateString) return "Date TBD";
@@ -70,9 +46,6 @@ export default async function SavedPage() {
                 <p className="text-stone-500 text-sm">Events you are interested in.</p>
             </div>
 
-            {!supabase && (
-                <div className="text-xs text-stone-400 text-center uppercase tracking-widest mb-4">Demo Mode - Mock Data</div>
-            )}
 
             {savedEvents.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">

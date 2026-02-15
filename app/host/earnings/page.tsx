@@ -17,9 +17,9 @@ export default function EarningsPage() {
                         <CardTitle className="text-sm font-medium text-stone-500">Total Revenue</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold text-stone-900">€2,450.00</div>
-                        <div className="flex items-center text-xs text-moss-600 mt-1 font-medium">
-                            <TrendingUp className="h-3 w-3 mr-1" /> +20% from last month
+                        <div className="text-3xl font-bold text-stone-900">€0.00</div>
+                        <div className="flex items-center text-xs text-stone-500 mt-1 font-medium">
+                            No revenue yet
                         </div>
                     </CardContent>
                 </Card>
@@ -28,22 +28,7 @@ export default function EarningsPage() {
                         <CardTitle className="text-sm font-medium text-stone-500">Pending Payout</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold text-stone-900">€420.00</div>
-                        <div className="flex items-center text-xs text-stone-500 mt-1">
-                            Scheduled for Monday
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card className="bg-moss-50 border-moss-200">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-moss-800">Payout Method</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex justify-between items-center">
-                        <div>
-                            <div className="font-bold text-moss-900">Stripe Connect</div>
-                            <div className="text-xs text-moss-700">Ends in •••• 4242</div>
-                        </div>
-                        <Button size="sm" variant="outline" className="bg-white border-moss-200 text-moss-800 hover:bg-moss-100">Manage</Button>
+                        <div className="text-3xl font-bold text-stone-900">€0.00</div>
                     </CardContent>
                 </Card>
             </div>
@@ -53,33 +38,8 @@ export default function EarningsPage() {
                 <div className="p-4 border-b border-stone-100 font-serif font-bold text-stone-900">
                     Recent Transactions
                 </div>
-                <div className="divide-y divide-stone-100">
-                    {[
-                        { id: 1, desc: "Payout #1024", date: "Feb 12", amount: "-€380.00", status: "Paid" },
-                        { id: 2, desc: "Booking: Intro to Wheel Throwing", date: "Feb 11", amount: "+€45.00", status: "Cleared" },
-                        { id: 3, desc: "Booking: Intro to Wheel Throwing", date: "Feb 11", amount: "+€45.00", status: "Cleared" },
-                        { id: 4, desc: "Booking: Open Studio", date: "Feb 10", amount: "+€15.00", status: "Cleared" },
-                    ].map((tx) => (
-                        <div key={tx.id} className="flex items-center justify-between p-4 hover:bg-stone-50 transition-colors">
-                            <div className="flex items-center gap-4">
-                                <div className="h-10 w-10 bg-stone-100 rounded-full flex items-center justify-center text-stone-500">
-                                    <DollarSign className="h-4 w-4" />
-                                </div>
-                                <div>
-                                    <div className="font-medium text-stone-900 text-sm">{tx.desc}</div>
-                                    <div className="text-xs text-stone-500">{tx.date}</div>
-                                </div>
-                            </div>
-                            <div className="text-right">
-                                <div className={`font-bold text-sm ${tx.amount.startsWith('-') ? 'text-stone-900' : 'text-moss-600'}`}>
-                                    {tx.amount}
-                                </div>
-                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-stone-200 text-stone-500">
-                                    {tx.status}
-                                </Badge>
-                            </div>
-                        </div>
-                    ))}
+                <div className="p-8 text-center text-stone-500 italic">
+                    No transactions yet.
                 </div>
             </div>
         </div>

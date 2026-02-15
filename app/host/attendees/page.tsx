@@ -3,15 +3,48 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, Mail, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
-// Mock Attendees
-const MOCK_ATTENDEES = [
-    { id: 1, name: "Sarah Miller", email: "sarah@example.com", event: "Intro to Wheel Throwing", status: "Confirmed", ticket: "General" },
-    { id: 2, name: "Tom K.", email: "tom@example.com", event: "Intro to Wheel Throwing", status: "Confirmed", ticket: "General" },
-    { id: 3, name: "Lisa Wong", email: "lisa@example.com", event: "Open Studio Session", status: "Pending", ticket: "Student" },
-];
+export default async function AttendeesPage() {
+    const supabase = await createClient();
 
-export default function AttendeesPage() {
+    if (!supabase) return redirect("/login");
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return redirect("/login");
+
+    // Fetch bookings for events created by this host
+    const { data: bookings } = await supabase
+        .from('bookings')
+        .select(`
+            id,
+            status,
+            created_at,
+            events (title),
+            profiles:user_id (full_name, email)
+        `)
+        .eq('events.creator_user_id', user.id); // This filter requires a join or two-step fetch. 
+    // Simpler for MVP: Fetch events first, then bookings.
+
+    // 1. Get Host's Events
+    const { data: events } = await supabase.from('events').select('id, title').eq('creator_user_id', user.id);
+    const eventIds = events?.map(e => e.id) || [];
+
+    // 2. Get Bookings
+    let realBookings: any[] = [];
+    if (eventIds.length > 0) {
+        const { data } = await supabase
+            .from('bookings')
+            .select(`
+                id,
+                status,
+                events (title),
+                profiles (full_name)
+            `)
+            .in('event_id', eventIds);
+        if (data) realBookings = data;
+    }
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -22,14 +55,11 @@ export default function AttendeesPage() {
             </div>
 
             <div className="bg-white rounded-xl border border-stone-200 overflow-hidden shadow-sm">
-
-                {/* Toolbar */}
                 <div className="p-4 border-b border-stone-100 flex gap-4">
                     <div className="relative flex-1 max-w-sm">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-stone-400" />
                         <Input placeholder="Search attendees..." className="pl-9 bg-stone-50 border-stone-200" />
                     </div>
-                    {/* Add filters later */}
                 </div>
 
                 <div className="overflow-x-auto">
@@ -38,32 +68,30 @@ export default function AttendeesPage() {
                             <tr>
                                 <th className="px-6 py-4">Name</th>
                                 <th className="px-6 py-4">Event</th>
-                                <th className="px-6 py-4">Ticket Type</th>
                                 <th className="px-6 py-4">Status</th>
                                 <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-stone-100">
-                            {MOCK_ATTENDEES.map((person) => (
-                                <tr key={person.id} className="hover:bg-stone-50/50 transition-colors">
+                            {realBookings.length > 0 ? realBookings.map((booking: any) => (
+                                <tr key={booking.id} className="hover:bg-stone-50/50 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <Avatar className="h-8 w-8">
                                                 <AvatarFallback className="bg-stone-100 text-stone-600 font-medium text-xs">
-                                                    {person.name.charAt(0)}
+                                                    {(booking.profiles?.full_name || 'Guest').charAt(0)}
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <div className="font-medium text-stone-900">{person.name}</div>
-                                                <div className="text-xs text-stone-500">{person.email}</div>
+                                                <div className="font-medium text-stone-900">{booking.profiles?.full_name || 'Guest User'}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 font-medium">{person.event}</td>
-                                    <td className="px-6 py-4 text-stone-500">{person.ticket}</td>
+                                    <td className="px-6 py-4 font-medium">{booking.events?.title}</td>
                                     <td className="px-6 py-4">
-                                        <Badge variant={person.status === 'Confirmed' ? 'default' : 'secondary'} className={person.status === 'Confirmed' ? 'bg-moss-100 text-moss-800' : 'bg-terracotta-100 text-terracotta-800'}>
-                                            {person.status}
+                                        <Badge variant={booking.status === 'approved' ? 'default' : 'secondary'}
+                                            className={booking.status === 'approved' ? 'bg-moss-100 text-moss-800' : 'bg-terracotta-100 text-terracotta-800'}>
+                                            {booking.status}
                                         </Badge>
                                     </td>
                                     <td className="px-6 py-4 text-right">
@@ -72,7 +100,13 @@ export default function AttendeesPage() {
                                         </Button>
                                     </td>
                                 </tr>
-                            ))}
+                            )) : (
+                                <tr>
+                                    <td colSpan={4} className="px-6 py-12 text-center text-stone-400 italic">
+                                        No attendees found yet.
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

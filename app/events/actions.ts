@@ -176,3 +176,91 @@ export async function cancelBooking(bookingId: string) {
     revalidatePath('/bookings')
     return { success: true }
 }
+
+export async function updateBookingStatus(bookingId: string, status: 'approved' | 'rejected') {
+    const supabase = await createClient()
+
+    if (!supabase) return { error: "Database connection failed" }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: "Not authenticated" }
+
+    // Verify host ownership (security check)
+    // We need to check if the CURRENT user is the CREATOR of the event associated with this booking
+    const { data: booking } = await supabase
+        .from('bookings')
+        .select(`
+            id,
+            event_id,
+            events (
+                creator_user_id
+            )
+        `)
+        .eq('id', bookingId)
+        .single()
+
+    if (!booking) return { error: "Booking not found" }
+    // @ts-ignore - Supabase types might be tricky with joins
+    if (booking.events?.creator_user_id !== user.id) {
+        return { error: "Unauthorized: You are not the host of this event" }
+    }
+
+    // Update status
+    const { error } = await supabase
+        .from('bookings')
+        .update({ status })
+        .eq('id', bookingId)
+
+    if (error) {
+        console.error('Update booking error:', error)
+        return { error: error.message }
+    }
+
+    revalidatePath('/host')
+    revalidatePath('/bookings')
+    return { success: true }
+}
+
+export async function approveEvent(eventId: string) {
+    const supabase = await createClient()
+    if (!supabase) return { error: "Database connection failed" }
+
+    // Auth check (Admin only - for MVP, any user can do this, detailed roles later)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: "Not authenticated" }
+
+    const { error } = await supabase
+        .from('events')
+        .update({ status: 'approved' })
+        .eq('id', eventId)
+
+    if (error) {
+        console.error('Approve event error:', error)
+        return { error: error.message }
+    }
+
+    revalidatePath('/admin')
+    revalidatePath('/')
+    return { success: true }
+}
+
+export async function rejectEvent(eventId: string) {
+    const supabase = await createClient()
+    if (!supabase) return { error: "Database connection failed" }
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: "Not authenticated" }
+
+    const { error } = await supabase
+        .from('events')
+        .update({ status: 'rejected' })
+        .eq('id', eventId)
+
+    if (error) {
+        console.error('Reject event error:', error)
+        return { error: error.message }
+    }
+
+    revalidatePath('/admin')
+    revalidatePath('/')
+    return { success: true }
+}

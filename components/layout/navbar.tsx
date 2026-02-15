@@ -33,7 +33,7 @@ export async function Navbar() {
                 <div className="flex items-center gap-4">
                     <Link href="/host">
                         <Button variant="ghost" className="text-stone-600 hover:text-moss-700 hidden sm:inline-flex">
-                            Host an Event
+                            Host Dashboard
                         </Button>
                     </Link>
                     <div className="h-6 w-px bg-stone-200 hidden sm:block" />
