@@ -8,6 +8,10 @@ import { Badge } from "@/components/ui/badge";
 export default async function HostStudiosPage() {
     const supabase = await createClient();
 
+    if (!supabase) {
+        return redirect("/login");
+    }
+
     // Auth check
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return redirect("/login");
