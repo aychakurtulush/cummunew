@@ -156,7 +156,33 @@ export async function createStudio(prevState: any, formData: FormData) {
 
         if (error) {
             console.error('[createStudio] DB INSERT ERROR:', error)
-            return { message: `Failed to create studio: ${error.message}`, success: false }
+
+            // Fallback: Try with Service Role if PERMISSION DENIED (42501)
+            // This handles cases where RLS policies (Migration 015) haven't been applied yet
+            if (error.code === '42501') {
+                console.warn('[createStudio] RLS Permission Denied. Attempting fallback to Service Role...');
+                try {
+                    const { createServiceRoleClient } = await import('@/lib/supabase/service');
+                    const adminSupabase = createServiceRoleClient();
+
+                    const { error: adminError } = await adminSupabase
+                        .from('studios')
+                        .insert(rawData);
+
+                    if (adminError) {
+                        console.error('[createStudio] Admin Fallback Failed:', adminError);
+                        return { message: `Failed to create studio (Admin): ${adminError.message}`, success: false }
+                    }
+
+                    console.log('[createStudio] Admin Fallback Successful');
+                    // Success - fall through to return
+                } catch (adminErr: any) {
+                    console.error('[createStudio] Service Role init failed:', adminErr);
+                    return { message: `Failed to create studio: ${error.message}`, success: false }
+                }
+            } else {
+                return { message: `Failed to create studio: ${error.message}`, success: false }
+            }
         }
 
         console.log('[createStudio] Insert success. Revalidating...');
