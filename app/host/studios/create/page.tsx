@@ -3,36 +3,25 @@ import { createStudio } from '../../actions'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, Upload, Building2, MapPin, Users, Coins, Sparkles } from "lucide-react"
+import { ArrowLeft, Upload, Building2, MapPin, Users, Coins, Sparkles, Loader2 } from "lucide-react"
 import Link from "next/link"
-import { useActionState, useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
-const initialState = {
-    message: '',
-    success: false,
-}
-
 export default function CreateStudioPage() {
-    const [state, formAction] = useActionState(createStudio, initialState)
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const router = useRouter();
-
-    useEffect(() => {
-        if (state?.success) {
-            toast.success("Studio created successfully! 🎉");
-            router.push("/host/studios");
-        }
-    }, [state?.success, router]);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            // Check file size (max 4MB)
-            if (file.size > 4 * 1024 * 1024) {
-                toast.error("Image too large. Please select an image under 4MB.");
+            // Check file size (max 4.5MB client side check to match Vercel/Next limit of 5MB safely)
+            if (file.size > 4.5 * 1024 * 1024) {
+                toast.error("Image too large. Please select an image under 4.5MB.");
                 e.target.value = ""; // Reset input
                 setImagePreview(null);
                 return;
@@ -45,6 +34,35 @@ export default function CreateStudioPage() {
             reader.readAsDataURL(file);
         }
     };
+
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setIsLoading(true);
+        setError('');
+
+        const formData = new FormData(event.currentTarget);
+
+        try {
+            console.log("Submitting form data...");
+            const result = await createStudio(null, formData);
+
+            if (result.success) {
+                toast.success("Studio created successfully! 🎉");
+                router.push("/host/studios");
+            } else {
+                console.error("Server returned error:", result);
+                setError(result.message || "Failed to create studio");
+                toast.error(result.message || "Failed to create studio");
+            }
+        } catch (e: any) {
+            console.error("CRITICAL SUBMISSION ERROR:", e);
+            // This catches the 'Client-side exception' which is often a network/payload size issue
+            setError("Connection failed. This usually happens if the image is too large or the server is unreachable.");
+            toast.error("Submission failed. Try a smaller image.");
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
     return (
         <div className="max-w-2xl mx-auto space-y-8 pb-12">
@@ -61,14 +79,14 @@ export default function CreateStudioPage() {
 
             <Separator />
 
-            {state?.message && state.message !== 'Success' && (
+            {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg relative flex items-start gap-2" role="alert">
                     <span className="font-bold">Error:</span>
-                    <span>{state.message}</span>
+                    <span>{error}</span>
                 </div>
             )}
 
-            <form action={formAction} className="space-y-8">
+            <form onSubmit={handleSubmit} className="space-y-8">
 
                 {/* Basic Info */}
                 <div className="space-y-5">
@@ -113,7 +131,7 @@ export default function CreateStudioPage() {
                                     required
                                     onChange={handleImageChange}
                                 />
-                                <span className="text-xs text-stone-500 italic">Required</span>
+                                <span className="text-xs text-stone-500 italic">Required. Max 4.5MB.</span>
                             </div>
 
                             {imagePreview && (
@@ -167,8 +185,15 @@ export default function CreateStudioPage() {
                 </div>
 
                 <div className="pt-6 flex justify-end">
-                    <Button type="submit" size="lg" className="w-full sm:w-auto bg-moss-600 hover:bg-moss-700 text-white font-semibold text-base px-8 shadow-md">
-                        Publish Studio
+                    <Button type="submit" size="lg" disabled={isLoading} className="w-full sm:w-auto bg-moss-600 hover:bg-moss-700 text-white font-semibold text-base px-8 shadow-md">
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Creating...
+                            </>
+                        ) : (
+                            "Publish Studio"
+                        )}
                     </Button>
                 </div>
 

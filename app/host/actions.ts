@@ -160,7 +160,7 @@ export async function createStudio(prevState: any, formData: FormData) {
         }
 
         console.log('[createStudio] Insert success. Revalidating...');
-        revalidatePath('/host/studios');
+        // revalidatePath('/host/studios');
         // revalidatePath('/'); // Commenting out to isolate issues
 
         return {
