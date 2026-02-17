@@ -62,64 +62,13 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
                 </div>
             </div>
 
-            {/* Chat Area */}
-            <div className="flex-1 flex flex-col">
-                {/* Header */}
-                <div className="p-4 border-b border-stone-200 flex items-center justify-between bg-white">
-                    <div className="flex items-center gap-3">
-                        <Link href="/messages" className="md:hidden text-stone-500 hover:text-stone-900 mr-2">
-                            ←
-                        </Link>
-                        <Avatar className="h-10 w-10 border border-stone-200">
-                            <AvatarImage src={currentChat.otherUser.avatar} />
-                            <AvatarFallback className="bg-stone-100 text-stone-600">{currentChat.otherUser.initial}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                            <h3 className="font-bold text-stone-900">{currentChat.otherUser.name}</h3>
-                            <p className="text-xs text-stone-500">Online</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Messages List */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-stone-50/30 flex flex-col">
-                    {/* Note: Flex-col keeps natural order (Oldest -> Newest) since our query is ASC */}
-                    {/* Actually, let's just map normally and scroll to bottom or use proper flex. For MVP simple map. */}
-                    <div className="flex flex-col justify-end min-h-full space-y-4">
-                        {messages.map((msg: any) => {
-                            const isMe = msg.sender_user_id === user?.id;
-                            return (
-                                <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-                                    <div className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${isMe
-                                        ? "bg-moss-600 text-white rounded-br-none"
-                                        : "bg-white border border-stone-200 text-stone-800 rounded-bl-none shadow-sm"
-                                        }`}>
-                                        <p>{msg.content}</p>
-                                        <span className={`text-[10px] block mt-1 ${isMe ? "text-moss-100" : "text-stone-400"}`}>
-                                            {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
-                                    </div>
-                                </div>
-                            )
-                        })}
-                    </div>
-                </div>
-
-                {/* Input Area */}
-                <div className="p-4 bg-white border-t border-stone-200">
-                    <form action={handleSendMessage} className="flex gap-2">
-                        <Input
-                            name="content"
-                            placeholder="Type a message..."
-                            className="flex-1 bg-stone-50 border-stone-200 focus-visible:ring-moss-500"
-                            autoComplete="off"
-                        />
-                        <Button type="submit" size="icon" className="bg-moss-600 hover:bg-moss-700 text-white shrink-0">
-                            <Send className="h-4 w-4" />
-                        </Button>
-                    </form>
-                </div>
-            </div>
+            {/* Chat Area - Now Client Side */}
+            <ChatInterface
+                initialMessages={messages}
+                currentUser={user}
+                conversationId={conversationId}
+                otherUser={currentChat.otherUser}
+            />
         </div>
     );
 }

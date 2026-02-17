@@ -180,12 +180,26 @@ export async function requestToHost(ownerId: string, studioName: string) {
 
     if (!conversationId) return { error: "Failed to start conversation" };
 
-    // 2. Check if specific request message already exists recently to avoid spam
-    // (Skipping for now for simplicity, but good to have in mind)
+    // 2. Check if specific request message already exists to avoid spam
+    const { data: existingMessages } = await supabase
+        .from('messages')
+        .select('id, content, created_at')
+        .eq('conversation_id', conversationId)
+        .eq('sender_user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
 
-    // 3. Send Request Message
+    const lastMsg = existingMessages?.[0];
     const messageContent = `Hi, I'm interested in hosting an event at ${studioName}. Is it available?`;
 
+    // Only send if the last message wasn't identical (basic idempotency)
+    // or if it's been a while (e.g., allow re-sending after some time if needed, but for now strict check is safer)
+    if (lastMsg && lastMsg.content === messageContent) {
+        // Already sent, just return success
+        return { conversationId };
+    }
+
+    // 3. Send Request Message
     const msgResult = await sendMessage(conversationId, messageContent);
     if (msgResult.error) return { error: msgResult.error };
 
