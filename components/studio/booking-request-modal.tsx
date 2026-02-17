@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,12 @@ interface BookingRequestModalProps {
 }
 
 export function BookingRequestModal({ isOpen, onClose, studioId, studioName }: BookingRequestModalProps) {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const [isLoading, setIsLoading] = useState(false);
 
     // Form State
@@ -26,7 +32,7 @@ export function BookingRequestModal({ isOpen, onClose, studioId, studioName }: B
     const [endTime, setEndTime] = useState("");
     const [message, setMessage] = useState("");
 
-    if (!isOpen) return null;
+    if (!isOpen || !mounted) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

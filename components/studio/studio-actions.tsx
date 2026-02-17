@@ -41,12 +41,18 @@ export function StudioActions({ studioId, studioName, isOwner, ownerId, hasAuth 
     };
 
     const handleRequest = async () => {
-        if (!checkAuth()) return;
+        console.log("Handle Request Clicked");
+        if (!checkAuth()) {
+            console.log("Auth check failed");
+            return;
+        }
 
         if (!ownerId) {
+            console.error("Owner ID missing");
             toast.error("Cannot contact owner");
             return;
         }
+        console.log("Opening Booking Modal");
         setIsBookingModalOpen(true);
     };
 
