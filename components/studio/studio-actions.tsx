@@ -163,6 +163,13 @@ export function StudioActions({ studioId, studioName, isOwner, ownerId, hasAuth 
                 <CalendarPlus className="h-4 w-4 mr-2" />
                 Request Booking
             </Button>
+
+            <BookingRequestModal
+                isOpen={isBookingModalOpen}
+                onClose={() => setIsBookingModalOpen(false)}
+                studioId={studioId}
+                studioName={studioName}
+            />
         </div>
     );
 }
