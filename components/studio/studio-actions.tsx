@@ -50,10 +50,10 @@ export function StudioActions({ studioId, studioName, isOwner, ownerId, hasAuth 
             const { requestToHost } = await import("@/app/messages/actions");
             const result = await requestToHost(ownerId, studioName);
             if (result.error) throw new Error(result.error);
-            if (result.conversationId) router.push(`/messages/${result.conversationId}`);
+            // No redirect - just stay on page as requested
         }, {
             loading: 'Sending request...',
-            success: 'Request sent! Redirecting to chat...',
+            success: 'Request sent! check your inbox for replies.',
             error: (err) => `Failed to send request: ${err.message}`
         });
     };
