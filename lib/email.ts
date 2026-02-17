@@ -1,13 +1,16 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize safely to prevent build crashes if env var is missing
+const resend = process.env.RESEND_API_KEY
+    ? new Resend(process.env.RESEND_API_KEY)
+    : null;
 
 export async function sendBookingNotification(
     userEmail: string,
     eventTitle: string,
     eventId: string
 ) {
-    if (!process.env.RESEND_API_KEY) {
+    if (!resend) {
         console.warn("[Email] Resend API Key missing. Skipping email.");
         return;
     }
@@ -46,7 +49,7 @@ export async function sendInquiryReceivedEmail(
     studioName: string,
     inquiryId: string
 ) {
-    if (!process.env.RESEND_API_KEY) return;
+    if (!resend) return;
 
     try {
         await resend.emails.send({
@@ -74,7 +77,7 @@ export async function sendInquiryStatusEmail(
     studioName: string,
     status: string
 ) {
-    if (!process.env.RESEND_API_KEY) return;
+    if (!resend) return;
 
     const subject = status === 'approved' ? `Request Approved: ${studioName} ✅` : `Request Declined: ${studioName} ❌`;
     const color = status === 'approved' ? '#4a5d23' : '#b91c1c';
@@ -106,7 +109,7 @@ export async function sendMessageReceivedEmail(
     messagePreview: string,
     conversationId: string
 ) {
-    if (!process.env.RESEND_API_KEY) return;
+    if (!resend) return;
 
     try {
         await resend.emails.send({
