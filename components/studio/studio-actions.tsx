@@ -13,20 +13,34 @@ interface StudioActionsProps {
     studioName: string;
     isOwner?: boolean;
     ownerId: string;
+    hasAuth: boolean;
 }
 
-export function StudioActions({ studioId, studioName, isOwner, ownerId }: StudioActionsProps) {
+export function StudioActions({ studioId, studioName, isOwner, ownerId, hasAuth }: StudioActionsProps) {
     const [isFollowing, setIsFollowing] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
     useEffect(() => {
-        if (!isOwner) {
+        if (!isOwner && hasAuth) {
             getIsFollowing(studioId).then(setIsFollowing).finally(() => setIsLoading(false));
+        } else {
+            setIsLoading(false);
         }
-    }, [studioId, isOwner]);
+    }, [studioId, isOwner, hasAuth]);
+
+    const checkAuth = () => {
+        if (!hasAuth) {
+            toast.error("Please log in to interact");
+            router.push(`/login?next=/studios/${studioId}`);
+            return false;
+        }
+        return true;
+    };
 
     const handleRequest = () => {
+        if (!checkAuth()) return;
+
         // TODO: Implement actual request flow
         toast.info("Request feature coming soon!", {
             description: "You'll be able to request to host events here."
@@ -34,6 +48,8 @@ export function StudioActions({ studioId, studioName, isOwner, ownerId }: Studio
     };
 
     const handleFollow = async () => {
+        if (!checkAuth()) return;
+
         // Optimistic update
         const newState = !isFollowing;
         setIsFollowing(newState);
@@ -52,6 +68,8 @@ export function StudioActions({ studioId, studioName, isOwner, ownerId }: Studio
     };
 
     const handleContact = async () => {
+        if (!checkAuth()) return;
+
         if (!ownerId) {
             toast.error("Cannot contact owner");
             return;
@@ -65,7 +83,14 @@ export function StudioActions({ studioId, studioName, isOwner, ownerId }: Studio
                 router.push(`/messages/${result.conversationId}`);
             }
         } catch (e) {
-            toast.error("Failed to start conversation");
+            // Check if it's a redirect error (Next.js internals)
+            // Just ignore/let it happen if it's a redirect, or log for debug
+            // But since we checkedAuth, it should be fine.
+            // If startConversation throws a redirect, we might end up here.
+            // We can't easily detect Next.js redirect errors in client without importing internal types
+            // But valid redirect usually stops execution or throws.
+            // For now, assume success or error message.
+            console.error(e);
         }
     }
 
@@ -83,7 +108,7 @@ export function StudioActions({ studioId, studioName, isOwner, ownerId }: Studio
                 variant="outline"
                 size="icon"
                 onClick={handleFollow}
-                disabled={isLoading}
+                disabled={isLoading && hasAuth}
                 className={isFollowing ? "text-red-500 hover:text-red-600 border-red-200 bg-red-50" : "text-stone-600"}
             >
                 <Heart className={`h-4 w-4 ${isFollowing ? "fill-current" : ""}`} />

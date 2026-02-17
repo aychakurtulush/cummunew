@@ -113,6 +113,7 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
                                         studioName={studio.name}
                                         isOwner={studio.isOwner}
                                         ownerId={studio.owner_user_id}
+                                        hasAuth={!!user}
                                     />
                                 </div>
                             </div>
