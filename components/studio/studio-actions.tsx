@@ -3,20 +3,22 @@
 import { Button } from "@/components/ui/button";
 import { Heart, CalendarPlus, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { toggleStudioFollow, getIsFollowing } from "@/app/studios/actions";
+import { startConversation } from "@/app/messages/actions";
+import { useRouter } from "next/navigation";
 
 interface StudioActionsProps {
     studioId: string;
     studioName: string;
     isOwner?: boolean;
+    ownerId: string;
 }
 
-export function StudioActions({ studioId, studioName, isOwner }: StudioActionsProps) {
+export function StudioActions({ studioId, studioName, isOwner, ownerId }: StudioActionsProps) {
     const [isFollowing, setIsFollowing] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-
-    import { useEffect } from "react";
-    import { toggleStudioFollow, getIsFollowing } from "@/app/studios/actions";
+    const router = useRouter();
 
     useEffect(() => {
         if (!isOwner) {
@@ -49,8 +51,22 @@ export function StudioActions({ studioId, studioName, isOwner }: StudioActionsPr
         }
     };
 
-    const handleContact = () => {
-        toast.info("Chat feature coming soon!");
+    const handleContact = async () => {
+        if (!ownerId) {
+            toast.error("Cannot contact owner");
+            return;
+        }
+
+        try {
+            const result = await startConversation(ownerId);
+            if (result.error) {
+                toast.error(result.error);
+            } else if (result.conversationId) {
+                router.push(`/messages/${result.conversationId}`);
+            }
+        } catch (e) {
+            toast.error("Failed to start conversation");
+        }
     }
 
     if (isOwner) {

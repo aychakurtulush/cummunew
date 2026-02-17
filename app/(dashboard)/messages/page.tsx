@@ -1,21 +1,19 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Search, Send } from "lucide-react";
+import Link from "next/link";
+import { getConversations } from "@/app/messages/actions";
 
-// Real data fetching would happen here
-import { createClient } from "@/lib/supabase/server";
-
-async function getConversations() {
-    const supabase = await createClient();
-    if (!supabase) return [];
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
-
-    // Pending implementation of real messages
-    return [];
+const formatDate = (dateString?: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const now = new Date();
+    if (date.toDateString() === now.toDateString()) {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
 export default async function MessagesPage() {
@@ -35,18 +33,21 @@ export default async function MessagesPage() {
                 </div>
                 <div className="flex-1 overflow-y-auto">
                     {conversations.length > 0 ? conversations.map((chat: any) => (
-                        <div key={chat.id} className={`p-4 flex items-start gap-3 hover:bg-stone-50 cursor-pointer transition-colors ${chat.unread ? "bg-moss-50/50" : ""}`}>
-                            <Avatar className="h-10 w-10 border border-stone-200">
-                                <AvatarFallback className="bg-stone-100 text-stone-600">{chat.initial}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex justify-between items-baseline mb-1">
-                                    <h4 className={`text-sm truncate ${chat.unread ? "font-bold text-stone-900" : "font-medium text-stone-700"}`}>{chat.name}</h4>
-                                    <span className="text-xs text-stone-400 shrink-0">{chat.time}</span>
+                        <Link href={`/messages/${chat.id}`} key={chat.id}>
+                            <div className={`p-4 flex items-start gap-3 hover:bg-stone-50 cursor-pointer transition-colors border-b border-stone-50`}>
+                                <Avatar className="h-10 w-10 border border-stone-200">
+                                    <AvatarImage src={chat.otherUser.avatar} />
+                                    <AvatarFallback className="bg-stone-100 text-stone-600">{chat.otherUser.initial}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between items-baseline mb-1">
+                                        <h4 className="text-sm font-medium text-stone-900 truncate">{chat.otherUser.name}</h4>
+                                        <span className="text-xs text-stone-400 shrink-0">{formatDate(chat.lastMessageTime)}</span>
+                                    </div>
+                                    <p className="text-xs text-stone-500 truncate">{chat.lastMessage}</p>
                                 </div>
-                                <p className={`text-xs truncate ${chat.unread ? "text-stone-900 font-medium" : "text-stone-500"}`}>{chat.lastMessage}</p>
                             </div>
-                        </div>
+                        </Link>
                     )) : (
                         <div className="p-8 text-center text-stone-500 text-sm">
                             No messages yet.
