@@ -71,6 +71,31 @@ export async function createInquiry(data: {
                         console.error("Failed to send notification message:", msgResult.error);
                     }
                 }
+
+                // 3. Send Email Notification to Host
+                try {
+                    const { createServiceRoleClient } = await import('@/lib/supabase/service');
+                    const adminSupabase = createServiceRoleClient();
+
+                    const { data: hostUser } = await adminSupabase.auth.admin.getUserById(studio.owner_user_id);
+
+                    if (hostUser?.user?.email) {
+                        const { sendInquiryReceivedEmail } = await import('@/lib/email');
+                        // Use requester name from current user metadata
+                        const requesterName = user.user_metadata?.full_name || 'A Guest';
+
+                        await sendInquiryReceivedEmail(
+                            hostUser.user.email,
+                            requesterName,
+                            studio.name,
+                            "" // inquiry ID not strictly needed for the link in current template, or could fetch newly created ID if we selected it.
+                            // To be perfect, we should have selected ID from insert.
+                            // But for MVP the link just goes to dashboard.
+                        );
+                    }
+                } catch (emailErr) {
+                    console.error("Failed to send host email:", emailErr);
+                }
             }
         }
     } catch (notifyError) {
@@ -88,7 +113,7 @@ export async function getInquiriesForHost() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    console.log("[getInquiriesForHost] User:", user.id);
+    // console.log("[getInquiriesForHost] User:", user.id); // Quieting logs
 
     // 1. Get IDs of studios owned by user
     const { data: studios, error: studioError } = await supabase
@@ -100,8 +125,6 @@ export async function getInquiriesForHost() {
         console.error("[getInquiriesForHost] Studio fetch error:", studioError);
         return [];
     }
-
-    console.log("[getInquiriesForHost] Studios found:", studios?.length, studios);
 
     if (!studios || studios.length === 0) return [];
 
@@ -128,8 +151,6 @@ export async function getInquiriesForHost() {
         console.error("[getInquiriesForHost] Inquiries Error:", error);
         return [];
     }
-
-    console.log("[getInquiriesForHost] Inquiries found:", inquiries?.length);
 
     // 3. Manually fetch profiles for requesters
     const requesterIds = Array.from(new Set(inquiries.map((i: any) => i.requester_id)));
@@ -160,12 +181,43 @@ export async function updateInquiryStatus(inquiryId: string, newStatus: 'approve
     if (!user) return { error: "Unauthorized" };
 
     // Update
-    const { error } = await supabase
+    const { data: inquiry, error } = await supabase
         .from('studio_inquiries')
         .update({ status: newStatus })
-        .eq('id', inquiryId);
+        .eq('id', inquiryId)
+        .select(`
+            id,
+            requester_id,
+            studio:studios(name)
+        `)
+        .single();
 
     if (error) return { error: error.message };
+
+    // Setup Email Notification to Requester
+    // (Run in background/detached from return if possible, but await is safer for serverless)
+    try {
+        if (inquiry) {
+            const { createServiceRoleClient } = await import('@/lib/supabase/service');
+            const adminSupabase = createServiceRoleClient();
+
+            const { data: requesterUser } = await adminSupabase.auth.admin.getUserById(inquiry.requester_id);
+
+            if (requesterUser?.user?.email) {
+                const { sendInquiryStatusEmail } = await import('@/lib/email');
+                // @ts-ignore - studio relation presence
+                const studioName = inquiry.studio?.name || 'Studio';
+
+                await sendInquiryStatusEmail(
+                    requesterUser.user.email,
+                    studioName,
+                    newStatus
+                );
+            }
+        }
+    } catch (emailErr) {
+        console.error("Failed to send status email:", emailErr);
+    }
 
     revalidatePath('/host/inquiries');
     return { success: true };

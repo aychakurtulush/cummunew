@@ -14,6 +14,8 @@ const fontSerif = Fraunces({
   variable: "--font-serif",
 });
 
+import { RealtimeListener } from "@/components/notifications/realtime-listener";
+
 export const metadata: Metadata = {
   title: "Communew. | Local Hobby Events in Berlin",
   description: "Discover and book local hobby events, workshops, and meetups in Berlin.",
@@ -33,6 +35,7 @@ export default function RootLayout({
           fontSerif.variable
         )}
       >
+        <RealtimeListener />
         {children}
         <Toaster />
       </body>

@@ -74,6 +74,42 @@ export async function sendMessage(conversationId: string, content: string) {
         .update({ updated_at: new Date().toISOString() })
         .eq('id', conversationId);
 
+    // Notification Logic (Email)
+    try {
+        // 1. Get Conversation to find recipient
+        const { data: conversation } = await supabase
+            .from('conversations')
+            .select('participant1_id, participant2_id')
+            .eq('id', conversationId)
+            .single();
+
+        if (conversation) {
+            const recipientId = conversation.participant1_id === user.id
+                ? conversation.participant2_id
+                : conversation.participant1_id;
+
+            // 2. Fetch Recipient Email (via Service Role)
+            const { createServiceRoleClient } = await import('@/lib/supabase/service');
+            const adminSupabase = createServiceRoleClient();
+
+            const { data: recipientUser } = await adminSupabase.auth.admin.getUserById(recipientId);
+
+            if (recipientUser?.user?.email) {
+                const { sendMessageReceivedEmail } = await import('@/lib/email');
+                const senderName = user.user_metadata?.full_name || 'A User';
+
+                await sendMessageReceivedEmail(
+                    recipientUser.user.email,
+                    senderName,
+                    content,
+                    conversationId
+                );
+            }
+        }
+    } catch (notifyErr) {
+        console.error("Failed to send message notification:", notifyErr);
+    }
+
     revalidatePath(`/messages/${conversationId}`);
     revalidatePath('/messages');
     return { success: true };

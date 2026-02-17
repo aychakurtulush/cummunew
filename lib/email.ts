@@ -39,3 +39,94 @@ export async function sendBookingNotification(
         console.error("[Email] Failed to send:", error);
     }
 }
+
+export async function sendInquiryReceivedEmail(
+    userEmail: string,
+    requesterName: string,
+    studioName: string,
+    inquiryId: string
+) {
+    if (!process.env.RESEND_API_KEY) return;
+
+    try {
+        await resend.emails.send({
+            from: 'Communew <noreply@communew.com>',
+            to: userEmail,
+            subject: `New Request: ${studioName} 📅`,
+            html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h1 style="color: #4a5d23;">New Studio Request!</h1>
+                    <p><strong>${requesterName}</strong> has requested to book <strong>${studioName}</strong>.</p>
+                    <p>Please log in to your dashboard to review and approve/reject this request.</p>
+                    <p>
+                        <a href="${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/host/inquiries" style="color: #4a5d23; font-weight: bold;">Review Request</a>
+                    </p>
+                </div>
+            `
+        });
+    } catch (error) {
+        console.error("[Email] Failed to send inquiry notification:", error);
+    }
+}
+
+export async function sendInquiryStatusEmail(
+    userEmail: string,
+    studioName: string,
+    status: string
+) {
+    if (!process.env.RESEND_API_KEY) return;
+
+    const subject = status === 'approved' ? `Request Approved: ${studioName} ✅` : `Request Declined: ${studioName} ❌`;
+    const color = status === 'approved' ? '#4a5d23' : '#b91c1c';
+
+    try {
+        await resend.emails.send({
+            from: 'Communew <noreply@communew.com>',
+            to: userEmail,
+            subject: subject,
+            html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h1 style="color: ${color};">Request ${status.charAt(0).toUpperCase() + status.slice(1)}</h1>
+                    <p>Your request to book <strong>${studioName}</strong> has been <strong>${status}</strong>.</p>
+                    ${status === 'approved' ? '<p>The host will be in touch shortly with more details.</p>' : '<p>You can try booking another time or contact the host for more info.</p>'}
+                    <p>
+                        <a href="${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/bookings" style="color: #4a5d23;">View Bookings</a>
+                    </p>
+                </div>
+            `
+        });
+    } catch (error) {
+        console.error("[Email] Failed to send status notification:", error);
+    }
+}
+
+export async function sendMessageReceivedEmail(
+    userEmail: string,
+    senderName: string,
+    messagePreview: string,
+    conversationId: string
+) {
+    if (!process.env.RESEND_API_KEY) return;
+
+    try {
+        await resend.emails.send({
+            from: 'Communew <noreply@communew.com>',
+            to: userEmail,
+            subject: `New Message from ${senderName} 💬`,
+            html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #4a5d23;">New Message</h2>
+                    <p><strong>${senderName}</strong> sent you a message:</p>
+                    <blockquote style="border-left: 4px solid #e7e5e4; padding-left: 10px; color: #57534e; font-style: italic;">
+                        "${messagePreview.length > 50 ? messagePreview.slice(0, 50) + '...' : messagePreview}"
+                    </blockquote>
+                    <p>
+                        <a href="${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/messages/${conversationId}" style="color: #4a5d23; font-weight: bold;">Reply Now</a>
+                    </p>
+                </div>
+            `
+        });
+    } catch (error) {
+        console.error("[Email] Failed to send message notification:", error);
+    }
+}
