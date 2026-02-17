@@ -64,20 +64,25 @@ export default async function BookingsPage() {
     // Combine and Sort
     const allBookings = [
         ...(eventBookings?.map(b => ({ ...b, type: 'event' })) || []),
-        ...(studioInquiries?.map(i => ({
-            id: i.id,
-            status: i.status,
-            created_at: i.created_at,
-            type: 'studio',
-            details: {
-                title: i.studio?.name || 'Unknown Studio',
-                location: i.studio?.location || 'Unknown Location',
-                start_time: i.start_time,
-                image_url: i.studio?.image_url, // Might be undefined
-                category: 'Studio Rental'
-            },
-            raw: i
-        })) || [])
+        ...(studioInquiries?.map(i => {
+            // Handle studio relation potentially returned as array by Supabase types
+            const studio = Array.isArray(i.studio) ? i.studio[0] : i.studio;
+
+            return {
+                id: i.id,
+                status: i.status,
+                created_at: i.created_at,
+                type: 'studio',
+                details: {
+                    title: studio?.name || 'Unknown Studio',
+                    location: studio?.location || 'Unknown Location',
+                    start_time: i.start_time,
+                    image_url: studio?.image_url,
+                    category: 'Studio Rental'
+                },
+                raw: i
+            };
+        }) || [])
     ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
     return (
