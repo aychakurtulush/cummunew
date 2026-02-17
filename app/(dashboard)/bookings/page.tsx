@@ -171,7 +171,7 @@ export default async function BookingsPage() {
                                     )}
 
                                     {!isEvent && (booking.status === 'approved' || booking.status === 'confirmed') && (
-                                        <Link href={`/host/events/create?studio_id=${booking.raw.studio?.id}&start_time=${booking.raw.start_time}&end_time=${booking.raw.end_time}`}>
+                                        <Link href={`/host/events/create?studio_id=${booking.raw.studio?.id}&start_time=${encodeURIComponent(booking.raw.start_time)}&end_time=${encodeURIComponent(booking.raw.end_time)}`}>
                                             <Button size="sm" className="bg-moss-600 hover:bg-moss-700 text-white">
                                                 Create Event
                                             </Button>

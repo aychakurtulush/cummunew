@@ -20,19 +20,23 @@ interface Studio {
 
 import { useSearchParams } from "next/navigation"
 
-export default function CreateEventForm({ studios }: { studios: Studio[] }) {
+interface CreateEventFormProps {
+    studios: Studio[];
+    initialStartTime?: string;
+    initialEndTime?: string;
+}
+
+export default function CreateEventForm({ studios, initialStartTime, initialEndTime }: CreateEventFormProps) {
     const [state, formAction] = useActionState(createEvent, initialState)
     const searchParams = useSearchParams();
 
     // Auto-fill from URL params (e.g. converting a studio booking)
     const studioIdParam = searchParams.get('studio_id');
-    const startTimeParam = searchParams.get('start_time');
-    const endTimeParam = searchParams.get('end_time');
 
     const [locationType, setLocationType] = useState<string>(studioIdParam ? "studio" : "home");
 
     // Format dates for datetime-local input (YYYY-MM-DDThh:mm)
-    const formatForInput = (dateString: string | null) => {
+    const formatForInput = (dateString: string | null | undefined) => {
         if (!dateString) return undefined;
         try {
             const date = new Date(dateString);
@@ -45,8 +49,8 @@ export default function CreateEventForm({ studios }: { studios: Studio[] }) {
         }
     };
 
-    const defaultStartTime = formatForInput(startTimeParam);
-    const defaultEndTime = formatForInput(endTimeParam);
+    const defaultStartTime = formatForInput(initialStartTime);
+    const defaultEndTime = formatForInput(initialEndTime);
 
     return (
         <div className="max-w-2xl mx-auto space-y-8">
