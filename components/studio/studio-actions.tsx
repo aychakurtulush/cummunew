@@ -13,6 +13,16 @@ interface StudioActionsProps {
 
 export function StudioActions({ studioId, studioName, isOwner }: StudioActionsProps) {
     const [isFollowing, setIsFollowing] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    import { useEffect } from "react";
+    import { toggleStudioFollow, getIsFollowing } from "@/app/studios/actions";
+
+    useEffect(() => {
+        if (!isOwner) {
+            getIsFollowing(studioId).then(setIsFollowing).finally(() => setIsLoading(false));
+        }
+    }, [studioId, isOwner]);
 
     const handleRequest = () => {
         // TODO: Implement actual request flow
@@ -21,9 +31,22 @@ export function StudioActions({ studioId, studioName, isOwner }: StudioActionsPr
         });
     };
 
-    const handleFollow = () => {
-        setIsFollowing(!isFollowing);
-        toast.success(isFollowing ? `Unfollowed ${studioName}` : `Following ${studioName}`);
+    const handleFollow = async () => {
+        // Optimistic update
+        const newState = !isFollowing;
+        setIsFollowing(newState);
+
+        try {
+            const result = await toggleStudioFollow(studioId);
+            // Verify state matches server
+            if (result.isFollowing !== newState) {
+                setIsFollowing(result.isFollowing);
+            }
+            toast.success(result.isFollowing ? `Following ${studioName}` : `Unfollowed ${studioName}`);
+        } catch (error) {
+            setIsFollowing(!newState); // Revert on error
+            toast.error("Failed to update follow status");
+        }
     };
 
     const handleContact = () => {
@@ -44,6 +67,7 @@ export function StudioActions({ studioId, studioName, isOwner }: StudioActionsPr
                 variant="outline"
                 size="icon"
                 onClick={handleFollow}
+                disabled={isLoading}
                 className={isFollowing ? "text-red-500 hover:text-red-600 border-red-200 bg-red-50" : "text-stone-600"}
             >
                 <Heart className={`h-4 w-4 ${isFollowing ? "fill-current" : ""}`} />
