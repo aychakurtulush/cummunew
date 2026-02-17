@@ -79,27 +79,27 @@ export function BookingRequestModal({ isOpen, onClose, studioId, studioName }: B
             />
 
             {/* Modal Content */}
-            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-stone-200">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-stone-100 bg-stone-50/50">
-                    <h2 className="text-lg font-bold text-stone-900 font-serif">Request to Book</h2>
-                    <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+                <div className="flex items-center justify-between p-4 border-b border-stone-100 bg-moss-50">
+                    <h2 className="text-lg font-bold text-moss-900 font-serif">Request Booking</h2>
+                    <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 text-moss-700">
                         <X className="h-4 w-4" />
                     </Button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    <div className="bg-moss-50 border border-moss-100 rounded-lg p-3 text-sm text-moss-800 mb-4">
-                        Requesting <strong>{studioName}</strong>
+                <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                    <div className="bg-stone-50 border border-stone-200 rounded-lg p-3 text-sm text-stone-600">
+                        Requesting: <strong className="text-stone-900">{studioName}</strong>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-stone-700">Date</label>
+                        <label className="text-sm font-bold text-stone-700 block">Date</label>
                         <div className="relative">
-                            <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-stone-400" />
+                            <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-stone-500 pointer-events-none" />
                             <Input
                                 type="date"
-                                className="pl-9"
+                                className="pl-10 text-stone-900 bg-white border-stone-300"
                                 value={date}
                                 onChange={(e) => setDate(e.target.value)}
                                 min={new Date().toISOString().split('T')[0]}
@@ -110,18 +110,20 @@ export function BookingRequestModal({ isOpen, onClose, studioId, studioName }: B
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-stone-700">Start Time</label>
+                            <label className="text-sm font-bold text-stone-700 block">Start Time</label>
                             <Input
                                 type="time"
+                                className="text-stone-900 bg-white border-stone-300"
                                 value={startTime}
                                 onChange={(e) => setStartTime(e.target.value)}
                                 required
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-stone-700">End Time</label>
+                            <label className="text-sm font-bold text-stone-700 block">End Time</label>
                             <Input
                                 type="time"
+                                className="text-stone-900 bg-white border-stone-300"
                                 value={endTime}
                                 onChange={(e) => setEndTime(e.target.value)}
                                 required
@@ -130,10 +132,10 @@ export function BookingRequestModal({ isOpen, onClose, studioId, studioName }: B
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-stone-700">Message to Host</label>
+                        <label className="text-sm font-bold text-stone-700 block">Message to Host</label>
                         <Textarea
                             placeholder="Tell the host about your event plans..."
-                            className="min-h-[100px] resize-none"
+                            className="min-h-[100px] resize-none text-stone-900 bg-white border-stone-300"
                             value={message}
                             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setMessage(e.target.value)}
                             required

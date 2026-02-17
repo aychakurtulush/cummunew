@@ -48,6 +48,7 @@ export function StudioActions({ studioId, studioName, isOwner, ownerId, hasAuth 
         }
 
         console.log("Opening Booking Modal");
+        toast.info("Opening booking form...");
         setIsBookingModalOpen(true);
     };
 
@@ -158,9 +159,9 @@ export function StudioActions({ studioId, studioName, isOwner, ownerId, hasAuth 
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Contact
             </Button>
-            <Button onClick={handleRequest} className="bg-moss-700 hover:bg-moss-800 text-white">
+            <Button onClick={handleRequest} className="bg-moss-700 hover:bg-moss-800 text-white shadow-md">
                 <CalendarPlus className="h-4 w-4 mr-2" />
-                Request to Host
+                Request Booking
             </Button>
         </div>
     );
