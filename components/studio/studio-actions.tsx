@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Heart, CalendarPlus, MessageCircle } from "lucide-react";
+import { Heart, CalendarPlus, MessageCircle, Share2, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { toggleStudioFollow, getIsFollowing } from "@/app/studios/actions";
@@ -94,16 +94,53 @@ export function StudioActions({ studioId, studioName, isOwner, ownerId, hasAuth 
         }
     }
 
+    const [copied, setCopied] = useState(false);
+
+    const handleShare = async () => {
+        const path = window.location.pathname;
+        const url = `https://communew.com${path}`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: studioName,
+                    text: `Check out ${studioName} on Communew`,
+                    url: url
+                });
+            } catch (err) {
+                // Ignore cancel
+            }
+        } else {
+            navigator.clipboard.writeText(url);
+            setCopied(true);
+            toast.success("Link copied to clipboard");
+            setTimeout(() => setCopied(false), 2000);
+        }
+    };
+
     if (isOwner) {
         return (
-            <Button variant="outline" className="w-full sm:w-auto">
-                Edit Studio
-            </Button>
+            <div className="flex gap-2">
+                <Button variant="outline" className="w-full sm:w-auto">
+                    Edit Studio
+                </Button>
+                <Button variant="outline" size="icon" onClick={handleShare}>
+                    {copied ? <Check className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
+                </Button>
+            </div>
         )
     }
 
     return (
         <div className="flex gap-2">
+            <Button
+                variant="outline"
+                size="icon"
+                onClick={handleShare}
+                className="text-stone-600"
+            >
+                {copied ? <Check className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
+            </Button>
             <Button
                 variant="outline"
                 size="icon"
