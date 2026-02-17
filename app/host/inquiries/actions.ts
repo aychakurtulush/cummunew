@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { startConversation, sendMessage } from "@/app/messages/actions";
 
 export async function createInquiry(data: {
     studioId: string;
@@ -26,6 +27,7 @@ export async function createInquiry(data: {
         return { error: "Cannot book in the past" };
     }
 
+    // Insert Inquiry
     const { error } = await supabase
         .from('studio_inquiries')
         .insert({
@@ -42,7 +44,38 @@ export async function createInquiry(data: {
         return { error: error.message };
     }
 
-    // TODO: Send notification (email/chat) here
+    // Notification Logic
+    try {
+        const { data: studio } = await supabase
+            .from('studios')
+            .select('owner_user_id, name')
+            .eq('id', data.studioId)
+            .single();
+
+        if (studio) {
+            // Check for self-booking
+            if (studio.owner_user_id === user.id) {
+                console.log("Skipping notification for self-booking");
+            } else {
+                // 1. Ensure conversation exists
+                const convResult = await startConversation(studio.owner_user_id);
+
+                if (convResult.error) {
+                    console.error("Failed to start conversation for notification:", convResult.error);
+                } else if (convResult.conversationId) {
+                    // 2. Send formatted message
+                    const notificationText = `📅 New Booking Request\n\nI've requested to book ${studio.name || 'your studio'}.\n\nTime: ${new Date(data.startTime).toLocaleString()} - ${new Date(data.endTime).toLocaleTimeString()}\n\nMessage: "${data.message}"\n\nPlease check your Host Dashboard to approve or decline.`;
+
+                    const msgResult = await sendMessage(convResult.conversationId, notificationText);
+                    if (msgResult.error) {
+                        console.error("Failed to send notification message:", msgResult.error);
+                    }
+                }
+            }
+        }
+    } catch (notifyError) {
+        console.error("Unexpected error in notification logic:", notifyError);
+    }
 
     revalidatePath(`/studios/${data.studioId}`);
     return { success: true };
