@@ -35,13 +35,18 @@ export default async function HostDashboardOverview() {
             created_at,
             user_id,
             event_id,
-            events (title, start_time)
+            events (title, start_time, price)
         `)
         .in('event_id', eventIds)
         .order('created_at', { ascending: false });
 
     // Calculate stats
-    const totalRevenue = 0; // We don't have payments yet
+    const totalRevenue = bookings?.reduce((acc, booking: any) => {
+        if (booking.status === 'confirmed' && booking.events?.price) {
+            return acc + (booking.events.price);
+        }
+        return acc;
+    }, 0) || 0;
 
     const totalBookings = bookings?.filter(b => b.status === 'confirmed').length || 0;
     const pendingBookings = bookings?.filter(b => b.status === 'pending') || [];

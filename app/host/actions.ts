@@ -87,6 +87,56 @@ export async function createEvent(prevState: any, formData: FormData) {
     redirect('/host')
 }
 
+export async function updateEvent(prevState: any, formData: FormData) {
+    const supabase = await createClient()
+
+    if (!supabase) return { message: "Backend unavailable" }
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) redirect('/login')
+
+    const eventId = formData.get('id') as string;
+    if (!eventId) return { message: "Event ID missing" };
+
+    const startTime = new Date(formData.get('start_time') as string);
+    const endTime = formData.get('end_time') ? new Date(formData.get('end_time') as string) : new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
+
+    if (endTime <= startTime) {
+        return { message: "End time must be after the start time." };
+    }
+
+    const rawData = {
+        title: formData.get('title') as string,
+        description: formData.get('description') as string,
+        price: parseFloat(formData.get('price') as string),
+        capacity: parseInt(formData.get('capacity') as string),
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
+        location_type: formData.get('location_type') as 'home' | 'studio' | 'partner_venue',
+        city: formData.get('city') as string,
+        category: formData.get('category') as string,
+        studio_id: formData.get('studio_id') as string || null,
+    }
+
+    const { error } = await supabase
+        .from('events')
+        .update(rawData)
+        .eq('id', eventId)
+        .eq('creator_user_id', user.id); // Security check
+
+    if (error) {
+        console.error('SERVER ERROR updating event:', error)
+        return { message: `Failed to update event: ${error.message}` }
+    }
+
+    revalidatePath('/host');
+    revalidatePath(`/events/${eventId}`);
+    revalidatePath(`/host/events/${eventId}/edit`);
+
+    return { message: 'Success' }
+}
+
 export async function createStudio(prevState: any, formData: FormData) {
     console.log('[createStudio] Action started');
     const supabase = await createClient()
