@@ -88,11 +88,20 @@ export async function getInquiriesForHost() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
+    console.log("[getInquiriesForHost] User:", user.id);
+
     // 1. Get IDs of studios owned by user
-    const { data: studios } = await supabase
+    const { data: studios, error: studioError } = await supabase
         .from('studios')
-        .select('id')
+        .select('id, name, owner_user_id')
         .eq('owner_user_id', user.id);
+
+    if (studioError) {
+        console.error("[getInquiriesForHost] Studio fetch error:", studioError);
+        return [];
+    }
+
+    console.log("[getInquiriesForHost] Studios found:", studios?.length, studios);
 
     if (!studios || studios.length === 0) return [];
 
@@ -108,22 +117,27 @@ export async function getInquiriesForHost() {
             message,
             status,
             created_at,
-            studio:studios(name),
-            requester:requester_id(id) 
+            studio_id,
+            requester_id,
+            studio:studios(name)
         `)
         .in('studio_id', studioIds)
         .order('created_at', { ascending: false });
 
     if (error) {
-        console.error("Get Inquiries Error:", error);
+        console.error("[getInquiriesForHost] Inquiries Error:", error);
         return [];
     }
 
-    // 3. Manually fetch profiles for requesters (to avoid auth.users join issues)
-    const requesterIds = Array.from(new Set(inquiries.map((i: any) => i.requester.id)));
+    console.log("[getInquiriesForHost] Inquiries found:", inquiries?.length);
+
+    // 3. Manually fetch profiles for requesters
+    const requesterIds = Array.from(new Set(inquiries.map((i: any) => i.requester_id)));
+
+    // START MANUAL PROFILE FETCH
     const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, full_name, role') // assuming role or avatar_url exists
+        .select('user_id, full_name, role')
         .in('user_id', requesterIds);
 
     const profileMap = new Map(profiles?.map((p: any) => [p.user_id, p]) || []);
@@ -131,8 +145,8 @@ export async function getInquiriesForHost() {
     return inquiries.map((i: any) => ({
         ...i,
         requester: {
-            ...i.requester,
-            name: profileMap.get(i.requester.id)?.full_name || 'Guest User'
+            id: i.requester_id,
+            name: profileMap.get(i.requester_id)?.full_name || 'Guest User'
         }
     }));
 }
