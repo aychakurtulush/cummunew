@@ -11,7 +11,7 @@ const initialState = {
     message: '',
 }
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Studio {
     id: string;
@@ -34,23 +34,28 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
     const studioIdParam = searchParams.get('studio_id');
 
     const [locationType, setLocationType] = useState<string>(studioIdParam ? "studio" : "home");
+    const [startTime, setStartTime] = useState<string>("");
+    const [endTime, setEndTime] = useState<string>("");
 
     // Format dates for datetime-local input (YYYY-MM-DDThh:mm)
-    const formatForInput = (dateString: string | null | undefined) => {
-        if (!dateString) return undefined;
-        try {
-            const date = new Date(dateString);
-            // Adjust to local timezone for the input value
-            const offset = date.getTimezoneOffset() * 60000;
-            const localDate = new Date(date.getTime() - offset);
-            return localDate.toISOString().slice(0, 16);
-        } catch (e) {
-            return undefined;
-        }
-    };
+    // We utilize useEffect to avoid hydration mismatch (server timezone vs client timezone)
+    useEffect(() => {
+        const formatForInput = (dateString: string | null | undefined) => {
+            if (!dateString) return "";
+            try {
+                const date = new Date(dateString);
+                // Adjust to local timezone for the input value
+                const offset = date.getTimezoneOffset() * 60000;
+                const localDate = new Date(date.getTime() - offset);
+                return localDate.toISOString().slice(0, 16);
+            } catch (e) {
+                return "";
+            }
+        };
 
-    const defaultStartTime = formatForInput(initialStartTime);
-    const defaultEndTime = formatForInput(initialEndTime);
+        if (initialStartTime) setStartTime(formatForInput(initialStartTime));
+        if (initialEndTime) setEndTime(formatForInput(initialEndTime));
+    }, [initialStartTime, initialEndTime]);
 
     return (
         <div className="max-w-2xl mx-auto space-y-8">
