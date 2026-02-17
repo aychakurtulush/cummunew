@@ -3,10 +3,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { X } from "lucide-react";
-
-// Simplified context to manage state if needed, but for now we rely on the parent controlling it or internal state
-// Actually, Radix Sheet works by control or unchecked.
-// We'll implement a simple version that renders a fixed overlay.
+import { createPortal } from "react-dom";
 
 interface SheetProps {
     children: React.ReactNode;
@@ -38,11 +35,16 @@ const Sheet = ({ children, open: controlledOpen, onOpenChange }: SheetProps) => 
 const SheetTrigger = ({ asChild, children }: { asChild?: boolean, children: React.ReactNode }) => {
     const { setOpen } = React.useContext(SheetContext);
 
+    // If asChild is true, we clone the element and attach onClick.
+    // We assume the child accepts onClick and is a valid Element.
     if (asChild && React.isValidElement(children)) {
         return React.cloneElement(children as React.ReactElement<any>, {
             onClick: (e: React.MouseEvent) => {
-                // @ts-ignore - We validated it's an element, accessing props is safeish here for simple triggers
-                (children.props as any).onClick?.(e);
+                // Call original onClick if it exists
+                const originalOnClick = (children.props as any).onClick;
+                if (originalOnClick) {
+                    originalOnClick(e);
+                }
                 setOpen(true);
             }
         });
@@ -57,11 +59,17 @@ const SheetTrigger = ({ asChild, children }: { asChild?: boolean, children: Reac
 
 const SheetContent = ({ children, side = "right", className }: { children: React.ReactNode, side?: "left" | "right", className?: string }) => {
     const { open, setOpen } = React.useContext(SheetContext);
+    const [mounted, setMounted] = React.useState(false);
 
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return null;
     if (!open) return null;
 
-    return (
-        <div className="fixed inset-0 z-50 flex">
+    return createPortal(
+        <div className="fixed inset-0 z-50 flex justify-start"> {/* z-50 is standard for modals */}
             {/* Backdrop */}
             <div
                 className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
@@ -82,7 +90,8 @@ const SheetContent = ({ children, side = "right", className }: { children: React
                 </div>
                 {children}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
