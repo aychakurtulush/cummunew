@@ -12,6 +12,7 @@ import {
     PlusCircle,
     User,
     Building2,
+    Inbox,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -19,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 
 const HOST_SIDEBAR_ITEMS = [
     { icon: LayoutDashboard, label: "Overview", href: "/host" },
+    { icon: Inbox, label: "Inquiries", href: "/host/inquiries" },
     { icon: Calendar, label: "Manage Events", href: "/host/events" },
     { icon: Users, label: "Attendees", href: "/host/attendees" },
     { icon: DollarSign, label: "Earnings", href: "/host/earnings" },

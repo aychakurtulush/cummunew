@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { toggleStudioFollow, getIsFollowing } from "@/app/studios/actions";
 import { startConversation } from "@/app/messages/actions";
+import { BookingRequestModal } from "./booking-request-modal";
 import { useRouter } from "next/navigation";
 
 interface StudioActionsProps {
@@ -19,6 +20,7 @@ interface StudioActionsProps {
 export function StudioActions({ studioId, studioName, isOwner, ownerId, hasAuth }: StudioActionsProps) {
     const [isFollowing, setIsFollowing] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -45,17 +47,7 @@ export function StudioActions({ studioId, studioName, isOwner, ownerId, hasAuth 
             toast.error("Cannot contact owner");
             return;
         }
-
-        toast.promise(async () => {
-            const { requestToHost } = await import("@/app/messages/actions");
-            const result = await requestToHost(ownerId, studioName);
-            if (result.error) throw new Error(result.error);
-            // No redirect - just stay on page as requested
-        }, {
-            loading: 'Sending request...',
-            success: 'Request sent! check your inbox for replies.',
-            error: (err) => `Failed to send request: ${err.message}`
-        });
+        setIsBookingModalOpen(true);
     };
 
     const handleFollow = async () => {
