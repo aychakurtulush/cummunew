@@ -47,11 +47,6 @@ export function StudioActions({ studioId, studioName, isOwner, ownerId, hasAuth 
             return;
         }
 
-        if (!ownerId) {
-            console.error("Owner ID missing");
-            toast.error("Cannot contact owner");
-            return;
-        }
         console.log("Opening Booking Modal");
         setIsBookingModalOpen(true);
     };
