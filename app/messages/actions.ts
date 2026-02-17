@@ -148,3 +148,30 @@ export async function getMessages(conversationId: string) {
 
     return messages || [];
 }
+
+export async function requestToHost(ownerId: string, studioName: string) {
+    const supabase = await createClient();
+    if (!supabase) return { error: "Database unavailable" };
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect('/login');
+
+    // 1. Start/Get Conversation
+    const convResult = await startConversation(ownerId);
+    if (convResult.error) return { error: convResult.error };
+
+    const conversationId = convResult.conversationId;
+
+    if (!conversationId) return { error: "Failed to start conversation" };
+
+    // 2. Check if specific request message already exists recently to avoid spam
+    // (Skipping for now for simplicity, but good to have in mind)
+
+    // 3. Send Request Message
+    const messageContent = `Hi, I'm interested in hosting an event at ${studioName}. Is it available?`;
+
+    const msgResult = await sendMessage(conversationId, messageContent);
+    if (msgResult.error) return { error: msgResult.error };
+
+    return { conversationId };
+}

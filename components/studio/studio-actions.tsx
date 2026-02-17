@@ -38,12 +38,23 @@ export function StudioActions({ studioId, studioName, isOwner, ownerId, hasAuth 
         return true;
     };
 
-    const handleRequest = () => {
+    const handleRequest = async () => {
         if (!checkAuth()) return;
 
-        // TODO: Implement actual request flow
-        toast.info("Request feature coming soon!", {
-            description: "You'll be able to request to host events here."
+        if (!ownerId) {
+            toast.error("Cannot contact owner");
+            return;
+        }
+
+        toast.promise(async () => {
+            const { requestToHost } = await import("@/app/messages/actions");
+            const result = await requestToHost(ownerId, studioName);
+            if (result.error) throw new Error(result.error);
+            if (result.conversationId) router.push(`/messages/${result.conversationId}`);
+        }, {
+            loading: 'Sending request...',
+            success: 'Request sent! Redirecting to chat...',
+            error: (err) => `Failed to send request: ${err.message}`
         });
     };
 

@@ -18,8 +18,8 @@ export default function EditEventPage() {
             </div>
 
             <div className="bg-white p-12 rounded-xl border border-stone-200 text-center">
-                <p className="text-stone-500">Edit functionality coming soon!</p>
-                <p className="text-sm text-stone-400 mt-2">For now, you can delete and recreate the event if needed.</p>
+                <p className="text-stone-500 font-medium">Event editing is currently disabled.</p>
+                <p className="text-sm text-stone-400 mt-2">To ensure data integrity, please delete and recreate the event if changes are needed.</p>
             </div>
         </div>
     );
