@@ -86,23 +86,44 @@ export async function getConversations() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    // Fetch conversations
-    const { data: conversations, error } = await supabase
+    // 1. Fetch conversations (raw)
+    const { data: conversationsRaw, error } = await supabase
         .from('conversations')
-        .select(`
-            id,
-            updated_at,
-            participant1:participant1_id(id, full_name, avatar_url),
-            participant2:participant2_id(id, full_name, avatar_url)
-        `)
+        .select('id, updated_at, participant1_id, participant2_id')
         .or(`participant1_id.eq.${user.id},participant2_id.eq.${user.id}`)
         .order('updated_at', { ascending: false });
 
-    if (error || !conversations) return [];
+    if (error || !conversationsRaw || conversationsRaw.length === 0) {
+        if (error) console.error("Error fetching conversations:", error);
+        return [];
+    }
 
-    // Fetch last message for each
-    const conversationsWithDetails = await Promise.all(conversations.map(async (conv: any) => {
-        const otherUser = conv.participant1.id === user.id ? conv.participant2 : conv.participant1;
+    // 2. Collect User IDs to fetch profiles
+    const userIds = new Set<string>();
+    conversationsRaw.forEach((c: any) => {
+        if (c.participant1_id !== user.id) userIds.add(c.participant1_id);
+        if (c.participant2_id !== user.id) userIds.add(c.participant2_id);
+    });
+
+    // 3. Fetch Profiles
+    const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url') // Use avatar_url if that's the column name
+        .in('user_id', Array.from(userIds));
+
+    const profileMap = new Map(profiles?.map((p: any) => [p.user_id, p]) || []);
+
+    // 4. Map back to detailed objects
+    const conversationsWithDetails = await Promise.all(conversationsRaw.map(async (conv: any) => {
+        const otherUserId = conv.participant1_id === user.id ? conv.participant2_id : conv.participant1_id;
+        const otherProfile = profileMap.get(otherUserId);
+
+        const otherUser = {
+            id: otherUserId,
+            name: otherProfile?.full_name || 'User', // Fallback
+            avatar: otherProfile?.avatar_url, // Or whatever column
+            initial: (otherProfile?.full_name?.[0] || 'U').toUpperCase()
+        };
 
         // Get last message
         const { data: messages } = await supabase
@@ -116,15 +137,10 @@ export async function getConversations() {
 
         return {
             id: conv.id,
-            otherUser: {
-                id: otherUser?.id,
-                name: otherUser?.full_name || 'User',
-                avatar: otherUser?.avatar_url,
-                initial: (otherUser?.full_name?.[0] || 'U').toUpperCase()
-            },
+            otherUser,
             lastMessage: lastMessage?.content || 'No messages yet',
             lastMessageTime: lastMessage?.created_at,
-            isUnread: false // TODO: Implement read status
+            isUnread: false
         };
     }));
 
