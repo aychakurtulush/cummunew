@@ -40,6 +40,47 @@ export default async function HostDashboardOverview() {
         .in('event_id', eventIds)
         .order('created_at', { ascending: false });
 
+    // Fetch User's Studios
+    const { data: studios } = await supabase
+        .from('studios')
+        .select('id, name')
+        .eq('owner_user_id', user.id);
+
+    const studioIds = studios?.map(s => s.id) || [];
+
+    // Fetch Pending Inquiries
+    const { data: pendingInquiries } = await supabase
+        .from('studio_inquiries')
+        .select(`
+            id,
+            start_time,
+            end_time,
+            message,
+            created_at,
+            studio:studios(name),
+            requester_id
+        `)
+        .in('studio_id', studioIds)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+    // Manually fetch requester names for inquiries
+    let inquiriesWithNames: any[] = [];
+    if (pendingInquiries && pendingInquiries.length > 0) {
+        const requesterIds = Array.from(new Set(pendingInquiries.map(i => i.requester_id)));
+        const { data: profiles } = await supabase
+            .from('profiles')
+            .select('user_id, full_name')
+            .in('user_id', requesterIds);
+
+        const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
+
+        inquiriesWithNames = pendingInquiries.map(i => ({
+            ...i,
+            requester_name: profileMap.get(i.requester_id) || 'Guest User'
+        }));
+    }
+
     // Calculate stats
     const totalRevenue = bookings?.reduce((acc, booking: any) => {
         if (booking.status === 'confirmed' && booking.events?.price) {
@@ -52,6 +93,9 @@ export default async function HostDashboardOverview() {
     const pendingBookings = bookings?.filter(b => b.status === 'pending') || [];
     const upcomingEventsCount = events?.filter(e => new Date(e.start_time) > new Date()).length || 0;
 
+    // Total pending actions (Events + Studios)
+    const totalPendingCount = pendingBookings.length + (pendingInquiries?.length || 0);
+
     return (
         <div className="space-y-8">
 
@@ -61,9 +105,14 @@ export default async function HostDashboardOverview() {
                     <h1 className="text-2xl font-serif font-bold text-stone-900">Host Dashboard</h1>
                     <p className="text-stone-500">Welcome back, {user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'Host'}.</p>
                 </div>
-                <Button size="sm" variant="outline" asChild>
-                    <Link href="/profile">View Public Profile</Link>
-                </Button>
+                <div className="flex gap-2">
+                    <Button size="sm" variant="outline" asChild>
+                        <Link href="/host/inquiries">Studio Inquiries</Link>
+                    </Button>
+                    <Button size="sm" variant="outline" asChild>
+                        <Link href="/profile">View Public Profile</Link>
+                    </Button>
+                </div>
             </div>
 
             {/* Stats Cards */}
@@ -90,17 +139,17 @@ export default async function HostDashboardOverview() {
                     </CardContent>
                 </Card>
 
-                <Card className={`hover:shadow-sm transition-shadow ${pendingBookings.length > 0 ? 'border-moss-500 bg-moss-50' : ''}`}>
+                <Card className={`hover:shadow-sm transition-shadow ${totalPendingCount > 0 ? 'border-moss-500 bg-moss-50' : ''}`}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-stone-600">Pending Requests</CardTitle>
-                        <AlertCircle className={`h-4 w-4 ${pendingBookings.length > 0 ? 'text-moss-600' : 'text-stone-400'}`} />
+                        <CardTitle className="text-sm font-medium text-stone-600">Pending Actions</CardTitle>
+                        <AlertCircle className={`h-4 w-4 ${totalPendingCount > 0 ? 'text-moss-600' : 'text-stone-400'}`} />
                     </CardHeader>
                     <CardContent>
-                        <div className={`text-2xl font-bold ${pendingBookings.length > 0 ? 'text-moss-700' : 'text-stone-900'}`}>
-                            {pendingBookings.length}
+                        <div className={`text-2xl font-bold ${totalPendingCount > 0 ? 'text-moss-700' : 'text-stone-900'}`}>
+                            {totalPendingCount}
                         </div>
-                        <p className={`text-xs ${pendingBookings.length > 0 ? 'text-moss-600' : 'text-stone-500'}`}>
-                            Requires action
+                        <p className={`text-xs ${totalPendingCount > 0 ? 'text-moss-600' : 'text-stone-500'}`}>
+                            {pendingBookings.length} events, {pendingInquiries?.length || 0} studios
                         </p>
                     </CardContent>
                 </Card>
@@ -117,17 +166,53 @@ export default async function HostDashboardOverview() {
                 </Card>
             </div>
 
+            {/* Pending Studio Inquiries */}
+            {inquiriesWithNames.length > 0 && (
+                <div>
+                    <div className="flex justify-between items-end mb-4">
+                        <h2 className="text-lg font-serif font-semibold text-stone-900">New Studio Requests</h2>
+                        <Button variant="link" asChild className="text-moss-600 p-0 h-auto">
+                            <Link href="/host/inquiries">Manage All ({inquiriesWithNames.length})</Link>
+                        </Button>
+                    </div>
+                    <div className="bg-white rounded-xl border border-moss-200 overflow-hidden shadow-sm">
+                        <div className="divide-y divide-stone-100">
+                            {inquiriesWithNames.map((inquiry: any) => (
+                                <div key={inquiry.id} className="flex items-center justify-between p-4 bg-moss-50/30">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-10 w-10 bg-white border border-moss-100 rounded-full flex items-center justify-center text-moss-600 font-bold text-xs shadow-sm">
+                                            Stu
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold text-stone-900 text-sm">
+                                                {inquiry.requester_name} wants to book {inquiry.studio?.name}
+                                            </h4>
+                                            <p className="text-xs text-stone-500">
+                                                {new Date(inquiry.start_time).toLocaleDateString()} • {new Date(inquiry.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(inquiry.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Button size="sm" asChild className="bg-moss-600 hover:bg-moss-700">
+                                        <Link href="/host/inquiries">Review</Link>
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Pending Requests List */}
             {pendingBookings.length > 0 && (
                 <div>
-                    <h2 className="text-lg font-serif font-semibold text-stone-900 mb-4">Pending Requests</h2>
+                    <h2 className="text-lg font-serif font-semibold text-stone-900 mb-4">Pending Event Requests</h2>
                     <div className="bg-white rounded-xl border border-moss-200 overflow-hidden shadow-sm">
                         <div className="divide-y divide-stone-100">
                             {pendingBookings.map((booking: any) => (
                                 <div key={booking.id} className="flex items-center justify-between p-4 bg-moss-50/30">
                                     <div className="flex items-center gap-4">
                                         <div className="h-10 w-10 bg-white border border-moss-100 rounded-full flex items-center justify-center text-moss-600 font-bold text-xs shadow-sm">
-                                            Req
+                                            Evt
                                         </div>
                                         <div>
                                             <h4 className="font-semibold text-stone-900 text-sm">Request for "{booking.events?.title}"</h4>
