@@ -138,7 +138,7 @@ export async function updateEvent(prevState: any, formData: FormData) {
 }
 
 export async function createStudio(prevState: any, formData: FormData) {
-    console.log('[createStudio] Action started');
+
     const supabase = await createClient()
 
     if (!supabase) {
@@ -152,7 +152,7 @@ export async function createStudio(prevState: any, formData: FormData) {
         console.error('[createStudio] No user');
         redirect('/login')
     }
-    console.log('[createStudio] User authenticated:', user.id);
+
 
     try {
         // Handle Image Upload
@@ -160,7 +160,7 @@ export async function createStudio(prevState: any, formData: FormData) {
         const imageFile = formData.get('image') as File;
 
         if (imageFile && imageFile.size > 0) {
-            console.log('[createStudio] Uploading image:', imageFile.name);
+
             const fileExt = imageFile.name.split('.').pop();
             const fileName = `${user.id}/${Date.now()}.${fileExt}`;
             const filePath = `${fileName}`;
@@ -179,7 +179,7 @@ export async function createStudio(prevState: any, formData: FormData) {
                 .getPublicUrl(filePath);
 
             imageUrls.push(publicUrl);
-            console.log('[createStudio] Image uploaded:', publicUrl);
+
         }
 
         // Parse Amenities
@@ -199,7 +199,7 @@ export async function createStudio(prevState: any, formData: FormData) {
             images: imageUrls,
             status: 'active'
         }
-        console.log('[createStudio] Inserting data:', rawData);
+
 
         const { error } = await supabase
             .from('studios')
@@ -225,7 +225,7 @@ export async function createStudio(prevState: any, formData: FormData) {
                         return { message: `Failed to create studio (Admin): ${adminError.message}`, success: false }
                     }
 
-                    console.log('[createStudio] Admin Fallback Successful');
+
                     // Success - fall through to return
                 } catch (adminErr: any) {
                     console.error('[createStudio] Service Role init failed:', adminErr);
@@ -236,7 +236,7 @@ export async function createStudio(prevState: any, formData: FormData) {
             }
         }
 
-        console.log('[createStudio] Insert success. Revalidating...');
+
         // revalidatePath('/host/studios');
         // revalidatePath('/'); // Commenting out to isolate issues
 

@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function bookEvent(formData: FormData) {
     const eventId = formData.get('eventId') as string
-    console.log('[bookEvent] Request for event:', eventId);
+
 
     const supabase = await createClient()
 
@@ -18,7 +18,7 @@ export async function bookEvent(formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-        console.log('[bookEvent] No user logged in');
+
         return { error: "Not authenticated" }
     }
 
@@ -35,7 +35,7 @@ export async function bookEvent(formData: FormData) {
     }
 
     if (existingBooking) {
-        console.log('[bookEvent] Already booked');
+
         return { success: true, message: "Already booked" }
     }
 
@@ -52,7 +52,7 @@ export async function bookEvent(formData: FormData) {
         return { error: error.message }
     }
 
-    console.log('[bookEvent] Booking successful');
+
 
     // --- Email Notification Start ---
     try {
@@ -80,7 +80,7 @@ export async function bookEvent(formData: FormData) {
 }
 
 export async function toggleWishlist(eventId: string) {
-    console.log('[toggleWishlist] Starting for event:', eventId);
+
     const supabase = await createClient()
     if (!supabase) {
         console.error('[toggleWishlist] Supabase client creation failed');
@@ -93,7 +93,7 @@ export async function toggleWishlist(eventId: string) {
         return { error: "Not authenticated" }
     }
 
-    console.log('[toggleWishlist] User found:', user.id);
+
 
     // Check if exists
     const { data: existing, error: fetchError } = await supabase
@@ -108,7 +108,7 @@ export async function toggleWishlist(eventId: string) {
     }
 
     if (existing) {
-        console.log('[toggleWishlist] Removing from wishlist:', existing.id);
+
         // Remove
         const { error } = await supabase
             .from('wishlist')
@@ -120,7 +120,7 @@ export async function toggleWishlist(eventId: string) {
             return { error: error.message }
         }
     } else {
-        console.log('[toggleWishlist] Adding to wishlist');
+
         // Add
         const { error } = await supabase
             .from('wishlist')
@@ -135,7 +135,7 @@ export async function toggleWishlist(eventId: string) {
         }
     }
 
-    console.log('[toggleWishlist] Success. Revalidating paths.');
+
     revalidatePath('/')
     revalidatePath('/dashboard/saved')
     revalidatePath(`/events/${eventId}`)
@@ -291,14 +291,14 @@ export async function deleteEvent(eventId: string) {
         const { createServiceRoleClient } = await import('@/lib/supabase/service');
         const adminSupabase = createServiceRoleClient();
 
-        console.log('[deleteEvent] Attempting delete with Admin Client...');
+
         const { error: adminError } = await adminSupabase
             .from('events')
             .delete()
             .eq('id', eventId)
 
         if (!adminError) {
-            console.log('[deleteEvent] Admin delete successful');
+
             revalidatePath('/host/events')
             revalidatePath('/')
             return { success: true }
@@ -313,7 +313,7 @@ export async function deleteEvent(eventId: string) {
 
     // 2. Fallback to Standard User Client
     // This works if the RLS policy is correctly set (e.g. via migration 012)
-    console.log('[deleteEvent] Falling back to Standard User Client...');
+
     const { data, error } = await supabase
         .from('events')
         .delete()
@@ -330,7 +330,7 @@ export async function deleteEvent(eventId: string) {
         return { error: "Delete failed: Permission denied. Please ensure migration '012_allow_event_deletion.sql' is applied to your database." }
     }
 
-    console.log('[deleteEvent] Standard delete successful');
+
     revalidatePath('/host/events')
     revalidatePath('/')
     return { success: true }
