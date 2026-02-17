@@ -55,7 +55,7 @@ export default async function BookingsPage() {
                 id,
                 name,
                 location,
-                image_url
+                images
             )
         `)
         .eq('requester_id', user.id)
@@ -67,6 +67,8 @@ export default async function BookingsPage() {
         ...(studioInquiries?.map(i => {
             // Handle studio relation potentially returned as array by Supabase types
             const studio = Array.isArray(i.studio) ? i.studio[0] : i.studio;
+            // Studio uses 'images' array, Event uses 'image_url' string
+            const studioImage = studio?.images?.[0] || null;
 
             return {
                 id: i.id,
@@ -77,7 +79,7 @@ export default async function BookingsPage() {
                     title: studio?.name || 'Unknown Studio',
                     location: studio?.location || 'Unknown Location',
                     start_time: i.start_time,
-                    image_url: studio?.image_url,
+                    image_url: studioImage,
                     category: 'Studio Rental'
                 },
                 raw: i
