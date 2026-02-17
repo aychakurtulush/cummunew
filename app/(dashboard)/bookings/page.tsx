@@ -165,8 +165,17 @@ export default async function BookingsPage() {
                                     <Link href={linkHref}>
                                         <Button variant="ghost" size="sm">View {isEvent ? 'Event' : 'Studio'}</Button>
                                     </Link>
+
                                     {isEvent && booking.status === 'pending' && (
                                         <CancelBookingButton bookingId={booking.id} />
+                                    )}
+
+                                    {!isEvent && (booking.status === 'approved' || booking.status === 'confirmed') && (
+                                        <Link href={`/host/events/create?studio_id=${booking.raw.studio?.id}&start_time=${booking.raw.start_time}&end_time=${booking.raw.end_time}`}>
+                                            <Button size="sm" className="bg-moss-600 hover:bg-moss-700 text-white">
+                                                Create Event
+                                            </Button>
+                                        </Link>
                                     )}
                                 </div>
                             </div>

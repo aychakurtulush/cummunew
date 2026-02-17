@@ -18,9 +18,35 @@ interface Studio {
     name: string;
 }
 
+import { useSearchParams } from "next/navigation"
+
 export default function CreateEventForm({ studios }: { studios: Studio[] }) {
     const [state, formAction] = useActionState(createEvent, initialState)
-    const [locationType, setLocationType] = useState<string>("home");
+    const searchParams = useSearchParams();
+
+    // Auto-fill from URL params (e.g. converting a studio booking)
+    const studioIdParam = searchParams.get('studio_id');
+    const startTimeParam = searchParams.get('start_time');
+    const endTimeParam = searchParams.get('end_time');
+
+    const [locationType, setLocationType] = useState<string>(studioIdParam ? "studio" : "home");
+
+    // Format dates for datetime-local input (YYYY-MM-DDThh:mm)
+    const formatForInput = (dateString: string | null) => {
+        if (!dateString) return undefined;
+        try {
+            const date = new Date(dateString);
+            // Adjust to local timezone for the input value
+            const offset = date.getTimezoneOffset() * 60000;
+            const localDate = new Date(date.getTime() - offset);
+            return localDate.toISOString().slice(0, 16);
+        } catch (e) {
+            return undefined;
+        }
+    };
+
+    const defaultStartTime = formatForInput(startTimeParam);
+    const defaultEndTime = formatForInput(endTimeParam);
 
     return (
         <div className="max-w-2xl mx-auto space-y-8">
@@ -143,6 +169,7 @@ export default function CreateEventForm({ studios }: { studios: Studio[] }) {
                                         name="studio_id"
                                         className="flex h-10 w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss-600/20 focus-visible:border-moss-600"
                                         required
+                                        defaultValue={studioIdParam || ""}
                                     >
                                         <option value="" disabled selected>Select a studio</option>
                                         {studios.map(studio => (
@@ -175,6 +202,7 @@ export default function CreateEventForm({ studios }: { studios: Studio[] }) {
                                 name="start_time"
                                 type="datetime-local"
                                 required
+                                defaultValue={defaultStartTime}
                                 onChange={(e) => {
                                     const endTimeInput = document.getElementById('end_time') as HTMLInputElement;
                                     if (endTimeInput) {
@@ -190,6 +218,7 @@ export default function CreateEventForm({ studios }: { studios: Studio[] }) {
                                 name="end_time"
                                 type="datetime-local"
                                 required
+                                defaultValue={defaultEndTime}
                             />
                             <p className="text-[10px] text-stone-400">Must be after the start time.</p>
                         </div>
