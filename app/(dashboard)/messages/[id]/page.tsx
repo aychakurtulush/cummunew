@@ -6,6 +6,7 @@ import Link from "next/link";
 import { getConversations, getMessages, sendMessage } from "@/app/messages/actions";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { ChatInterface } from "@/components/messages/chat-interface";
 
 export default async function ConversationPage({ params }: { params: Promise<{ id: string }> }) {
     const { id: conversationId } = await params;
