@@ -134,21 +134,31 @@ export default function CreateEventForm({ studios }: { studios: Studio[] }) {
                             </select>
                         </div>
 
-                        {locationType === 'studio' && studios.length > 0 ? (
-                            <div className="space-y-2">
-                                <label htmlFor="studio_id" className="text-sm font-semibold text-stone-700">Select Studio</label>
-                                <select
-                                    id="studio_id"
-                                    name="studio_id"
-                                    className="flex h-10 w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss-600/20 focus-visible:border-moss-600"
-                                    required
-                                >
-                                    <option value="" disabled selected>Select a studio</option>
-                                    {studios.map(studio => (
-                                        <option key={studio.id} value={studio.id}>{studio.name}</option>
-                                    ))}
-                                </select>
-                            </div>
+                        {locationType === 'studio' ? (
+                            studios.length > 0 ? (
+                                <div className="space-y-2">
+                                    <label htmlFor="studio_id" className="text-sm font-semibold text-stone-700">Select Studio</label>
+                                    <select
+                                        id="studio_id"
+                                        name="studio_id"
+                                        className="flex h-10 w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss-600/20 focus-visible:border-moss-600"
+                                        required
+                                    >
+                                        <option value="" disabled selected>Select a studio</option>
+                                        {studios.map(studio => (
+                                            <option key={studio.id} value={studio.id}>{studio.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-stone-400">Select Studio</label>
+                                    <div className="flex h-10 items-center px-3 border border-dashed border-stone-300 rounded-lg bg-stone-50 text-sm text-stone-500">
+                                        No studios found. <Link href="/host/studios/create" className="ml-1 text-moss-700 font-medium hover:underline">Create a Studio</Link>
+                                    </div>
+                                    <input type="hidden" name="studio_id" required /> {/* Force error if they submit */}
+                                </div>
+                            )
                         ) : (
                             <div className="space-y-2">
                                 <label htmlFor="city" className="text-sm font-semibold text-stone-700">City / District</label>

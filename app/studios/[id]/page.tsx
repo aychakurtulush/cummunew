@@ -38,7 +38,8 @@ async function getStudio(id: string) {
     return {
         ...studio,
         upcomingEvents: events || [],
-        isOwner
+        isOwner,
+        isAuthenticated: !!user
     };
 }
 
@@ -113,7 +114,7 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
                                         studioName={studio.name}
                                         isOwner={studio.isOwner}
                                         ownerId={studio.owner_user_id}
-                                        hasAuth={!!user}
+                                        hasAuth={studio.isAuthenticated}
                                     />
                                 </div>
                             </div>

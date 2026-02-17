@@ -4,6 +4,7 @@ import { SearchInput } from "./search-input"
 import { Suspense } from "react"
 import { NavLinks } from "./nav-links"
 import { NavbarActions } from "./navbar-actions"
+import { MobileNav } from "./mobile-nav"
 
 export async function Navbar() {
     const supabase = await createClient()
@@ -18,6 +19,7 @@ export async function Navbar() {
                         Communew.
                     </Link>
                     <NavLinks />
+                    <MobileNav />
                 </div>
 
                 {/* Center: Search - Enforce min-width */}

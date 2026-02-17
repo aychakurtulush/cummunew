@@ -109,8 +109,9 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                     className="absolute inset-0 w-full h-full object-cover"
                                 />
                             ) : (
-                                <div className="absolute inset-0 flex items-center justify-center bg-stone-100 text-stone-400 font-medium">
-                                    [{event.category || "Event"} Cover Image]
+                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-stone-100 text-stone-300">
+                                    <Globe className="h-16 w-16 mb-2 opacity-20" />
+                                    <span className="text-sm font-medium opacity-40">No Cover Image</span>
                                 </div>
                             )}
                             <Badge className="absolute top-4 left-4 bg-white/90 text-stone-900 shadow-sm hover:bg-white">{event.category || "General"}</Badge>
