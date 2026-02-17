@@ -34,25 +34,27 @@ export default async function StudiosPage() {
 
             <main className="flex-1">
                 {/* Hero Section */}
-                <section className="relative bg-stone-50/50 pt-16 pb-20 border-b border-stone-200 overflow-hidden">
+                <section className="relative bg-stone-50/50 pt-12 pb-16 border-b border-stone-200 overflow-hidden">
                     <AtmosphereBackground intensity="medium" />
-                    <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-6">
-                        <Badge variant="outline" className="bg-white/50 backdrop-blur text-stone-600 border-stone-200 px-3 py-1 text-xs uppercase tracking-wider font-semibold">
-                            Venues & Spaces
-                        </Badge>
-                        <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-stone-900 tracking-tight">
-                            Find the perfect space<br className="hidden sm:block" /> for your craft.
-                        </h1>
-                        <p className="text-stone-600 text-lg max-w-2xl mx-auto leading-relaxed">
-                            Discover clean, affordable, and inspiring studios in Berlin. From art lofts to yoga shalas, find a place to host your next workshop.
-                        </p>
+                    <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-8">
+                        <div className="space-y-6 max-w-3xl">
+                            <Badge variant="outline" className="bg-white/50 backdrop-blur text-stone-600 border-stone-200 px-3 py-1 text-xs uppercase tracking-wider font-semibold">
+                                Venues & Spaces
+                            </Badge>
+                            <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif font-bold text-stone-900 tracking-tight leading-[1.05]">
+                                Find the perfect space<br className="hidden sm:block" /> for your craft.
+                            </h1>
+                            <p className="text-stone-600 text-lg sm:text-xl max-w-2xl leading-relaxed">
+                                Discover clean, affordable, and inspiring studios in Berlin. From art lofts to yoga shalas, find a place to host your next workshop.
+                            </p>
 
-                        <div className="pt-4 flex justify-center">
-                            <Link href="/host/studios/create">
-                                <Button className="bg-stone-900 text-white hover:bg-stone-800 rounded-full px-8 h-12 text-base font-medium shadow-lg hover:shadow-xl transition-all">
-                                    List Your Space
-                                </Button>
-                            </Link>
+                            <div className="pt-2 flex justify-start">
+                                <Link href="/host/studios/create">
+                                    <Button className="bg-moss-700 text-white hover:bg-moss-800 rounded-full px-8 h-12 text-base font-medium shadow-lg hover:shadow-xl transition-all">
+                                        List Your Space
+                                    </Button>
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </section>

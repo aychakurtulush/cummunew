@@ -15,8 +15,8 @@ export function AtmosphereBackground({
     // Opacity map based on intensity
     const opacityMap = {
         low: "opacity-[0.08]",
-        medium: "opacity-[0.14]",
-        high: "opacity-[0.20]",
+        medium: "opacity-[0.12]", // Updated to max 0.12 as per requirements
+        high: "opacity-[0.12]",   // Cap at 0.12
     };
 
     return (
@@ -29,7 +29,7 @@ export function AtmosphereBackground({
         >
             <div className={cn("absolute inset-0 w-full h-full mix-blend-multiply transition-opacity duration-700", opacityMap[intensity])}>
                 <Image
-                    src="/textures/white-quartz.jpg"
+                    src="/textures/marble.webp"
                     alt=""
                     fill
                     className="object-cover grayscale-[0.2]"
