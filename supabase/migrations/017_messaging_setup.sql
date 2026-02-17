@@ -10,16 +10,26 @@ CREATE TABLE IF NOT EXISTS conversations (
     CONSTRAINT unique_participants UNIQUE (participant1_id, participant2_id)
 );
 
+-- Ensure messages table exists (in case it was lost or never created)
+CREATE TABLE IF NOT EXISTS messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  booking_id UUID REFERENCES bookings(id) ON DELETE CASCADE,
+  sender_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Add conversation_id to messages
 ALTER TABLE messages 
 ADD COLUMN IF NOT EXISTS conversation_id UUID REFERENCES conversations(id) ON DELETE CASCADE;
 
--- Make booking_id nullable if it's not already (it might be from 001_schema.sql)
+-- Make booking_id nullable if it's not already
 ALTER TABLE messages 
 ALTER COLUMN booking_id DROP NOT NULL;
 
 -- Enable RLS
 ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 
 -- Policies for conversations
 DROP POLICY IF EXISTS "Users can view their own conversations" ON conversations;
@@ -43,7 +53,7 @@ USING (
         WHERE c.id = messages.conversation_id 
         AND (c.participant1_id = auth.uid() OR c.participant2_id = auth.uid())
     ) OR
-    -- Keep existing booking logic if needed, or unify.
+    -- Keep existing booking logic
     (booking_id IS NOT NULL AND EXISTS (
         SELECT 1 FROM bookings b
         WHERE b.id = messages.booking_id
@@ -63,6 +73,6 @@ WITH CHECK (
             WHERE c.id = conversation_id 
             AND (c.participant1_id = auth.uid() OR c.participant2_id = auth.uid())
         ) OR
-        (booking_id IS NOT NULL) -- formatting for existing logic
+        (booking_id IS NOT NULL)
     )
 );
