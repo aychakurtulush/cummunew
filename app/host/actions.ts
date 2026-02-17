@@ -65,6 +65,7 @@ export async function createEvent(prevState: any, formData: FormData) {
         city: formData.get('city') as string,
         category: formData.get('category') as string,
         image_url: imageUrl,
+        studio_id: formData.get('studio_id') as string || null, // Add studio_id
         status: 'pending' // Default to pending for approval flow, or 'approved' for MVP
     }
 

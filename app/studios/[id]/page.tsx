@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"; // Adjusted imports
-import { MapPin, Globe, Users, Coins, Image as ImageIcon } from "lucide-react";
+import { MapPin, Globe, Users, Coins, Image as ImageIcon, CalendarPlus } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
