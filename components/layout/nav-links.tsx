@@ -9,6 +9,7 @@ export function NavLinks() {
 
     const links = [
         { href: "/", label: "Explore" },
+        { href: "/studios", label: "Studios" },
         { href: "/about", label: "About" },
     ];
 
