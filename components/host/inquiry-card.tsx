@@ -5,10 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Check, X, Calendar, Clock, MessageSquare } from "lucide-react";
-import { updateInquiryStatus } from "@/app/host/inquiries/actions";
+import { updateInquiryStatus, deleteInquiry } from "@/app/host/inquiries/actions";
 import { toast } from "sonner";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { Trash2 } from "lucide-react";
 
 export function InquiryCard({ inquiry }: { inquiry: any }) {
     const [isLoading, setIsLoading] = useState(false);
@@ -29,6 +30,24 @@ export function InquiryCard({ inquiry }: { inquiry: any }) {
         }
     };
 
+    const handleDelete = async () => {
+        if (!confirm("Are you sure you want to delete this inquiry?")) return;
+
+        setIsLoading(true);
+        try {
+            const result = await deleteInquiry(inquiry.id);
+            if (result.error) {
+                toast.error(result.error);
+            } else {
+                toast.success("Inquiry deleted");
+            }
+        } catch (e) {
+            toast.error("Failed to delete inquiry");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const statusColors = {
         pending: "bg-yellow-100 text-yellow-800",
         approved: "bg-green-100 text-green-800",
@@ -36,11 +55,24 @@ export function InquiryCard({ inquiry }: { inquiry: any }) {
     };
 
     return (
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden group">
             <div className="flex flex-col sm:flex-row">
                 {/* Left: Info */}
-                <div className="flex-1 p-6">
-                    <div className="flex justify-between items-start mb-4">
+                <div className="flex-1 p-6 relative">
+                    {/* Delete Button - Top Right */}
+                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-stone-400 hover:text-red-600 hover:bg-red-50"
+                            onClick={handleDelete}
+                            disabled={isLoading}
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </div>
+
+                    <div className="flex justify-between items-start mb-4 pr-10">
                         <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10 border border-stone-200">
                                 <AvatarFallback className="bg-moss-50 text-moss-700">

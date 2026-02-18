@@ -222,3 +222,28 @@ export async function updateInquiryStatus(inquiryId: string, newStatus: 'approve
     revalidatePath('/host/inquiries');
     return { success: true };
 }
+
+export async function deleteInquiry(inquiryId: string) {
+    const supabase = await createClient();
+    if (!supabase) return { error: "Database unavailable" };
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "Unauthorized" };
+
+    // 1. Verify Ownership (Optional but good for explicit error message, RLS handles security)
+    // Actually, RLS policy 025 handles it. If we try to delete and it fails, it's likely permission.
+    // But let's check existence first to be nice.
+
+    const { error } = await supabase
+        .from('studio_inquiries')
+        .delete()
+        .eq('id', inquiryId);
+
+    if (error) {
+        console.error("Delete Inquiry Error:", error);
+        return { error: "Failed to delete inquiry" };
+    }
+
+    revalidatePath('/host/inquiries');
+    return { success: true };
+}
