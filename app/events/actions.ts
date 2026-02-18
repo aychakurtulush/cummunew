@@ -57,6 +57,7 @@ export async function bookEvent(formData: FormData) {
     // --- Email Notification Start ---
     try {
         // Fetch event details for the email and notification
+        // Note: We use the standard client for reading event details to respect RLS (though usually public)
         const { data: eventData } = await supabase
             .from('events')
             .select('title, creator_user_id')
@@ -65,14 +66,18 @@ export async function bookEvent(formData: FormData) {
 
         if (eventData) {
             // 1. In-App Notification
-            await supabase
+            // Use Service Role to bypass RLS for inserting notifications for OTHER users
+            const { createServiceRoleClient } = await import('@/lib/supabase/service');
+            const adminSupabase = createServiceRoleClient();
+
+            await adminSupabase
                 .from('notifications')
                 .insert({
                     user_id: eventData.creator_user_id,
                     type: 'booking_request',
                     title: 'New Booking Request',
                     message: `${user.user_metadata?.full_name || 'Someone'} requested to join "${eventData.title}"`,
-                    link: '/host/events', // Or link to specific booking logic
+                    link: '/host/events',
                     metadata: { event_id: eventId, booking_id: 'pending' }
                 })
                 .then(({ error }) => {
