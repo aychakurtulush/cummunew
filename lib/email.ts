@@ -22,18 +22,20 @@ export async function sendBookingNotification(
             to: userEmail, // Sending to the booker (current user) to bypass Free Tier verify limits
             subject: `Request Sent: ${eventTitle}`,
             html: `
-                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h1 style="color: #4a5d23;">Booking Request Sent! 🌿</h1>
-                    <p>You have successfully requested to join <strong>${eventTitle}</strong>.</p>
-                    <p>The host has been notified (simulated) and will review your request shortly.</p>
-                    <hr style="border: 1px solid #e7e5e4; margin: 20px 0;" />
-                    <p style="color: #78716c; font-size: 12px;">
-                        <strong>Note for Demo:</strong> This email was sent to <em>you</em> (${userEmail}) because the Resend Free Tier only allows sending to the registered account email.
-                        In a production app, this email would go to the Host, and you would receive a separate confirmation.
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #1c1917; margin-bottom: 24px;">Request Sent!</h2>
+                    <p style="color: #44403c; line-height: 1.6;">
+                        You have requested to join <strong>${eventTitle}</strong>.
                     </p>
-                    <p>
-                        <a href="${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/events/${eventId}" style="color: #4a5d23;">View Event</a>
+                    <p style="color: #44403c; line-height: 1.6;">
+                        The host has been notified and will review your request shortly.
                     </p>
+                    <div style="margin-top: 32px;">
+                        <a href="${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/bookings" 
+                           style="background-color: #4a5d23; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                           View My Bookings
+                        </a>
+                    </div>
                 </div>
             `
         });
@@ -134,6 +136,41 @@ export async function sendMessageReceivedEmail(
     }
 }
 
+
+export async function sendBookingCancelledEmail(
+    userEmail: string,
+    eventTitle: string
+) {
+    if (!resend) return;
+
+    try {
+        await resend.emails.send({
+            from: 'Communew <noreply@communew.com>',
+            to: userEmail,
+            subject: `Booking Cancelled: ${eventTitle}`,
+            html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #1c1917; margin-bottom: 24px;">Booking Cancelled</h2>
+                    <p style="color: #44403c; line-height: 1.6;">
+                        Your booking for <strong>${eventTitle}</strong> has been cancelled.
+                    </p>
+                    <p style="color: #44403c; line-height: 1.6;">
+                        We hope to see you at another event soon!
+                    </p>
+                    <div style="margin-top: 32px;">
+                        <a href="${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/" 
+                           style="background-color: #4a5d23; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                           Browse Events
+                        </a>
+                    </div>
+                </div>
+            `
+        });
+    } catch (error) {
+        console.error("[Email] Failed to send cancellation email:", error);
+    }
+}
+
 export async function sendBookingStatusEmail(
     userEmail: string,
     eventTitle: string,
@@ -142,7 +179,10 @@ export async function sendBookingStatusEmail(
     if (!resend) return;
 
     const subject = status === 'confirmed' ? `Booking Confirmed: ${eventTitle} ✅` : `Booking Declined: ${eventTitle} ❌`;
-    const color = status === 'confirmed' ? '#4a5d23' : '#b91c1c';
+    const title = status === 'confirmed' ? 'Booking Confirmed! 🎉' : 'Booking Declined';
+    const message = status === 'confirmed'
+        ? `You're all set for <strong>${eventTitle}</strong>. We can't wait to see you there!`
+        : `Your request for <strong>${eventTitle}</strong> was declined.`;
 
     try {
         await resend.emails.send({
@@ -150,13 +190,15 @@ export async function sendBookingStatusEmail(
             to: userEmail,
             subject: subject,
             html: `
-                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h1 style="color: ${color};">Booking ${status.charAt(0).toUpperCase() + status.slice(1)}</h1>
-                    <p>Your request to join <strong>${eventTitle}</strong> has been <strong>${status}</strong>.</p>
-                    ${status === 'confirmed' ? '<p>We look forward to seeing you there!</p>' : '<p>You can check out other events on our platform.</p>'}
-                    <p>
-                        <a href="${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/bookings" style="color: #4a5d23;">View Bookings</a>
-                    </p>
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #1c1917; margin-bottom: 24px;">${title}</h2>
+                    <p style="color: #44403c; line-height: 1.6;">${message}</p>
+                    <div style="margin-top: 32px;">
+                        <a href="${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/bookings" 
+                           style="background-color: #4a5d23; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                           View My Bookings
+                        </a>
+                    </div>
                 </div>
             `
         });

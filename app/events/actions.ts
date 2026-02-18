@@ -172,7 +172,8 @@ export async function cancelBooking(bookingId: string) {
         .select(`
             user_id,
             event:events (
-                start_time
+                start_time,
+                title
             )
         `)
         .eq('id', bookingId)
@@ -200,6 +201,16 @@ export async function cancelBooking(bookingId: string) {
     if (error) {
         console.error('Cancel error:', error)
         return { error: error.message }
+    }
+
+    // Send cancellation email
+    if (user.email && booking.event?.title) {
+        try {
+            const { sendBookingCancelledEmail } = await import('@/lib/email');
+            await sendBookingCancelledEmail(user.email, booking.event.title);
+        } catch (e) {
+            console.error('Failed to send cancellation email:', e);
+        }
     }
 
     revalidatePath('/bookings')

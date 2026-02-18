@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
+import { AttendanceToggle } from "@/components/host/attendance-toggle";
 
 export default async function ManageEventPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -116,6 +117,14 @@ export default async function ManageEventPage({ params }: { params: Promise<{ id
                                         <Badge variant={booking.status === 'confirmed' ? 'default' : 'secondary'}>
                                             {booking.status}
                                         </Badge>
+                                        {booking.status === 'confirmed' && (
+                                            <div className="ml-4 pl-4 border-l border-stone-200">
+                                                <AttendanceToggle
+                                                    bookingId={booking.id}
+                                                    initialAttended={booking.attended || false}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                 )) : (
                                     <div className="text-center text-stone-500 py-4">No bookings yet.</div>
