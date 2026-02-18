@@ -42,6 +42,13 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
     useEffect(() => {
         const formatForInput = (dateString: string | null | undefined) => {
             if (!dateString) return "";
+
+            // If the string appears to be a local ISO string (no Z, no offset), use it directly
+            // This prevents double-shifting (e.g. 10:00 Local -> 11:00 Local)
+            if (!dateString.endsWith('Z') && !dateString.match(/[+-]\d{2}:?\d{2}$/)) {
+                return dateString.slice(0, 16);
+            }
+
             try {
                 const date = new Date(dateString);
                 // Adjust to local timezone for the input value
