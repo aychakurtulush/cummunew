@@ -4,13 +4,8 @@ import { Calendar, MapPin, Clock } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 import { CancelBookingButton } from "@/components/event/cancel-booking-button";
-
-const formatDate = (dateString?: string) => {
-    if (!dateString) return "Date TBD";
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-DE', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(date);
-}
 
 export default async function BookingsPage() {
     const supabase = await createClient();
@@ -151,7 +146,7 @@ export default async function BookingsPage() {
                                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-stone-600">
                                         <div className="flex items-center gap-1.5">
                                             <Calendar className="h-3.5 w-3.5" />
-                                            {formatDate(startTime)}
+                                            {formatEventDate(startTime, 'EEE, MMM d, HH:mm')}
                                         </div>
                                         <div className="flex items-center gap-1.5">
                                             <MapPin className="h-3.5 w-3.5" />

@@ -11,7 +11,8 @@ const initialState = {
     message: '',
 }
 
-import { useState, useEffect } from "react";
+import { toBerlinInput } from "@/lib/date-utils";
+import { useState } from "react";
 
 interface Studio {
     id: string;
@@ -34,34 +35,13 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
     const studioIdParam = searchParams.get('studio_id');
 
     const [locationType, setLocationType] = useState<string>(studioIdParam ? "studio" : "home");
-    const [startTime, setStartTime] = useState<string>("");
-    const [endTime, setEndTime] = useState<string>("");
-
-    // Format dates for datetime-local input (YYYY-MM-DDThh:mm)
-    // We utilize useEffect to avoid hydration mismatch (server timezone vs client timezone)
-    useEffect(() => {
-        const formatForInput = (dateString: string | null | undefined) => {
-            if (!dateString) return "";
-
-            // If the string appears to be a local ISO string (no Z, no offset), use it directly
-            // This prevents double-shifting (e.g. 10:00 Local -> 11:00 Local)
-            if (!dateString.endsWith('Z') && !dateString.match(/[+-]\d{2}:?\d{2}$/)) {
-                return dateString.slice(0, 16);
-            }
-
-            // If not local (i.e., has Z or offset), use the UTC time literal directly
-            // This ensures 10:00Z becomes 10:00 in the input, not 11:00 (Local)
-            try {
-                const date = new Date(dateString);
-                return date.toISOString().slice(0, 16);
-            } catch (e) {
-                return "";
-            }
-        };
-
-        if (initialStartTime) setStartTime(formatForInput(initialStartTime));
-        if (initialEndTime) setEndTime(formatForInput(initialEndTime));
-    }, [initialStartTime, initialEndTime]);
+    // Initialize state with Berlin time, handling conversion from UTC if necessary
+    const [startTime, setStartTime] = useState<string>(
+        initialStartTime ? toBerlinInput(initialStartTime) : ""
+    );
+    const [endTime, setEndTime] = useState<string>(
+        initialEndTime ? toBerlinInput(initialEndTime) : ""
+    );
 
     return (
         <div className="max-w-2xl mx-auto space-y-8">

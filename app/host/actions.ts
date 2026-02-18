@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
+import { parseBerlinInput } from '@/lib/date-utils';
+
 export async function createEvent(prevState: any, formData: FormData) {
     const supabase = await createClient()
 
@@ -17,8 +19,19 @@ export async function createEvent(prevState: any, formData: FormData) {
         redirect('/login')
     }
 
-    const startTime = new Date(formData.get('start_time') as string);
-    const endTime = formData.get('end_time') ? new Date(formData.get('end_time') as string) : new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
+    const startInput = formData.get('start_time') as string;
+    const endInput = formData.get('end_time') as string;
+
+    // Convert input (Berlin Time) -> UTC
+    const startTimeString = parseBerlinInput(startInput);
+    const endTimeString = endInput ? parseBerlinInput(endInput) : null;
+
+    if (!startTimeString) {
+        return { message: "Invalid start time." };
+    }
+
+    const startTime = new Date(startTimeString);
+    const endTime = endTimeString ? new Date(endTimeString) : new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
 
     // Validation: End time must be after start time
     if (endTime <= startTime) {
@@ -99,8 +112,19 @@ export async function updateEvent(prevState: any, formData: FormData) {
     const eventId = formData.get('id') as string;
     if (!eventId) return { message: "Event ID missing" };
 
-    const startTime = new Date(formData.get('start_time') as string);
-    const endTime = formData.get('end_time') ? new Date(formData.get('end_time') as string) : new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
+    const startInput = formData.get('start_time') as string;
+    const endInput = formData.get('end_time') as string;
+
+    // Convert input (Berlin Time) -> UTC
+    const startTimeString = parseBerlinInput(startInput);
+    const endTimeString = endInput ? parseBerlinInput(endInput) : null;
+
+    if (!startTimeString) {
+        return { message: "Invalid start time." };
+    }
+
+    const startTime = new Date(startTimeString);
+    const endTime = endTimeString ? new Date(endTimeString) : new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
 
     if (endTime <= startTime) {
         return { message: "End time must be after the start time." };

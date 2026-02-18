@@ -9,20 +9,8 @@ import { MapPin, Check, Globe } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
+import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 import { ShareButton } from "@/components/event/share-button";
-
-// Helper to format date
-const formatDate = (dateString?: string) => {
-    if (!dateString) return "Date TBD";
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-DE', { weekday: 'short', day: 'numeric', month: 'short' }).format(date);
-}
-
-const formatTime = (dateString?: string) => {
-    if (!dateString) return "00:00";
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-DE', { hour: '2-digit', minute: '2-digit' }).format(date);
-}
 
 
 
@@ -190,8 +178,8 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                             className="flex justify-between items-center w-full p-3 rounded-lg border text-sm transition-all border-moss-600 bg-moss-50 ring-2 ring-moss-600 ring-opacity-20"
                                         >
                                             <div className="flex flex-col items-start">
-                                                <span className="font-medium">{formatDate(event.start_time)}</span>
-                                                <span className="text-xs">{formatTime(event.start_time)} - {formatTime(event.end_time)}</span>
+                                                <span className="font-medium">{formatEventDate(event.start_time)}</span>
+                                                <span className="text-xs">{formatEventTime(event.start_time)} - {formatEventTime(event.end_time)}</span>
                                             </div>
                                             <div className="text-xs font-medium text-moss-700">
                                                 {spotsLeft} spots left
