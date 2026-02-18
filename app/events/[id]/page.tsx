@@ -25,16 +25,42 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
     let isLiked = false;
     let bookingStatus: string | null = null;
 
+    let hostProfile: any = null;
+
     if (supabase) {
         try {
             const { data: { user } } = await supabase.auth.getUser();
 
             const { data, error } = await supabase
                 .from('events')
-                .select('*')
+                .select(`
+                    *,
+                    studios (
+                        name,
+                        location
+                    )
+                `)
                 .eq('id', id)
                 .single();
-            if (!error) event = data;
+
+            if (!error && data) {
+                event = data;
+
+                // Fetch Host Profile
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('full_name, avatar_url') // Assuming 'avatar_url' exists in profiles? Schema said 'full_name', 'bio'. No avatart_url in 001.
+                    // Wait, 001 schema for profiles: full_name, bio, languages, interests.
+                    // But NavbarActions uses user_metadata.avatar_url.
+                    // Let's use user_metadata if profile doesn't have it? 
+                    // Or fetch from auth.users? We can't fetch auth.users from client lib easily.
+                    // Let's check if we added avatar_url to profiles later?
+                    // I will just fetch full_name for now.
+                    .eq('user_id', data.creator_user_id)
+                    .single();
+
+                hostProfile = profile;
+            }
 
             if (user && event) {
                 const { data: wishlistEntry } = await supabase
@@ -59,7 +85,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                 }
             }
         } catch (e) {
-            // Ignore
+            console.error("Error loading event:", e);
         }
     }
 
@@ -119,16 +145,27 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 
                         <Separator />
 
-                        {/* Host Info (Placeholder) */}
+                        {/* Host Info */}
                         <div className="flex items-start gap-4">
                             <Avatar className="h-12 w-12 border border-stone-200">
-                                <AvatarFallback className="bg-stone-100 text-stone-500">H</AvatarFallback>
+                                {/* Use Google/Auth avatar if available, else placeholder */}
+                                <AvatarFallback className="bg-stone-100 text-stone-500">
+                                    {(hostProfile?.full_name?.[0] || "H").toUpperCase()}
+                                </AvatarFallback>
                             </Avatar>
                             <div>
-                                <h3 className="text-lg font-serif font-semibold text-stone-900">Hosted by {event.host || "Community Member"}</h3>
+                                <h3 className="text-lg font-serif font-semibold text-stone-900">
+                                    Hosted by {hostProfile?.full_name || "Community Member"}
+                                    {event.studios && (
+                                        <span className="font-normal text-stone-600">
+                                            {' '}at <Link href={`/studios/${event.studio_id}`} className="hover:underline text-moss-700">{event.studios.name}</Link>
+                                        </span>
+                                    )}
+                                </h3>
                                 <p className="text-stone-500 text-sm mb-2">Verified Host</p>
                                 <p className="text-stone-600 leading-relaxed text-sm max-w-lg">
-                                    This event is hosted by a passionate member of the Berlin community.
+                                    This event is organized by {hostProfile?.full_name || "a member"}
+                                    {event.studios ? ` and hosted at ${event.studios.name}.` : "."}
                                 </p>
                             </div>
                         </div>
