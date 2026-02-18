@@ -234,6 +234,26 @@ export async function deleteInquiry(inquiryId: string) {
     // Actually, RLS policy 025 handles it. If we try to delete and it fails, it's likely permission.
     // But let's check existence first to be nice.
 
+    // 1. Fetch Inquiry to check time and ownership
+    const { data: inquiry } = await supabase
+        .from('studio_inquiries')
+        .select('requester_id, start_time')
+        .eq('id', inquiryId)
+        .single();
+
+    if (!inquiry) return { error: "Inquiry not found" };
+    if (inquiry.requester_id !== user.id) return { error: "Unauthorized" };
+
+    // 2. 24h Cancellation Policy Check
+    const startTime = new Date(inquiry.start_time);
+    const now = new Date();
+    const hoursDifference = (startTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+    if (hoursDifference < 24) {
+        return { error: "Cannot cancel less than 24 hours before the booking." };
+    }
+
+    // 3. Delete
     const { error } = await supabase
         .from('studio_inquiries')
         .delete()

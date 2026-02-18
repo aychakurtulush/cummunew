@@ -29,13 +29,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={cn(
-          "min-h-screen bg-stone-50 font-sans antialiased",
-          fontSans.variable,
-          fontSerif.variable
-        )}
+        className={`${fontSerif.variable} ${fontSans.variable} font-sans antialiased`} // Modified className
       >
-        <RealtimeListener />
         {children}
         <Toaster />
       </body>

@@ -39,7 +39,7 @@ export function NavbarActions({ user }: NavbarActionsProps) {
                             : "text-stone-600 hover:text-moss-700 hover:bg-stone-50"
                     )}
                 >
-                    Host Dashboard
+                    Host an Experience
                 </Button>
             </Link>
             <div className="h-6 w-px bg-stone-200 hidden sm:block" />
@@ -67,10 +67,10 @@ export function NavbarActions({ user }: NavbarActionsProps) {
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>
-                                <Link href="/dashboard">
+                                <Link href="/bookings">
                                     <DropdownMenuItem className="cursor-pointer">
                                         <User className="mr-2 h-4 w-4" />
-                                        <span>Dashboard</span>
+                                        <span>My Bookings</span>
                                     </DropdownMenuItem>
                                 </Link>
                                 <Link href="/host">

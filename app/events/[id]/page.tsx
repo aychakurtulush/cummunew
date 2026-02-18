@@ -16,6 +16,7 @@ import { ShareButton } from "@/components/event/share-button";
 
 import { WishlistButton } from "@/components/event/wishlist-button";
 import { BookingButton } from "@/components/event/booking-button";
+import { ReportButton } from "@/components/shared/report-button";
 
 export default async function EventPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -46,7 +47,18 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
             if (!error && data) {
                 event = data;
 
-                // Fetch Host Profile
+                // Fetch confirmed bookings count
+                const { count, error: countError } = await supabase
+                    .from('bookings')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('event_id', id)
+                    .eq('status', 'confirmed');
+
+                if (!countError) {
+                    event.confirmed_count = count || 0;
+                }
+
+                // ... host profile fetch ...
                 const { data: profile } = await supabase
                     .from('profiles')
                     .select('full_name, avatar_url') // Assuming 'avatar_url' exists in profiles? Schema said 'full_name', 'bio'. No avatart_url in 001.
@@ -94,7 +106,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
     }
 
     // Calculate spots left
-    const spotsLeft = event.capacity;
+    const spotsLeft = Math.max(0, (event.capacity || 0) - (event.confirmed_count || 0));
 
     return (
         <div className="min-h-screen bg-stone-50 flex flex-col">
@@ -230,8 +242,8 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                 {bookingStatus ? (
                                     <Link href="/bookings">
                                         <Button className="w-full h-12 text-base bg-emerald-600 hover:bg-emerald-700 shadow-md">
-                                            {bookingStatus === 'approved' ? 'Booking Confirmed' :
-                                                bookingStatus === 'rejected' ? 'Booking Rejected' :
+                                            {bookingStatus === 'confirmed' ? 'Booking Confirmed' :
+                                                bookingStatus === 'declined' ? 'Booking Declined' :
                                                     'Request Sent'}
                                         </Button>
                                     </Link>
@@ -240,13 +252,15 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                         eventId={event.id}
                                         price={event.price}
                                         hasAuth={!!supabase && await supabase.auth.getUser().then(r => !!r.data.user)}
+                                        isFull={spotsLeft === 0}
                                     />
                                 )}
                                 <p className="text-xs text-center text-stone-500">
-                                    {bookingStatus ? "View your bookings" : "Pay on arrival. No card needed today."}
+                                    {bookingStatus ? "View your bookings" : (spotsLeft === 0 ? "Event is full" : "Pay on arrival. No card needed today.")}
                                 </p>
-                                <div className="text-xs text-center text-stone-400">
-                                    Flexible cancellation: Cancel up to 24h before.
+                                <div className="text-xs text-center text-stone-500 bg-stone-50 py-2 rounded-md border border-stone-100 mt-2">
+                                    <span className="font-semibold block mb-0.5">Cancellation Policy</span>
+                                    Cancel up to 24 hours before for a full refund.
                                 </div>
                             </div>
 
@@ -258,6 +272,15 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                     eventId={event.id}
                                     initialIsLiked={isLiked}
                                     variant="full"
+                                />
+                            </div>
+
+                            <div className="flex justify-center pt-2">
+                                <ReportButton
+                                    targetId={event.id}
+                                    targetType="event"
+                                    buttonText="Report Event"
+                                    className="text-stone-400 hover:text-red-600 hover:bg-red-50"
                                 />
                             </div>
 

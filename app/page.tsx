@@ -3,6 +3,8 @@ import { Footer } from "@/components/layout/footer";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { EventExplorer } from "@/components/home/event-explorer";
+import { HeroSection } from "@/components/home/hero-section";
+import { AtmosphereBackground } from "@/components/ui/atmosphere-background";
 
 // Helper to format date
 const formatDate = (dateString?: string) => {
@@ -60,11 +62,17 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
   const displayEvents = events || [];
   const isDemo = false;
 
+
+
+  // ... imports
+
   return (
     <div className="min-h-screen bg-stone-50 flex flex-col font-sans relative">
+      <AtmosphereBackground intensity="medium" />
       <Navbar />
 
       <main className="flex-1">
+        <HeroSection />
         <EventExplorer
           initialEvents={displayEvents}
           isDemo={isDemo}

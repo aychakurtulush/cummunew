@@ -166,15 +166,30 @@ export async function cancelBooking(bookingId: string) {
 
     if (!user) return { error: "Not authenticated" }
 
-    // Verify ownership
+    // Verify ownership and fetch event time
     const { data: booking } = await supabase
         .from('bookings')
-        .select('user_id')
+        .select(`
+            user_id,
+            event:events (
+                start_time
+            )
+        `)
         .eq('id', bookingId)
         .single()
 
     if (!booking || booking.user_id !== user.id) {
         return { error: "Unauthorized" }
+    }
+
+    // 24h Cancellation Policy Check
+    // @ts-ignore
+    const eventStartTime = new Date(booking.event?.start_time);
+    const now = new Date();
+    const hoursDifference = (eventStartTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+    if (hoursDifference < 24) {
+        return { error: "Cannot cancel less than 24 hours before the event." }
     }
 
     const { error } = await supabase
@@ -220,6 +235,29 @@ export async function updateBookingStatus(bookingId: string, status: 'confirmed'
         return { error: "Unauthorized: You are not the host of this event" }
     }
 
+    // Check capacity if confirming
+    if (status === 'confirmed') {
+        const eventId = booking.event_id;
+
+        // 1. Get capacity
+        const { data: event } = await supabase
+            .from('events')
+            .select('capacity')
+            .eq('id', eventId)
+            .single();
+
+        // 2. Get current confirmed count
+        const { count } = await supabase
+            .from('bookings')
+            .select('*', { count: 'exact', head: true })
+            .eq('event_id', eventId)
+            .eq('status', 'confirmed');
+
+        if (event && (count || 0) >= event.capacity) {
+            return { error: "Cannot confirm: Event is at full capacity" };
+        }
+    }
+
     // Update status
     const { error } = await supabase
         .from('bookings')
@@ -246,6 +284,28 @@ export async function updateBookingStatus(bookingId: string, status: 'confirmed'
                 link: '/bookings',
                 metadata: { booking_id: bookingId, status: status }
             });
+
+        // 3. Email Notification to Participant
+        // @ts-ignore
+        const participantUserId = booking.user_id;
+
+        // We need to fetch the participant's email.
+        // Since we are in a server action, `supabase.auth.getUser()` gives US (the Host).
+        // We need admin client to get the participant's email by ID.
+
+        const { createServiceRoleClient } = await import('@/lib/supabase/service');
+        const adminSupabase = createServiceRoleClient();
+        const { data: participantUser } = await adminSupabase.auth.admin.getUserById(participantUserId);
+
+        if (participantUser?.user?.email) {
+            const { sendBookingStatusEmail } = await import('@/lib/email');
+            await sendBookingStatusEmail(
+                participantUser.user.email,
+                eventTitle,
+                status
+            );
+        }
+
     } catch (e) {
         console.error('Notification error:', e);
     }

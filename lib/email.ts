@@ -133,3 +133,34 @@ export async function sendMessageReceivedEmail(
         console.error("[Email] Failed to send message notification:", error);
     }
 }
+
+export async function sendBookingStatusEmail(
+    userEmail: string,
+    eventTitle: string,
+    status: string
+) {
+    if (!resend) return;
+
+    const subject = status === 'confirmed' ? `Booking Confirmed: ${eventTitle} ✅` : `Booking Declined: ${eventTitle} ❌`;
+    const color = status === 'confirmed' ? '#4a5d23' : '#b91c1c';
+
+    try {
+        await resend.emails.send({
+            from: 'Communew <noreply@communew.com>',
+            to: userEmail,
+            subject: subject,
+            html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h1 style="color: ${color};">Booking ${status.charAt(0).toUpperCase() + status.slice(1)}</h1>
+                    <p>Your request to join <strong>${eventTitle}</strong> has been <strong>${status}</strong>.</p>
+                    ${status === 'confirmed' ? '<p>We look forward to seeing you there!</p>' : '<p>You can check out other events on our platform.</p>'}
+                    <p>
+                        <a href="${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/bookings" style="color: #4a5d23;">View Bookings</a>
+                    </p>
+                </div>
+            `
+        });
+    } catch (error) {
+        console.error("[Email] Failed to send booking status notification:", error);
+    }
+}

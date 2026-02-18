@@ -68,25 +68,18 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [] }: 
 
     const activeFilterCount = (priceFilter !== "any" ? 1 : 0) + (dateFilter !== "any" ? 1 : 0);
 
+
+
     return (
-        <div className="space-y-12 pb-20">
-            {/* Hero & Filters */}
-            <section className="relative bg-stone-50/50 pt-12 pb-16 border-b border-stone-200 overflow-hidden">
-                <AtmosphereBackground intensity="medium" />
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-10 relative z-10">
-                    <div className="space-y-6 max-w-3xl">
-                        <Badge variant="outline" className="bg-white/50 backdrop-blur text-stone-600 border-stone-200 px-3 py-1 text-xs uppercase tracking-wider font-semibold">
-                            Berlin Community Platform
-                        </Badge>
-                        <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif font-bold text-stone-900 tracking-tight leading-[1.05]">
-                            Find your people.
-                        </h1>
-                        <p className="text-stone-600 text-lg sm:text-xl max-w-2xl leading-relaxed">
-                            Discover the local community where you belong. Join workshops, classes, and gatherings hosted by neighbors who share your passions.
-                        </p>
+        <div id="events-explorer" className="space-y-8 py-12">
+            {/* Filters */}
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-stone-100 pb-8">
+                    <div className="space-y-1">
+                        <h2 className="text-3xl font-serif font-bold text-stone-900">Explore Events</h2>
+                        <p className="text-stone-500">Discover what's happening in your community.</p>
                     </div>
 
-                    {/* Filters */}
                     <div className="flex flex-wrap items-center gap-2">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -163,7 +156,7 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [] }: 
                         ))}
                     </div>
                 </div>
-            </section>
+            </div>
 
             {/* Event Grid */}
             <section className="container mx-auto px-4 sm:px-6 lg:px-8">

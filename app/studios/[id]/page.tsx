@@ -10,6 +10,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { StudioActions } from "@/components/studio/studio-actions";
+import { ReportButton } from "@/components/shared/report-button";
 
 async function getStudio(id: string) {
     const supabase = await createClient();
@@ -159,6 +160,13 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
                                         <p>• Minimum 2 hours booking</p>
                                         <p>• Cleaning fee included</p>
                                     </div>
+
+                                    <Separator />
+
+                                    <div className="text-xs text-stone-500">
+                                        <span className="font-semibold text-stone-900 block mb-1">Cancellation Policy</span>
+                                        Cancel up to 24 hours before your booking start time for a full refund.
+                                    </div>
                                 </div>
 
                                 {studio.website && (
@@ -169,6 +177,15 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
                                         </a>
                                     </div>
                                 )}
+
+                                <div className="pt-4 border-t border-stone-100 flex justify-center">
+                                    <ReportButton
+                                        targetId={studio.id}
+                                        targetType="studio"
+                                        buttonText="Report Studio"
+                                        className="text-stone-400 hover:text-red-600 hover:bg-red-50"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>

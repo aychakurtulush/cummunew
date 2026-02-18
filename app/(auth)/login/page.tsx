@@ -4,13 +4,17 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Label } from "@radix-ui/react-label" // Ensure this is installed or use custom Label but standard is better
 import Link from "next/link"
+import { AtmosphereBackground } from "@/components/ui/atmosphere-background"
 
 export default async function LoginPage(props: any) {
     const searchParams = await props.searchParams;
     const error = searchParams?.error;
 
+    // ...
+
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50 px-4 py-12">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50 px-4 py-12 relative overflow-hidden">
+            <AtmosphereBackground intensity="medium" />
             {/* Home Link */}
             <div className="absolute top-8 left-8">
                 <Link href="/" className="text-stone-900 font-serif font-bold text-xl">Communew.</Link>
