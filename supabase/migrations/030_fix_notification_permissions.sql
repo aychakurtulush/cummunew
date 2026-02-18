@@ -33,4 +33,3 @@ USING (auth.uid() = user_id);
 
 -- Explicitly grant permissions to the authenticated role
 GRANT ALL ON TABLE notifications TO authenticated;
-GRANT USAGE, SELECT ON SEQUENCE notifications_id_seq TO authenticated;
