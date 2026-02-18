@@ -168,26 +168,6 @@ export function NotificationBell() {
                             Mark all read
                         </Button>
                     )}
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-auto p-0 text-xs text-stone-400 hover:text-stone-600 ml-2"
-                        onClick={async (e) => {
-                            e.preventDefault();
-                            const { toast } = await import('sonner');
-                            const { sendTestNotification } = await import('@/app/actions/test-notification');
-                            toast.promise(sendTestNotification(), {
-                                loading: 'Sending test...',
-                                success: (data) => {
-                                    if (data.error) throw new Error(data.error);
-                                    return 'Test notification sent!';
-                                },
-                                error: (e) => `Error: ${e.message}`
-                            });
-                        }}
-                    >
-                        Test
-                    </Button>
                 </div>
                 <div className="max-h-[70vh] overflow-y-auto">
                     {notifications.length === 0 ? (
