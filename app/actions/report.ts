@@ -6,6 +6,10 @@ import { revalidatePath } from "next/cache";
 export async function submitReport(prevState: any, formData: FormData) {
     const supabase = await createClient();
 
+    if (!supabase) {
+        return { error: 'Service Unavailable' };
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -22,7 +26,6 @@ export async function submitReport(prevState: any, formData: FormData) {
     }
 
     try {
-        if (!supabase) throw new Error("Database connection failed");
 
         const { error } = await supabase
             .from('reports')
