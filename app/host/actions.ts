@@ -66,6 +66,28 @@ export async function createEvent(prevState: any, formData: FormData) {
     }
 
     // Basic validation could go here
+    let city = formData.get('city') as string;
+    const studioId = formData.get('studio_id') as string || null;
+
+    // If studio_id is present but city is missing (likely hidden in form), fetch studio location
+    if (studioId && !city) {
+        try {
+            const { data: studio } = await supabase
+                .from('studios')
+                .select('location')
+                .eq('id', studioId)
+                .single();
+
+            if (studio && studio.location) {
+                // Extract city from location if possible, or just use the whole location string
+                // For MVP, assuming location string acts as city or contains it
+                city = studio.location.split(',')[0].trim(); // Simple heuristic: take first part before comma
+            }
+        } catch (error) {
+            console.error('Error fetching studio location:', error);
+        }
+    }
+
     const rawData = {
         creator_user_id: user.id,
         title: formData.get('title') as string,
@@ -75,10 +97,10 @@ export async function createEvent(prevState: any, formData: FormData) {
         start_time: startTime.toISOString(),
         end_time: endTime.toISOString(),
         location_type: formData.get('location_type') as 'home' | 'studio' | 'partner_venue',
-        city: formData.get('city') as string,
+        city: city || 'Berlin', // Fallback to Berlin if all else fails
         category: formData.get('category') as string,
         image_url: imageUrl,
-        studio_id: formData.get('studio_id') as string || null, // Add studio_id
+        studio_id: studioId,
         status: 'pending' // Default to pending for approval flow, or 'approved' for MVP
     }
 
