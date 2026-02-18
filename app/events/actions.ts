@@ -185,7 +185,8 @@ export async function cancelBooking(bookingId: string) {
 
     // 24h Cancellation Policy Check
     // @ts-ignore
-    const eventStartTime = new Date(booking.event?.start_time);
+    const eventData = Array.isArray(booking.event) ? booking.event[0] : booking.event;
+    const eventStartTime = new Date(eventData?.start_time);
     const now = new Date();
     const hoursDifference = (eventStartTime.getTime() - now.getTime()) / (1000 * 60 * 60);
 
@@ -204,10 +205,13 @@ export async function cancelBooking(bookingId: string) {
     }
 
     // Send cancellation email
-    if (user.email && booking.event?.title) {
+    // @ts-ignore
+    const eventTitle = Array.isArray(booking.event) ? booking.event[0]?.title : booking.event?.title;
+
+    if (user.email && eventTitle) {
         try {
             const { sendBookingCancelledEmail } = await import('@/lib/email');
-            await sendBookingCancelledEmail(user.email, booking.event.title);
+            await sendBookingCancelledEmail(user.email, eventTitle);
         } catch (e) {
             console.error('Failed to send cancellation email:', e);
         }
