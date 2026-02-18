@@ -16,6 +16,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { NotificationBell } from "./notification-bell";
 
 interface NavbarActionsProps {
     user: any; // Using any for Supabase user object to avoid complex type imports for now
@@ -25,14 +26,6 @@ export function NavbarActions({ user }: NavbarActionsProps) {
     const pathname = usePathname();
 
     const isHostActive = pathname.startsWith("/host");
-    const isDashboardActive = pathname === "/dashboard" || (pathname.startsWith("/dashboard") && !pathname.startsWith("/dashboard/"));
-    // Note: Dashboard usually has sub-routes like /dashboard/bookings, but standard /dashboard is the overview.
-    // However, sidebar logic uses .startsWith. Let's stick to simple .startsWith for "Dashboard" 
-    // but we need to be careful not to conflict if we had /dashboard-something (unlikely).
-    // Actually, for the top nav, "Dashboard" usually implies the user area.
-    // Let's us startsWith("/dashboard") for simple matching.
-
-    const isDashboardSection = pathname.startsWith("/dashboard") || pathname.startsWith("/bookings") || pathname.startsWith("/saved") || pathname.startsWith("/messages") || pathname.startsWith("/profile") || pathname.startsWith("/settings");
 
     return (
         <div className="flex items-center gap-2 md:gap-4">
@@ -53,6 +46,7 @@ export function NavbarActions({ user }: NavbarActionsProps) {
 
             {user ? (
                 <div className="flex items-center gap-2 md:gap-4">
+                    <NotificationBell />
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="relative h-10 w-10 rounded-full">

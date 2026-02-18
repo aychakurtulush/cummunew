@@ -105,6 +105,18 @@ export async function sendMessage(conversationId: string, content: string) {
                     conversationId
                 );
             }
+
+            // 3. In-App Notification
+            await supabase
+                .from('notifications')
+                .insert({
+                    user_id: recipientId,
+                    type: 'message',
+                    title: `New message from ${user.user_metadata?.full_name || 'User'}`,
+                    message: content,
+                    link: `/messages/${conversationId}`,
+                    metadata: { conversation_id: conversationId }
+                });
         }
     } catch (notifyErr) {
         console.error("Failed to send message notification:", notifyErr);

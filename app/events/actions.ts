@@ -56,21 +56,35 @@ export async function bookEvent(formData: FormData) {
 
     // --- Email Notification Start ---
     try {
-        // Fetch event details for the email
+        // Fetch event details for the email and notification
         const { data: eventData } = await supabase
             .from('events')
-            .select('title')
+            .select('title, creator_user_id')
             .eq('id', eventId)
             .single();
 
-        if (eventData && user.email) {
-            // Dynamically import to avoid build issues if file missing (though we just created it)
-            const { sendBookingNotification } = await import('@/lib/email');
-            await sendBookingNotification(user.email, eventData.title, eventId);
+        if (eventData) {
+            // 1. In-App Notification
+            await supabase
+                .from('notifications')
+                .insert({
+                    user_id: eventData.creator_user_id,
+                    type: 'booking_request',
+                    title: 'New Booking Request',
+                    message: `${user.user_metadata?.full_name || 'Someone'} requested to join "${eventData.title}"`,
+                    link: '/host/events', // Or link to specific booking logic
+                    metadata: { event_id: eventId, booking_id: 'pending' } // Ideally we'd have the booking ID but it's not returned by insert above. MVP.
+                });
+
+            // 2. Email Notification
+            if (user.email) {
+                // Dynamically import to avoid build issues
+                const { sendBookingNotification } = await import('@/lib/email');
+                await sendBookingNotification(user.email, eventData.title, eventId);
+            }
         }
-    } catch (emailError) {
-        console.error('[bookEvent] Email failed (non-critical):', emailError);
-        // Don't fail the booking if email fails
+    } catch (notificationError) {
+        console.error('[bookEvent] Notification failed (non-critical):', notificationError);
     }
     // --- Email Notification End ---
 
@@ -191,7 +205,9 @@ export async function updateBookingStatus(bookingId: string, status: 'confirmed'
         .select(`
             id,
             event_id,
+            user_id,
             events (
+                title,
                 creator_user_id
             )
         `)
@@ -213,6 +229,25 @@ export async function updateBookingStatus(bookingId: string, status: 'confirmed'
     if (error) {
         console.error('Update booking error:', error)
         return { error: error.message }
+    }
+
+    // Notify Participant
+    try {
+        // @ts-ignore
+        const eventTitle = booking.events?.title || 'your event';
+
+        await supabase
+            .from('notifications')
+            .insert({
+                user_id: booking.user_id,
+                type: 'booking_status',
+                title: `Booking ${status === 'confirmed' ? 'Confirmed' : 'Declined'}`,
+                message: `Your booking for "${eventTitle}" has been ${status}.`,
+                link: '/bookings',
+                metadata: { booking_id: bookingId, status: status }
+            });
+    } catch (e) {
+        console.error('Notification error:', e);
     }
 
     revalidatePath('/host')
