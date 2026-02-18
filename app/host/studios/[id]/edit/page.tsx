@@ -5,12 +5,13 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, Upload, Building2, MapPin, Users, Coins, Sparkles, Loader2, Save } from "lucide-react"
 import Link from "next/link"
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { createClient } from "@/lib/supabase/client"
 
-export default function EditStudioPage({ params }: { params: { id: string } }) {
+export default function EditStudioPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
     const [isLoading, setIsLoading] = useState(false);
     const [isFetching, setIsFetching] = useState(true);
     const [error, setError] = useState('');
@@ -25,12 +26,14 @@ export default function EditStudioPage({ params }: { params: { id: string } }) {
                 const { data, error } = await supabase
                     .from('studios')
                     .select('*')
-                    .eq('id', params.id)
+                    .eq('id', id)
                     .single();
 
                 if (error) {
-                    toast.error("Failed to load studio details");
-                    router.push('/host/studios');
+                    console.error("Supabase Fetch Error:", error);
+                    toast.error(`Failed to load studio details: ${error.message}`);
+                    // router.push('/host/studios'); // Don't redirect immediately to allow debugging
+                    setError(error.message);
                     return;
                 }
 
@@ -38,15 +41,16 @@ export default function EditStudioPage({ params }: { params: { id: string } }) {
                 if (data.images && data.images.length > 0) {
                     setImagePreview(data.images[0]);
                 }
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Error fetching studio:", err);
+                setError(err.message || "Unknown error");
             } finally {
                 setIsFetching(false);
             }
         };
 
         fetchStudio();
-    }, [params.id, router, supabase]);
+    }, [id, router, supabase]);
 
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,7 +76,7 @@ export default function EditStudioPage({ params }: { params: { id: string } }) {
         setError('');
 
         const formData = new FormData(event.currentTarget);
-        formData.append('id', params.id); // Add ID to formData
+        formData.append('id', id); // Add ID to formData
 
         try {
             const result = await updateStudio(null, formData);
