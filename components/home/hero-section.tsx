@@ -9,8 +9,8 @@ export function HeroSection() {
     return (
         <section className="relative bg-stone-50/50 pt-20 pb-24 border-b border-stone-200 overflow-hidden">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div className="max-w-4xl mx-auto text-center space-y-8">
-                    <Badge variant="outline" className="bg-white/50 backdrop-blur text-stone-600 border-stone-200 px-3 py-1 text-xs uppercase tracking-wider font-semibold mx-auto">
+                <div className="max-w-4xl mr-auto text-left space-y-8">
+                    <Badge variant="outline" className="bg-white/50 backdrop-blur text-stone-600 border-stone-200 px-3 py-1 text-xs uppercase tracking-wider font-semibold">
                         Berlin Community Platform
                     </Badge>
 
@@ -18,12 +18,12 @@ export function HeroSection() {
                         Find your people.
                     </h1>
 
-                    <p className="text-stone-600 text-lg sm:text-xl md:text-2xl max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-stone-600 text-lg sm:text-xl md:text-2xl max-w-2xl leading-relaxed">
                         Discover local workshops, gatherings, and creative spaces.
                         Join neighbors who share your passions.
                     </p>
 
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                    <div className="flex flex-col sm:flex-row items-start gap-4 pt-4">
                         <Button
                             size="lg"
                             className="bg-moss-700 hover:bg-moss-800 text-white rounded-full px-8 h-14 text-lg w-full sm:w-auto shadow-lg hover:shadow-xl transition-all"
