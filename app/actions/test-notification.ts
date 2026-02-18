@@ -10,31 +10,22 @@ export async function sendTestNotification() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: "Not authenticated" }
 
-    try {
-        const adminSupabase = createServiceRoleClient()
+    // Use standard client (RLS fix applied)
+    const { error } = await supabase
+        .from('notifications')
+        .insert({
+            user_id: user.id,
+            type: 'system',
+            title: 'Test Notification 🔔',
+            message: 'This is a test notification using standard client (RLS Fixed).',
+            link: null,
+            is_read: false
+        })
 
-        const { error } = await adminSupabase
-            .from('notifications')
-            .insert({
-                user_id: user.id,
-                type: 'system',
-                title: 'Test Notification 🔔',
-                message: 'This is a test notification to verify the system works.',
-                link: null,
-                is_read: false
-            })
-
-        if (error) {
-            console.error('[Debug] Notification insert failed:', error)
-            return { error: `Insert failed: ${error.message}` }
-        }
-
-        return { success: true }
-    } catch (e: any) {
-        console.error('[Debug] Service Role Client failed:', e)
-        if (e.message?.includes('Missing Supabase environment variables')) {
-            return { error: "Configuration Error: SUPABASE_SERVICE_ROLE_KEY is missing in env variables." }
-        }
-        return { error: `Server Error: ${e.message}` }
+    if (error) {
+        console.error('[Debug] Notification insert failed:', error)
+        return { error: `Insert failed: ${error.message}` }
     }
+
+    return { success: true }
 }

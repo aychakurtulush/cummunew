@@ -66,11 +66,8 @@ export async function bookEvent(formData: FormData) {
 
         if (eventData) {
             // 1. In-App Notification
-            // Use Service Role to bypass RLS for inserting notifications for OTHER users
-            const { createServiceRoleClient } = await import('@/lib/supabase/service');
-            const adminSupabase = createServiceRoleClient();
-
-            await adminSupabase
+            // Revert to standard client for compatibility with missing Service Role Key (Relies on new RLS policy)
+            await supabase
                 .from('notifications')
                 .insert({
                     user_id: eventData.creator_user_id,
