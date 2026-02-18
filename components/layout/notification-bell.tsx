@@ -35,42 +35,74 @@ export function NotificationBell() {
     const supabase = createClient()
 
     useEffect(() => {
-        fetchNotifications()
+        let channel: any;
 
-        // Real-time subscription
-        const channel = supabase
-            .channel('notifications_channel')
-            .on(
-                'postgres_changes',
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'notifications',
-                },
-                (payload) => {
-                    // For simplicity, just refetch or prepend
-                    // Check if it belongs to us (RLS handles fetch, but real-time receives all broadcast unless filtered)
-                    // Actually RLS applies to Realtime if configured, but often easier to just fetch
-                    fetchNotifications()
-                }
-            )
-            .subscribe()
+        const setupSubscription = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) return
+
+            // Initial fetch
+            fetchNotifications(user.id)
+
+            // Real-time subscription
+            channel = supabase
+                .channel('notifications_channel')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: 'INSERT',
+                        schema: 'public',
+                        table: 'notifications',
+                        filter: `user_id=eq.${user.id}`, // Filter for current user
+                    },
+                    (payload) => {
+                        console.log('New notification received:', payload)
+                        fetchNotifications(user.id)
+                        // Show a toast for immediate feedback
+                        // toast("New notification received")
+                    }
+                )
+                .subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        console.log('Notification channel subscribed')
+                    }
+                })
+        }
+
+        setupSubscription()
+
+        // Auth listener
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session?.user) {
+                fetchNotifications(session.user.id)
+            }
+        })
 
         return () => {
-            supabase.removeChannel(channel)
+            if (channel) supabase.removeChannel(channel)
+            subscription.unsubscribe()
         }
     }, [])
 
-    const fetchNotifications = async () => {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
+    const fetchNotifications = async (userId?: string) => {
+        let currentUserId = userId;
+        if (!currentUserId) {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) return
+            currentUserId = user.id
+        }
 
-        const { data } = await supabase
+        const { data, error } = await supabase
             .from('notifications')
             .select('*')
-            .eq('user_id', user.id)
+            .eq('user_id', currentUserId)
             .order('created_at', { ascending: false })
             .limit(10)
+
+        if (error) {
+            console.error('Error fetching notifications:', error)
+            return
+        }
 
         if (data) {
             setNotifications(data)
