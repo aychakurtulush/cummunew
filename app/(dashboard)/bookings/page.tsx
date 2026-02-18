@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 import { CancelBookingButton } from "@/components/event/cancel-booking-button";
+import { CancelInquiryButton } from "./components/cancel-inquiry-button";
 
 export default async function BookingsPage() {
     const supabase = await createClient();
@@ -171,6 +172,10 @@ export default async function BookingsPage() {
                                                 Create Event
                                             </Button>
                                         </Link>
+                                    )}
+
+                                    {!isEvent && booking.status === 'pending' && (
+                                        <CancelInquiryButton inquiryId={booking.id} />
                                     )}
                                 </div>
                             </div>

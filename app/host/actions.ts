@@ -296,3 +296,104 @@ export async function createStudio(prevState: any, formData: FormData) {
         return { message: `An unexpected error occurred: ${e.message}`, success: false }
     }
 }
+
+export async function updateStudio(prevState: any, formData: FormData) {
+    const supabase = await createClient()
+
+    if (!supabase) return { message: "Backend unavailable", success: false }
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return { message: "Unauthorized", success: false }
+    }
+
+    const studioId = formData.get('id') as string;
+    if (!studioId) return { message: "Studio ID missing", success: false };
+
+    try {
+        // Handle Image Upload if provided (Optional update)
+        let imageUrls: string[] | undefined = undefined;
+        const imageFile = formData.get('image') as File;
+
+        if (imageFile && imageFile.size > 0) {
+            const fileExt = imageFile.name.split('.').pop();
+            const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('studio-images')
+                .upload(filePath, imageFile);
+
+            if (uploadError) {
+                console.error('[updateStudio] STORAGE ERROR:', uploadError);
+                return { message: `Failed to upload image: ${uploadError.message}`, success: false };
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('studio-images')
+                .getPublicUrl(filePath);
+
+            imageUrls = [publicUrl]; // Replacing existing for simplicity in this MVP, or could append
+        }
+
+        // Parse Amenities
+        const amenitiesString = formData.get('amenities') as string;
+        const amenities = amenitiesString
+            ? amenitiesString.split(',').map(s => s.trim()).filter(s => s.length > 0)
+            : undefined; // undefined means don't update if not present? Form likely has it.
+
+        const rawData: any = {
+            name: formData.get('name') as string,
+            description: formData.get('description') as string,
+            location: formData.get('location') as string,
+            price_per_hour: parseFloat(formData.get('price_per_hour') as string) || 0,
+            capacity: parseInt(formData.get('capacity') as string) || 0,
+        };
+
+        if (amenities !== undefined) rawData.amenities = amenities;
+        if (imageUrls !== undefined) rawData.images = imageUrls;
+
+        const { error } = await supabase
+            .from('studios')
+            .update(rawData)
+            .eq('id', studioId)
+            .eq('owner_user_id', user.id); // RLS handles this too, but good double check
+
+        if (error) {
+            console.error('[updateStudio] UPDATE ERROR:', error);
+            return { message: `Failed to update studio: ${error.message}`, success: false };
+        }
+
+        revalidatePath('/host/studios');
+        revalidatePath(`/studios/${studioId}`);
+        return { message: 'Success', success: true };
+
+    } catch (e: any) {
+        console.error('[updateStudio] ERROR:', e);
+        return { message: `Error: ${e.message}`, success: false };
+    }
+}
+
+export async function deleteStudio(studioId: string) {
+    const supabase = await createClient()
+    if (!supabase) return { error: "Backend unavailable" }
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: "Unauthorized" }
+
+    const { error } = await supabase
+        .from('studios')
+        .delete()
+        .eq('id', studioId)
+        .eq('owner_user_id', user.id);
+
+    if (error) {
+        console.error('[deleteStudio] ERROR:', error);
+        return { error: `Failed to delete studio: ${error.message}` };
+    }
+
+    revalidatePath('/host/studios');
+    revalidatePath('/');
+    return { success: true };
+}

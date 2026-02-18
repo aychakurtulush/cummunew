@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, MapPin, Building2, Image as ImageIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { DeleteStudioButton } from "./components/delete-studio-button";
 
 export default async function HostStudiosPage() {
     const supabase = await createClient();
@@ -77,11 +78,14 @@ export default async function HostStudiosPage() {
                                         </span>
                                         <span className="text-stone-500"> / hour</span>
                                     </div>
-                                    <Link href={`/host/studios/${studio.id}/edit`}>
-                                        <Button variant="ghost" size="sm" className="text-stone-500 hover:text-stone-900">
-                                            Edit
-                                        </Button>
-                                    </Link>
+                                    <div className="flex items-center gap-2">
+                                        <Link href={`/host/studios/${studio.id}/edit`}>
+                                            <Button variant="ghost" size="sm" className="text-stone-500 hover:text-stone-900">
+                                                Edit
+                                            </Button>
+                                        </Link>
+                                        <DeleteStudioButton studioId={studio.id} />
+                                    </div>
                                 </div>
                             </div>
                         </div>
