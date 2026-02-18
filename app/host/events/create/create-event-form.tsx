@@ -211,8 +211,9 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
                                 name="start_time"
                                 type="datetime-local"
                                 required
-                                defaultValue={defaultStartTime}
+                                value={startTime}
                                 onChange={(e) => {
+                                    setStartTime(e.target.value);
                                     const endTimeInput = document.getElementById('end_time') as HTMLInputElement;
                                     if (endTimeInput) {
                                         endTimeInput.min = e.target.value;
@@ -227,7 +228,8 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
                                 name="end_time"
                                 type="datetime-local"
                                 required
-                                defaultValue={defaultEndTime}
+                                value={endTime}
+                                onChange={(e) => setEndTime(e.target.value)}
                             />
                             <p className="text-[10px] text-stone-400">Must be after the start time.</p>
                         </div>
