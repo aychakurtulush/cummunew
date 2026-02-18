@@ -73,7 +73,10 @@ export async function bookEvent(formData: FormData) {
                     title: 'New Booking Request',
                     message: `${user.user_metadata?.full_name || 'Someone'} requested to join "${eventData.title}"`,
                     link: '/host/events', // Or link to specific booking logic
-                    metadata: { event_id: eventId, booking_id: 'pending' } // Ideally we'd have the booking ID but it's not returned by insert above. MVP.
+                    metadata: { event_id: eventId, booking_id: 'pending' }
+                })
+                .then(({ error }) => {
+                    if (error) console.error('[bookEvent] Notification insert failed:', error);
                 });
 
             // 2. Email Notification
