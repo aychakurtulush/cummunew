@@ -165,7 +165,6 @@ export function NotificationBell() {
                             }}
                         >
                             Mark all read
-                            Mark all read
                         </Button>
                     )}
                 </div>
