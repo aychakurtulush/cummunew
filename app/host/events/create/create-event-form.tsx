@@ -49,12 +49,11 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
                 return dateString.slice(0, 16);
             }
 
+            // If not local (i.e., has Z or offset), use the UTC time literal directly
+            // This ensures 10:00Z becomes 10:00 in the input, not 11:00 (Local)
             try {
                 const date = new Date(dateString);
-                // Adjust to local timezone for the input value
-                const offset = date.getTimezoneOffset() * 60000;
-                const localDate = new Date(date.getTime() - offset);
-                return localDate.toISOString().slice(0, 16);
+                return date.toISOString().slice(0, 16);
             } catch (e) {
                 return "";
             }
