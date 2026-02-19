@@ -188,6 +188,7 @@ export async function updateInquiryStatus(inquiryId: string, newStatus: 'approve
         .select(`
             id,
             requester_id,
+            studio_id,
             studio:studios(name)
         `)
         .single();
@@ -217,6 +218,23 @@ export async function updateInquiryStatus(inquiryId: string, newStatus: 'approve
         }
     } catch (emailErr) {
         console.error("Failed to send status email:", emailErr);
+    }
+
+    // In-App Notification
+    if (inquiry) {
+        const studioName = (inquiry.studio as any)?.name || 'the studio';
+        await supabase.from('notifications').insert({
+            user_id: inquiry.requester_id,
+            type: 'booking_status', // ensure this type exists or is handled in frontend
+            title: `Inquiry ${newStatus === 'approved' ? 'Approved' : 'Declined'}`,
+            message: `Your booking request for ${studioName} has been ${newStatus}.`,
+            link: '/bookings', // User checks their bookings
+            metadata: {
+                inquiry_id: inquiry.id,
+                status: newStatus,
+                studio_id: inquiry.studio_id
+            }
+        });
     }
 
     revalidatePath('/host/inquiries');

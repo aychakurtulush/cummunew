@@ -182,6 +182,26 @@ export default function CreateStudioPage() {
                         <Input id="amenities" name="amenities" placeholder="Wifi, Projector, Sound System, Yoga Mats..." className="bg-white" />
                         <p className="text-[11px] text-stone-500">Separate with commas</p>
                     </div>
+
+                    <div className="space-y-3">
+                        <label className="text-sm font-semibold text-stone-700 block">Features</label>
+                        <div className="grid grid-cols-2 gap-3">
+                            {['Wifi', 'Accessibility', 'Parking', 'Air Conditioning', 'Tea/Coffee', 'Projector'].map((feature) => (
+                                <div key={feature} className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        name="features"
+                                        value={feature}
+                                        id={`feature-${feature}`}
+                                        className="h-4 w-4 rounded border-stone-300 text-moss-600 focus:ring-moss-600/20"
+                                    />
+                                    <label htmlFor={`feature-${feature}`} className="text-sm text-stone-600 cursor-pointer">
+                                        {feature}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
                 <div className="pt-6 flex justify-end">

@@ -192,18 +192,30 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                             </div>
                         </div>
 
-                        {/* Amenities (Hardcoded for MVP) */}
                         <div>
-                            <h3 className="text-lg font-serif font-semibold text-stone-900 mb-4">Everything you need</h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div className="flex items-center gap-2 text-stone-600">
-                                    <Check className="h-4 w-4 text-moss-600" />
-                                    <span>All materials provided</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-stone-600">
-                                    <Check className="h-4 w-4 text-moss-600" />
-                                    <span>Guided session</span>
-                                </div>
+                            <h3 className="text-lg font-serif font-semibold text-stone-900 mb-4">Event Details</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-stone-600">
+                                {event.materials_provided && (
+                                    <div className="flex items-center gap-2">
+                                        <Check className="h-4 w-4 text-moss-600" />
+                                        <span>All materials provided</span>
+                                    </div>
+                                )}
+                                {event.is_guided && (
+                                    <div className="flex items-center gap-2">
+                                        <Check className="h-4 w-4 text-moss-600" />
+                                        <span>Guided session</span>
+                                    </div>
+                                )}
+                                {event.seating_type && (
+                                    <div className="flex items-center gap-2">
+                                        <Check className="h-4 w-4 text-moss-600" />
+                                        <span className="capitalize">{event.seating_type} seating</span>
+                                    </div>
+                                )}
+                                {!event.materials_provided && !event.is_guided && !event.seating_type && (
+                                    <span className="text-sm italic text-stone-400">No specific details listed.</span>
+                                )}
                             </div>
                         </div>
 

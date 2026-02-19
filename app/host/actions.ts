@@ -101,7 +101,10 @@ export async function createEvent(prevState: any, formData: FormData) {
         category: formData.get('category') as string,
         image_url: imageUrl,
         studio_id: studioId,
-        status: 'pending' // Default to pending for approval flow, or 'approved' for MVP
+        status: 'pending', // Default to pending for approval flow, or 'approved' for MVP
+        seating_type: formData.get('seating_type') || 'mixed',
+        materials_provided: formData.get('materials_provided') === 'true',
+        is_guided: formData.get('is_guided') === 'true'
     }
 
     // For MVP, auto-approve
@@ -163,6 +166,9 @@ export async function updateEvent(prevState: any, formData: FormData) {
         city: formData.get('city') as string,
         category: formData.get('category') as string,
         studio_id: formData.get('studio_id') as string || null,
+        seating_type: formData.get('seating_type') || 'mixed',
+        materials_provided: formData.get('materials_provided') === 'true',
+        is_guided: formData.get('is_guided') === 'true'
     }
 
     const { error } = await supabase
@@ -242,6 +248,7 @@ export async function createStudio(prevState: any, formData: FormData) {
             price_per_hour: parseFloat(formData.get('price_per_hour') as string) || 0,
             capacity: parseInt(formData.get('capacity') as string) || 0,
             amenities: amenities,
+            features: formData.getAll('features') as string[],
             images: imageUrls,
             status: 'active'
         }
@@ -352,6 +359,10 @@ export async function updateStudio(prevState: any, formData: FormData) {
         };
 
         if (amenities !== undefined) rawData.amenities = amenities;
+
+        const features = formData.getAll('features');
+        if (features.length > 0) rawData.features = features as string[];
+
         if (imageUrls !== undefined) rawData.images = imageUrls;
 
         const { error } = await supabase

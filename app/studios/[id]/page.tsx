@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"; // Adjusted imports
-import { MapPin, Globe, Users, Coins, Image as ImageIcon, CalendarPlus } from "lucide-react";
+import { MapPin, Globe, Users, Coins, Image as ImageIcon, CalendarPlus, Check } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
@@ -142,6 +142,20 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
                                                 <Badge key={i} variant="secondary" className="px-3 py-1 bg-stone-100 text-stone-700 hover:bg-stone-200">
                                                     {amenity}
                                                 </Badge>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+
+                                {studio.features && studio.features.length > 0 && (
+                                    <section className="space-y-4">
+                                        <h2 className="text-xl font-bold text-stone-900 font-serif">Features</h2>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {studio.features.map((feature: string, i: number) => (
+                                                <div key={i} className="flex items-center gap-2 text-stone-600">
+                                                    <Check className="h-4 w-4 text-moss-600" />
+                                                    <span>{feature}</span>
+                                                </div>
                                             ))}
                                         </div>
                                     </section>

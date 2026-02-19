@@ -94,6 +94,62 @@ export default function EditEventForm({ event, studios }: EditEventFormProps) {
                     </div>
                 </div>
 
+
+
+                <div className="space-y-4">
+                    <label className="text-sm font-semibold text-stone-700">Event Options</label>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                            <label htmlFor="seating_type" className="text-xs font-medium text-stone-600">Seating Arrangement</label>
+                            <select
+                                id="seating_type"
+                                name="seating_type"
+                                defaultValue={event.seating_type || 'mixed'}
+                                className="flex h-10 w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss-600/20"
+                            >
+                                <option value="mixed">Mixed/Flexible</option>
+                                <option value="seated">Seated</option>
+                                <option value="standing">Standing</option>
+                            </select>
+                        </div>
+
+                        <div className="flex items-center space-x-2 pt-6">
+                            <input
+                                type="checkbox"
+                                id="materials_provided"
+                                name="materials_provided"
+                                value="true"
+                                defaultChecked={event.materials_provided !== false} // Default to true if null/undefined
+                                className="h-4 w-4 rounded border-stone-300 text-moss-600 focus:ring-moss-600/20"
+                            />
+                            <label
+                                htmlFor="materials_provided"
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-stone-700"
+                            >
+                                Materials Provided
+                            </label>
+                        </div>
+
+                        <div className="flex items-center space-x-2 pt-6">
+                            <input
+                                type="checkbox"
+                                id="is_guided"
+                                name="is_guided"
+                                value="true"
+                                defaultChecked={event.is_guided !== false} // Default to true if null/undefined
+                                className="h-4 w-4 rounded border-stone-300 text-moss-600 focus:ring-moss-600/20"
+                            />
+                            <label
+                                htmlFor="is_guided"
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-stone-700"
+                            >
+                                Guided Session
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+
                 <Separator />
 
                 {/* Location & Time */}
@@ -193,7 +249,7 @@ export default function EditEventForm({ event, studios }: EditEventFormProps) {
                     </Button>
                 </div>
 
-            </form>
-        </div>
+            </form >
+        </div >
     )
 }
