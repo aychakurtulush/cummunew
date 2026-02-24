@@ -4,12 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
-import { createMollieClient } from '@mollie/api-client'
 import { headers } from 'next/headers'
-
-const mollieClient = createMollieClient({
-    apiKey: process.env.MOLLIE_API_KEY || 'test_placeholder_key_for_mollie'
-});
 
 export async function bookEvent(formData: FormData) {
     const eventId = formData.get('eventId') as string
@@ -56,79 +51,11 @@ export async function bookEvent(formData: FormData) {
 
     const bookingId = insertedBooking.id;
 
-    // Handle Paid Events
-    if (eventData.price && eventData.price > 0) {
+    // All bookings (Free and Paid) follow the same flow now.
+    // They are saved as 'pending' and we notify the host.
+    // The Host will review and if they approve, the participant will receive an email with Payment Instructions.
 
-        // Fetch host's Mollie Organization ID
-        const { data: hostProfile } = await supabase
-            .from('profiles')
-            .select('mollie_organization_id')
-            .eq('user_id', eventData.creator_user_id)
-            .single();
-
-        if (!hostProfile?.mollie_organization_id) {
-            await supabase.from('bookings').delete().eq('id', bookingId);
-            return { error: "This Host is not set up to receive automated payments yet." }
-        }
-
-        const origin = (await headers()).get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-        // Webhook URLs require a public, routable URL. In local dev, Mollie can't reach localhost.
-        // We fallback to a dummy URL locally to prevent crashes, but webhooks won't fire until deployed.
-        const webhookUrl = process.env.NEXT_PUBLIC_APP_URL
-            ? `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mollie`
-            : 'https://example.com/api/webhooks/mollie';
-
-        let targetHref = '';
-
-        const platformFee = Math.round(eventData.price * 0.10 * 100) / 100; // 10% platform fee
-        const hostCut = Math.round((eventData.price - platformFee) * 100) / 100;
-
-        try {
-            const payment = await mollieClient.payments.create({
-                amount: {
-                    currency: 'EUR',
-                    value: eventData.price.toFixed(2) // Mollie requires exact 2 decimal string
-                },
-                description: `Booking: ${eventData.title}`,
-                redirectUrl: `${origin}/bookings?success=true`,
-                webhookUrl: webhookUrl,
-                profileId: process.env.MOLLIE_PROFILE_ID, // Use platform profile
-                metadata: {
-                    bookingId: bookingId,
-                    eventId: eventId,
-                    userId: user.id
-                },
-                routing: [
-                    {
-                        amount: {
-                            currency: 'EUR',
-                            value: hostCut.toFixed(2)
-                        },
-                        destination: {
-                            type: 'organization',
-                            organizationId: hostProfile.mollie_organization_id
-                        }
-                    }
-                ]
-            } as any) as any;
-
-            // Save the Mollie Payment ID to the booking
-            await supabase.from('bookings').update({ stripe_payment_intent_id: payment.id }).eq('id', bookingId);
-
-            if (payment._links?.checkout?.href) {
-                targetHref = payment._links.checkout.href;
-            }
-        } catch (err: any) {
-            console.error("Mollie checkout error:", err);
-            return { error: "Payment gateway error: " + err.message };
-        }
-
-        if (targetHref) {
-            redirect(targetHref);
-        }
-    }
-
-    // --- Email Notification Start (Only for Free Events) ---
+    // --- Email Notification Start ---
     try {
         await supabase
             .from('notifications')
@@ -299,7 +226,11 @@ export async function updateBookingStatus(bookingId: string, status: 'confirmed'
             user_id,
             events (
                 title,
-                creator_user_id
+                creator_user_id,
+                start_time,
+                location_type,
+                city,
+                payment_instructions
             )
         `)
         .eq('id', bookingId)
@@ -377,7 +308,7 @@ export async function updateBookingStatus(bookingId: string, status: 'confirmed'
             const { sendBookingStatusEmail } = await import('@/lib/email');
             await sendBookingStatusEmail(
                 participantUser.user.email,
-                eventTitle,
+                booking.events as any,
                 status
             );
         }

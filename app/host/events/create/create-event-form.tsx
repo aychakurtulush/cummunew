@@ -42,6 +42,7 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
     const [endTime, setEndTime] = useState<string>(
         initialEndTime ? toBerlinInput(initialEndTime) : ""
     );
+    const [price, setPrice] = useState<string>("");
 
     return (
         <div className="max-w-2xl mx-auto space-y-8">
@@ -283,7 +284,7 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <label htmlFor="price" className="text-sm font-semibold text-stone-700">Price per person (€)</label>
-                            <Input id="price" name="price" type="number" min="0" step="0.01" placeholder="45.00" required />
+                            <Input id="price" name="price" type="number" min="0" step="0.01" placeholder="45.00" required value={price} onChange={e => setPrice(e.target.value)} />
                         </div>
                         <div className="space-y-2">
                             <label htmlFor="capacity" className="text-sm font-semibold text-stone-700">Capacity (spots)</label>
@@ -291,6 +292,24 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
                         </div>
                     </div>
                 </div>
+
+                {parseFloat(price) > 0 && (
+                    <div className="space-y-4">
+                        <Separator />
+                        <h3 className="text-lg font-medium text-stone-900">Payment Instructions</h3>
+                        <p className="text-sm text-stone-500">Since this is a paid event, please specify how participants should pay you (e.g., PayPal link, Revolut tag, or "Cash at the door"). Participants will receive these instructions in their booking confirmation email.</p>
+                        <div className="space-y-2">
+                            <label htmlFor="payment_instructions" className="text-sm font-semibold text-stone-700">Instructions</label>
+                            <textarea
+                                id="payment_instructions"
+                                name="payment_instructions"
+                                className="flex min-h-[80px] w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss-600/20 focus-visible:border-moss-600"
+                                placeholder="e.g. Please PayPal €45 to paypal.me/example before the event and mention your name."
+                                required
+                            />
+                        </div>
+                    </div>
+                )}
 
                 <div className="pt-4 flex justify-end">
                     <Button type="submit" size="lg" className="w-full sm:w-auto bg-moss-600 hover:bg-moss-700 text-white font-semibold">

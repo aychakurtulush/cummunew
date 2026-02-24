@@ -104,7 +104,8 @@ export async function createEvent(prevState: any, formData: FormData) {
         status: 'pending', // Default to pending for approval flow, or 'approved' for MVP
         seating_type: formData.get('seating_type') || 'mixed',
         materials_provided: formData.get('materials_provided') === 'true',
-        is_guided: formData.get('is_guided') === 'true'
+        is_guided: formData.get('is_guided') === 'true',
+        payment_instructions: formData.get('payment_instructions') as string || null
     }
 
     // For MVP, auto-approve
@@ -168,7 +169,8 @@ export async function updateEvent(prevState: any, formData: FormData) {
         studio_id: formData.get('studio_id') as string || null,
         seating_type: formData.get('seating_type') || 'mixed',
         materials_provided: formData.get('materials_provided') === 'true',
-        is_guided: formData.get('is_guided') === 'true'
+        is_guided: formData.get('is_guided') === 'true',
+        payment_instructions: formData.get('payment_instructions') as string || null
     }
 
     const { error } = await supabase

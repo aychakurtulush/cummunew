@@ -173,16 +173,28 @@ export async function sendBookingCancelledEmail(
 
 export async function sendBookingStatusEmail(
     userEmail: string,
-    eventTitle: string,
+    eventData: any,
     status: string
 ) {
     if (!resend) return;
 
+    const eventTitle = eventData.title || 'your event';
     const subject = status === 'confirmed' ? `Booking Confirmed: ${eventTitle} ✅` : `Booking Declined: ${eventTitle} ❌`;
     const title = status === 'confirmed' ? 'Booking Confirmed! 🎉' : 'Booking Declined';
-    const message = status === 'confirmed'
+
+    let message = status === 'confirmed'
         ? `You're all set for <strong>${eventTitle}</strong>. We can't wait to see you there!`
         : `Your request for <strong>${eventTitle}</strong> was declined.`;
+
+    if (status === 'confirmed' && eventData.payment_instructions) {
+        message += `
+            <div style="margin-top: 24px; padding: 16px; background-color: #fefce8; border: 1px solid #fef08a; border-radius: 8px;">
+                <h3 style="color: #854d0e; margin-top: 0; margin-bottom: 12px; font-size: 16px;">Payment Instructions</h3>
+                <p style="color: #713f12; margin: 0; font-size: 14px; white-space: pre-wrap;">${eventData.payment_instructions}</p>
+                <p style="color: #713f12; margin-top: 12px; margin-bottom: 0; font-size: 13px;"><em>Please follow these instructions to secure your spot with the host.</em></p>
+            </div>
+        `;
+    }
 
     try {
         await resend.emails.send({
