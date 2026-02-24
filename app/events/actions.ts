@@ -4,94 +4,121 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
+import Stripe from 'stripe'
+import { headers } from 'next/headers'
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
+    apiVersion: '2023-10-16' as any
+});
+
 export async function bookEvent(formData: FormData) {
     const eventId = formData.get('eventId') as string
 
-
     const supabase = await createClient()
-
-    if (!supabase) {
-        console.error('[bookEvent] Supabase client failed');
-        return { error: "Demo Mode: Backend not configured" }
-    }
+    if (!supabase) return { error: "Demo Mode: Backend not configured" }
 
     const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-
-        return { error: "Not authenticated" }
-    }
+    if (!user) return { error: "Not authenticated" }
 
     // Check if already booked
-    const { data: existingBooking, error: checkError } = await supabase
+    const { data: existingBooking } = await supabase
         .from('bookings')
         .select('id')
         .eq('event_id', eventId)
         .eq('user_id', user.id)
         .single()
 
-    if (checkError && checkError.code !== 'PGRST116') {
-        console.error('[bookEvent] Check error:', checkError);
-    }
+    if (existingBooking) return { success: true, message: "Already booked" }
 
-    if (existingBooking) {
+    // Fetch event details
+    const { data: eventData } = await supabase
+        .from('events')
+        .select('title, creator_user_id, price')
+        .eq('id', eventId)
+        .single();
 
-        return { success: true, message: "Already booked" }
-    }
+    if (!eventData) return { error: "Event not found" }
 
-    const { error } = await supabase
+    // Insert booking
+    const { data: insertedBooking, error } = await supabase
         .from('bookings')
         .insert({
             event_id: eventId,
             user_id: user.id,
-            status: 'pending'
+            status: 'pending' // pending until payment/host approval
         })
+        .select('id')
+        .single()
 
-    if (error) {
-        console.error('[bookEvent] Insert error:', error);
-        return { error: error.message }
+    if (error || !insertedBooking) {
+        return { error: error?.message || "Failed to create booking" }
     }
 
+    const bookingId = insertedBooking.id;
 
-
-    // --- Email Notification Start ---
-    try {
-        // Fetch event details for the email and notification
-        // Note: We use the standard client for reading event details to respect RLS (though usually public)
-        const { data: eventData } = await supabase
-            .from('events')
-            .select('title, creator_user_id')
-            .eq('id', eventId)
+    // Handle Paid Events
+    if (eventData.price && eventData.price > 0) {
+        // Fetch host's Stripe ID
+        const { data: hostProfile } = await supabase
+            .from('profiles')
+            .select('stripe_account_id')
+            .eq('user_id', eventData.creator_user_id)
             .single();
 
-        if (eventData) {
-            // 1. In-App Notification
-            // Revert to standard client for compatibility with missing Service Role Key (Relies on new RLS policy)
-            await supabase
-                .from('notifications')
-                .insert({
-                    user_id: eventData.creator_user_id,
-                    type: 'booking_request',
-                    title: 'New Booking Request',
-                    message: `${user.user_metadata?.full_name || 'Someone'} requested to join "${eventData.title}"`,
-                    link: '/host/events',
-                    metadata: { event_id: eventId, booking_id: 'pending' }
-                })
-                .then(({ error }) => {
-                    if (error) console.error('[bookEvent] Notification insert failed:', error);
-                });
+        if (!hostProfile?.stripe_account_id) {
+            // Delete the booking we just made 
+            await supabase.from('bookings').delete().eq('id', bookingId);
+            return { error: "This Host is not set up to receive payments yet." }
+        }
 
-            // 2. Email Notification
-            if (user.email) {
-                // Dynamically import to avoid build issues
-                const { sendBookingNotification } = await import('@/lib/email');
-                await sendBookingNotification(user.email, eventData.title, eventId);
-            }
+        const origin = (await headers()).get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [{
+                price_data: {
+                    currency: 'eur',
+                    product_data: { name: eventData.title },
+                    unit_amount: Math.round(eventData.price * 100),
+                },
+                quantity: 1,
+            }],
+            mode: 'payment',
+            payment_intent_data: {
+                application_fee_amount: Math.round(eventData.price * 10), // 10% platform fee
+                transfer_data: { destination: hostProfile.stripe_account_id },
+            },
+            success_url: `${origin}/bookings?success=true`,
+            cancel_url: `${origin}/events/${eventId}?cancelled=true`,
+            client_reference_id: bookingId,
+        });
+
+        // Save session ID
+        await supabase.from('bookings').update({ stripe_payment_intent_id: session.id }).eq('id', bookingId);
+
+        redirect(session.url!);
+    }
+
+    // --- Email Notification Start (Only for Free Events) ---
+    try {
+        await supabase
+            .from('notifications')
+            .insert({
+                user_id: eventData.creator_user_id,
+                type: 'booking_request',
+                title: 'New Booking Request',
+                message: `${user.user_metadata?.full_name || 'Someone'} requested to join "${eventData.title}"`,
+                link: '/host/events',
+                metadata: { event_id: eventId, booking_id: 'pending' }
+            });
+
+        if (user.email) {
+            const { sendBookingNotification } = await import('@/lib/email');
+            await sendBookingNotification(user.email, eventData.title, eventId);
         }
     } catch (notificationError) {
-        console.error('[bookEvent] Notification failed (non-critical):', notificationError);
+        console.error('[bookEvent] Notification failed');
     }
-    // --- Email Notification End ---
 
     revalidatePath('/bookings')
     revalidatePath(`/events/${eventId}`)

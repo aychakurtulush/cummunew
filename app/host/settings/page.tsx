@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { createStripeAccountLink } from "./actions";
 
 export default function SettingsPage() {
     return (
@@ -23,6 +24,28 @@ export default function SettingsPage() {
                         </div>
                     </div>
                 </div>
+
+                <Separator />
+
+                <div>
+                    <h3 className="font-medium text-stone-900 mb-4">Payments & Payouts</h3>
+                    <div className="flex items-center justify-between py-3 border-b border-stone-100">
+                        <div>
+                            <div className="text-sm font-medium text-stone-900">Connect to Stripe</div>
+                            <div className="text-xs text-stone-500 max-w-sm mt-1">
+                                Receive direct payouts for your events and studio bookings.
+                                A Stripe account is required to charge participants.
+                            </div>
+                        </div>
+                        <form action={createStripeAccountLink}>
+                            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                                Connect with Stripe
+                            </Button>
+                        </form>
+                    </div>
+                </div>
+
+                <Separator />
 
                 <div>
                     <h3 className="font-medium text-stone-900 mb-4 text-red-600">Danger Zone</h3>
