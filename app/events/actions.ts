@@ -59,6 +59,18 @@ export async function bookEvent(formData: FormData) {
     // Handle Paid Events
     if (eventData.price && eventData.price > 0) {
 
+        // Fetch host's Mollie Organization ID
+        const { data: hostProfile } = await supabase
+            .from('profiles')
+            .select('mollie_organization_id')
+            .eq('user_id', eventData.creator_user_id)
+            .single();
+
+        if (!hostProfile?.mollie_organization_id) {
+            await supabase.from('bookings').delete().eq('id', bookingId);
+            return { error: "This Host is not set up to receive automated payments yet." }
+        }
+
         const origin = (await headers()).get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
         // Webhook URLs require a public, routable URL. In local dev, Mollie can't reach localhost.
         // We fallback to a dummy URL locally to prevent crashes, but webhooks won't fire until deployed.
@@ -67,6 +79,9 @@ export async function bookEvent(formData: FormData) {
             : 'https://example.com/api/webhooks/mollie';
 
         let targetHref = '';
+
+        const platformFee = Math.round(eventData.price * 0.10 * 100) / 100; // 10% platform fee
+        const hostCut = Math.round((eventData.price - platformFee) * 100) / 100;
 
         try {
             const payment = await mollieClient.payments.create({
@@ -77,18 +92,30 @@ export async function bookEvent(formData: FormData) {
                 description: `Booking: ${eventData.title}`,
                 redirectUrl: `${origin}/bookings?success=true`,
                 webhookUrl: webhookUrl,
+                profileId: process.env.MOLLIE_PROFILE_ID, // Use platform profile
                 metadata: {
                     bookingId: bookingId,
                     eventId: eventId,
                     userId: user.id
-                }
-            });
+                },
+                routing: [
+                    {
+                        amount: {
+                            currency: 'EUR',
+                            value: hostCut.toFixed(2)
+                        },
+                        destination: {
+                            type: 'organization',
+                            organizationId: hostProfile.mollie_organization_id
+                        }
+                    }
+                ]
+            } as any) as any;
 
             // Save the Mollie Payment ID to the booking
-            // We are reusing the stripe_payment_intent_id column to avoid a database schema migration for now
             await supabase.from('bookings').update({ stripe_payment_intent_id: payment.id }).eq('id', bookingId);
 
-            if (payment._links.checkout?.href) {
+            if (payment._links?.checkout?.href) {
                 targetHref = payment._links.checkout.href;
             }
         } catch (err: any) {

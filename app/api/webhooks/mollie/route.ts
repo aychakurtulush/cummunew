@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createMollieClient, PaymentStatus } from '@mollie/api-client';
 import { createServiceRoleClient } from '@/lib/supabase/service';
-import { createServiceRoleClient } from '@/lib/supabase/service';
 
 const mollieClient = createMollieClient({
     apiKey: process.env.MOLLIE_API_KEY || 'test_placeholder_key_for_mollie'
@@ -19,8 +18,9 @@ export async function POST(req: Request) {
 
         const payment = await mollieClient.payments.get(paymentId);
 
-        const bookingId = payment.metadata?.bookingId;
-        const eventId = payment.metadata?.eventId;
+        const metadata = payment.metadata as Record<string, any>;
+        const bookingId = metadata?.bookingId;
+        const eventId = metadata?.eventId;
 
         if (!bookingId) {
             return NextResponse.json({ error: 'No booking ID in metadata' }, { status: 400 });
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Database Admin fail' }, { status: 500 });
         }
 
-        if (payment.isPaid()) {
+        if (payment.status === PaymentStatus.paid) {
             // Update booking to confirmed
             await supabaseAdmin.from('bookings').update({ status: 'confirmed' }).eq('id', bookingId);
 

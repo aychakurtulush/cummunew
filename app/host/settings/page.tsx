@@ -12,10 +12,10 @@ export default async function SettingsPage(props: { searchParams?: Promise<{ err
     if (!supabase) return <div>Database configuration error</div>;
     const { data: { user } } = await supabase.auth.getUser();
 
-    let currentIban = "";
+    let isMollieConnected = false;
     if (user) {
-        const { data: profile } = await supabase.from('profiles').select('iban').eq('user_id', user.id).single();
-        currentIban = profile?.iban || "";
+        const { data: profile } = await supabase.from('profiles').select('mollie_organization_id').eq('user_id', user.id).single();
+        isMollieConnected = !!profile?.mollie_organization_id;
     }
 
     return (
@@ -31,9 +31,9 @@ export default async function SettingsPage(props: { searchParams?: Promise<{ err
                 </div>
             )}
 
-            {searchParams?.success === 'iban_saved' && (
+            {searchParams?.success === 'mollie_connected' && (
                 <div className="p-4 bg-green-50 text-green-700 border border-green-200 rounded-lg">
-                    <strong>Success!</strong> Your IBAN has been successfully saved. Payouts will be sent here.
+                    <strong>Success!</strong> Your Mollie account is securely connected. You can now receive automated payouts.
                 </div>
             )}
 
@@ -55,26 +55,26 @@ export default async function SettingsPage(props: { searchParams?: Promise<{ err
                 <Separator />
 
                 <div>
-                    <h3 className="font-medium text-stone-900 mb-4">Payouts (IBAN)</h3>
-                    <div className="py-3 border-t border-stone-100 mt-2 pt-4">
-                        <form action={saveIban} className="space-y-4 max-w-sm">
-                            <div>
-                                <Label htmlFor="iban" className="text-stone-700">Bank Account (IBAN)</Label>
-                                <div className="text-xs text-stone-500 mb-2">
-                                    This is where you will receive your payouts for events and studio bookings.
-                                </div>
-                                <Input
-                                    id="iban"
-                                    name="iban"
-                                    placeholder="DE89 3704 0044 0532 0130 00"
-                                    defaultValue={currentIban}
-                                    required
-                                />
+                    <h3 className="font-medium text-stone-900 mb-4">Payments & Payouts</h3>
+                    <div className="flex items-center justify-between py-3 border-t border-stone-100 mt-2 pt-4">
+                        <div>
+                            <div className="text-sm font-medium text-stone-900">Connect to Mollie</div>
+                            <div className="text-xs text-stone-500 max-w-sm mt-1">
+                                Receive automated payouts for your events and studio bookings.
+                                We use Mollie Connect to securely split payments.
                             </div>
-                            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white w-full">
-                                Save IBAN
-                            </Button>
-                        </form>
+                        </div>
+                        {isMollieConnected ? (
+                            <div className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1.5 rounded-full border border-green-200">
+                                ✓ Connected
+                            </div>
+                        ) : (
+                            <a href="/api/mollie/oauth">
+                                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                                    Connect with Mollie
+                                </Button>
+                            </a>
+                        )}
                     </div>
                 </div>
 
