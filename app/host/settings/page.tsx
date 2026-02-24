@@ -1,10 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { createStripeAccountLink } from "./actions";
-import { SubmitStripeButton } from "./submit-button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { saveIban } from "./actions";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function SettingsPage(props: { searchParams?: Promise<{ error?: string, success?: string }> }) {
     const searchParams = props.searchParams ? await props.searchParams : {};
+
+    const supabase = await createClient();
+    if (!supabase) return <div>Database configuration error</div>;
+    const { data: { user } } = await supabase.auth.getUser();
+
+    let currentIban = "";
+    if (user) {
+        const { data: profile } = await supabase.from('profiles').select('iban').eq('user_id', user.id).single();
+        currentIban = profile?.iban || "";
+    }
 
     return (
         <div className="max-w-2xl mx-auto space-y-8">
@@ -15,13 +27,13 @@ export default async function SettingsPage(props: { searchParams?: Promise<{ err
 
             {searchParams?.error && (
                 <div className="p-4 bg-red-50 text-red-700 border border-red-200 rounded-lg">
-                    <strong>Error connecting to Stripe:</strong> {searchParams.error}
+                    <strong>Error:</strong> {searchParams.error}
                 </div>
             )}
 
-            {searchParams?.success === 'stripe_connected' && (
+            {searchParams?.success === 'iban_saved' && (
                 <div className="p-4 bg-green-50 text-green-700 border border-green-200 rounded-lg">
-                    <strong>Success!</strong> Your Stripe account has been successfully connected.
+                    <strong>Success!</strong> Your IBAN has been successfully saved. Payouts will be sent here.
                 </div>
             )}
 
@@ -43,17 +55,25 @@ export default async function SettingsPage(props: { searchParams?: Promise<{ err
                 <Separator />
 
                 <div>
-                    <h3 className="font-medium text-stone-900 mb-4">Payments & Payouts</h3>
-                    <div className="flex items-center justify-between py-3 border-b border-stone-100">
-                        <div>
-                            <div className="text-sm font-medium text-stone-900">Connect to Stripe</div>
-                            <div className="text-xs text-stone-500 max-w-sm mt-1">
-                                Receive direct payouts for your events and studio bookings.
-                                A Stripe account is required to charge participants.
+                    <h3 className="font-medium text-stone-900 mb-4">Payouts (IBAN)</h3>
+                    <div className="py-3 border-t border-stone-100 mt-2 pt-4">
+                        <form action={saveIban} className="space-y-4 max-w-sm">
+                            <div>
+                                <Label htmlFor="iban" className="text-stone-700">Bank Account (IBAN)</Label>
+                                <div className="text-xs text-stone-500 mb-2">
+                                    This is where you will receive your payouts for events and studio bookings.
+                                </div>
+                                <Input
+                                    id="iban"
+                                    name="iban"
+                                    placeholder="DE89 3704 0044 0532 0130 00"
+                                    defaultValue={currentIban}
+                                    required
+                                />
                             </div>
-                        </div>
-                        <form action={createStripeAccountLink}>
-                            <SubmitStripeButton />
+                            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white w-full">
+                                Save IBAN
+                            </Button>
                         </form>
                     </div>
                 </div>

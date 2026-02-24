@@ -4,11 +4,11 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
-import Stripe from 'stripe'
+import { createMollieClient } from '@mollie/api-client'
 import { headers } from 'next/headers'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
-    apiVersion: '2023-10-16' as any
+const mollieClient = createMollieClient({
+    apiKey: process.env.MOLLIE_API_KEY || 'test_placeholder_key_for_mollie'
 });
 
 export async function bookEvent(formData: FormData) {
@@ -58,45 +58,47 @@ export async function bookEvent(formData: FormData) {
 
     // Handle Paid Events
     if (eventData.price && eventData.price > 0) {
-        // Fetch host's Stripe ID
-        const { data: hostProfile } = await supabase
-            .from('profiles')
-            .select('stripe_account_id')
-            .eq('user_id', eventData.creator_user_id)
-            .single();
-
-        if (!hostProfile?.stripe_account_id) {
-            // Delete the booking we just made 
-            await supabase.from('bookings').delete().eq('id', bookingId);
-            return { error: "This Host is not set up to receive payments yet." }
-        }
 
         const origin = (await headers()).get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        // Webhook URLs require a public, routable URL. In local dev, Mollie can't reach localhost.
+        // We fallback to a dummy URL locally to prevent crashes, but webhooks won't fire until deployed.
+        const webhookUrl = process.env.NEXT_PUBLIC_APP_URL
+            ? `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mollie`
+            : 'https://example.com/api/webhooks/mollie';
 
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            line_items: [{
-                price_data: {
-                    currency: 'eur',
-                    product_data: { name: eventData.title },
-                    unit_amount: Math.round(eventData.price * 100),
+        let targetHref = '';
+
+        try {
+            const payment = await mollieClient.payments.create({
+                amount: {
+                    currency: 'EUR',
+                    value: eventData.price.toFixed(2) // Mollie requires exact 2 decimal string
                 },
-                quantity: 1,
-            }],
-            mode: 'payment',
-            payment_intent_data: {
-                application_fee_amount: Math.round(eventData.price * 10), // 10% platform fee
-                transfer_data: { destination: hostProfile.stripe_account_id },
-            },
-            success_url: `${origin}/bookings?success=true`,
-            cancel_url: `${origin}/events/${eventId}?cancelled=true`,
-            client_reference_id: bookingId,
-        });
+                description: `Booking: ${eventData.title}`,
+                redirectUrl: `${origin}/bookings?success=true`,
+                webhookUrl: webhookUrl,
+                metadata: {
+                    bookingId: bookingId,
+                    eventId: eventId,
+                    userId: user.id
+                }
+            });
 
-        // Save session ID
-        await supabase.from('bookings').update({ stripe_payment_intent_id: session.id }).eq('id', bookingId);
+            // Save the Mollie Payment ID to the booking
+            // We are reusing the stripe_payment_intent_id column to avoid a database schema migration for now
+            await supabase.from('bookings').update({ stripe_payment_intent_id: payment.id }).eq('id', bookingId);
 
-        redirect(session.url!);
+            if (payment._links.checkout?.href) {
+                targetHref = payment._links.checkout.href;
+            }
+        } catch (err: any) {
+            console.error("Mollie checkout error:", err);
+            return { error: "Payment gateway error: " + err.message };
+        }
+
+        if (targetHref) {
+            redirect(targetHref);
+        }
     }
 
     // --- Email Notification Start (Only for Free Events) ---
