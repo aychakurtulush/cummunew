@@ -26,41 +26,45 @@ export async function createStripeAccountLink(formData: FormData) {
         }
     } catch (e) { /* ignore */ }
 
+    let targetUrl = '';
+
     try {
         const { data: profile } = await supabase.from('profiles').select('stripe_account_id').eq('user_id', user.id).single();
         let accountId = profile?.stripe_account_id;
 
         if (!accountId) {
+            // No account ID found. Let's create one.
             const account = await stripe.accounts.create({
                 type: 'express',
             });
             accountId = account.id;
-            // Update profile
+
+            // Save to database
             const { error: dbError } = await supabase.from('profiles').update({ stripe_account_id: accountId }).eq('user_id', user.id);
             if (dbError) {
                 console.error("Database error saving Stripe ID:", dbError);
-                throw new Error("Could not save your Stripe ID to the database.");
+                targetUrl = `/host/settings?error=${encodeURIComponent("Could not save your Stripe ID to the database.")}`;
             }
         }
 
-        const accountLink = await stripe.accountLinks.create({
-            account: accountId,
-            refresh_url: `${origin}/host/settings`,
-            return_url: `${origin}/host/settings?success=stripe_connected`,
-            type: 'account_onboarding',
-        });
-
-        // Safe redirect
-        redirect(accountLink.url);
+        // Only create the account link if there was no database error above
+        if (!targetUrl && accountId) {
+            const accountLink = await stripe.accountLinks.create({
+                account: accountId,
+                refresh_url: `${origin}/host/settings`,
+                return_url: `${origin}/host/settings?success=stripe_connected`,
+                type: 'account_onboarding',
+            });
+            targetUrl = accountLink.url;
+        }
 
     } catch (err: any) {
         console.error("Stripe onboarding error:", err);
-        // Important: We must not catch 'NEXT_REDIRECT' errors, so we check the message
-        if (err.message && err.message === 'NEXT_REDIRECT') {
-            throw err;
-        }
+        targetUrl = `/host/settings?error=${encodeURIComponent(err.message || 'Payment system error')}`;
+    }
 
-        // If it's a real error, redirect back to settings with the error message
-        redirect(`/host/settings?error=${encodeURIComponent(err.message || 'Payment system error')}`);
+    // Perform the redirect OUTSIDE the try-catch block to prevent Next.js navigation swallowing
+    if (targetUrl) {
+        redirect(targetUrl);
     }
 }
