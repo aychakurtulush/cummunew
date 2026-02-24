@@ -12,8 +12,8 @@ export async function login(formData: FormData) {
     }
 
     const data = {
-        email: formData.get('email') as string,
-        password: formData.get('password') as string,
+        email: (formData.get('email') as string).trim(),
+        password: (formData.get('password') as string).trim(),
     }
 
     const { error } = await supabase.auth.signInWithPassword(data)
@@ -34,8 +34,8 @@ export async function signup(formData: FormData) {
     }
 
     const data = {
-        email: formData.get('email') as string,
-        password: formData.get('password') as string,
+        email: (formData.get('email') as string).trim(),
+        password: (formData.get('password') as string).trim(),
         options: {
             data: {
                 full_name: formData.get('full_name') as string, // Capture name for profile

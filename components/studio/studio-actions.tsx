@@ -126,7 +126,7 @@ export function StudioActions({ studioId, studioName, isOwner, ownerId, hasAuth 
     if (isOwner) {
         return (
             <div className="flex gap-2">
-                <Button variant="outline" className="w-full sm:w-auto">
+                <Button variant="outline" className="w-full sm:w-auto" onClick={() => router.push(`/host/studios/${studioId}/edit`)}>
                     Edit Studio
                 </Button>
                 <Button variant="outline" size="icon" onClick={handleShare}>

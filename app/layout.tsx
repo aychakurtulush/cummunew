@@ -30,6 +30,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${fontSerif.variable} ${fontSans.variable} font-sans antialiased`} // Modified className
+        suppressHydrationWarning
       >
         {children}
         <Toaster />
