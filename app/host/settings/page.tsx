@@ -1,14 +1,29 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { createStripeAccountLink } from "./actions";
+import { SubmitStripeButton } from "./submit-button";
 
-export default function SettingsPage() {
+export default async function SettingsPage(props: { searchParams?: Promise<{ error?: string, success?: string }> }) {
+    const searchParams = props.searchParams ? await props.searchParams : {};
+
     return (
         <div className="max-w-2xl mx-auto space-y-8">
             <div>
                 <h1 className="text-2xl font-serif font-bold text-stone-900">Settings</h1>
                 <p className="text-stone-500">Manage your account preferences.</p>
             </div>
+
+            {searchParams?.error && (
+                <div className="p-4 bg-red-50 text-red-700 border border-red-200 rounded-lg">
+                    <strong>Error connecting to Stripe:</strong> {searchParams.error}
+                </div>
+            )}
+
+            {searchParams?.success === 'stripe_connected' && (
+                <div className="p-4 bg-green-50 text-green-700 border border-green-200 rounded-lg">
+                    <strong>Success!</strong> Your Stripe account has been successfully connected.
+                </div>
+            )}
 
             <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm space-y-6">
 
@@ -38,9 +53,7 @@ export default function SettingsPage() {
                             </div>
                         </div>
                         <form action={createStripeAccountLink}>
-                            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white">
-                                Connect with Stripe
-                            </Button>
+                            <SubmitStripeButton />
                         </form>
                     </div>
                 </div>
