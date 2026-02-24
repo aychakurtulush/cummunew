@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createMollieClient } from '@mollie/api-client';
+import { createMollieClient, PaymentStatus } from '@mollie/api-client';
+import { createServiceRoleClient } from '@/lib/supabase/service';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 
 const mollieClient = createMollieClient({
@@ -70,7 +71,7 @@ export async function POST(req: Request) {
                 }
             }
 
-        } else if (payment.isFailed() || payment.isCanceled() || payment.isExpired()) {
+        } else if ([PaymentStatus.failed, PaymentStatus.canceled, PaymentStatus.expired].includes(payment.status as PaymentStatus)) {
             await supabaseAdmin.from('bookings').update({ status: 'declined' }).eq('id', bookingId);
         }
 
