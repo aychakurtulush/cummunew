@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from 'react';
-import Map, { Marker, Popup, NavigationControl } from 'react-map-gl';
+import Map, { Marker, Popup, NavigationControl } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Link from 'next/link';
 import { MapPin, Calendar, ExternalLink } from 'lucide-react';

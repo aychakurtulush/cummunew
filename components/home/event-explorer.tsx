@@ -27,8 +27,13 @@ const formatDate = (dateString?: string) => {
 const FILTER_CATEGORIES = ["All", "Arts & Crafts", "Food & Drink", "Sports & Wellness", "Social & Games", "Language Exchange"];
 
 import { WishlistButton } from "@/components/event/wishlist-button";
-import { EventsMap } from "@/components/event/events-map";
 import { Map as MapIcon, Grid as GridIcon } from "lucide-react";
+import dynamic from 'next/dynamic';
+
+const EventsMap = dynamic(() => import('@/components/event/events-map').then(mod => mod.EventsMap), {
+    ssr: false,
+    loading: () => <div className="w-full h-[600px] rounded-2xl bg-stone-100 flex items-center justify-center animate-pulse"><p className="text-stone-400">Loading Map...</p></div>
+});
 
 export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], mapboxToken }: { initialEvents: any[], isDemo: boolean, wishlistEventIds?: string[], mapboxToken?: string }) {
     const [selectedCategory, setSelectedCategory] = useState("All");
