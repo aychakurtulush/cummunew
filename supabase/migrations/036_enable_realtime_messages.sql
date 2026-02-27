@@ -1,0 +1,13 @@
+-- 036_enable_realtime_messages.sql
+
+-- Enable Realtime for the messages table
+begin;
+  -- remove the supabase_realtime publication
+  drop publication if exists supabase_realtime;
+
+  -- re-create the supabase_realtime publication with no tables
+  create publication supabase_realtime;
+commit;
+
+-- add tables to the publication
+alter publication supabase_realtime add table messages;

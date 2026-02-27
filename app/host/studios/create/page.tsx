@@ -14,6 +14,7 @@ export default function CreateStudioPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [imageSelected, setImageSelected] = useState(false);
     const router = useRouter();
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,6 +31,7 @@ export default function CreateStudioPage() {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImagePreview(reader.result as string);
+                setImageSelected(true);
             };
             reader.readAsDataURL(file);
         }
@@ -37,6 +39,14 @@ export default function CreateStudioPage() {
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
+
+        if (!imageSelected) {
+            setError("An image is required. Please upload a cover photo to publish your studio.");
+            toast.error("Image is required.");
+            scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
         setIsLoading(true);
         setError('');
 

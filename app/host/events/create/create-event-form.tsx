@@ -43,6 +43,18 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
         initialEndTime ? toBerlinInput(initialEndTime) : ""
     );
     const [price, setPrice] = useState<string>("");
+    const [imageSelected, setImageSelected] = useState(false);
+    const [clientError, setClientError] = useState('');
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        if (!imageSelected) {
+            e.preventDefault();
+            setClientError("An image is required. Please upload a cover photo for your event.");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            setClientError('');
+        }
+    };
 
     return (
         <div className="max-w-2xl mx-auto space-y-8">
@@ -56,6 +68,13 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
 
             <Separator />
 
+            {clientError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong className="font-bold">Error: </strong>
+                    <span className="block sm:inline">{clientError}</span>
+                </div>
+            )}
+
             {state?.message && state.message !== 'Success' && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
                     <strong className="font-bold">Error: </strong>
@@ -63,7 +82,7 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
                 </div>
             )}
 
-            <form action={formAction} className="space-y-8">
+            <form action={formAction} onSubmit={handleSubmit} className="space-y-8">
                 {/* Basic Info */}
                 <div className="space-y-4">
                     <h3 className="text-lg font-medium text-stone-900">Basic Information</h3>
@@ -117,8 +136,11 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
                                             const preview = document.getElementById('image-preview') as HTMLImageElement;
                                             if (preview) preview.src = reader.result as string;
                                             document.getElementById('preview-container')?.classList.remove('hidden');
+                                            setImageSelected(true);
                                         };
                                         reader.readAsDataURL(file);
+                                    } else {
+                                        setImageSelected(false);
                                     }
                                 }}
                             />
