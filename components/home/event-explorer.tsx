@@ -27,11 +27,14 @@ const formatDate = (dateString?: string) => {
 const FILTER_CATEGORIES = ["All", "Arts & Crafts", "Food & Drink", "Sports & Wellness", "Social & Games", "Language Exchange"];
 
 import { WishlistButton } from "@/components/event/wishlist-button";
+import { EventsMap } from "@/components/event/events-map";
+import { Map as MapIcon, Grid as GridIcon } from "lucide-react";
 
-export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [] }: { initialEvents: any[], isDemo: boolean, wishlistEventIds?: string[] }) {
+export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], mapboxToken }: { initialEvents: any[], isDemo: boolean, wishlistEventIds?: string[], mapboxToken?: string }) {
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [priceFilter, setPriceFilter] = useState<"any" | "free" | "under-20">("any");
     const [dateFilter, setDateFilter] = useState<"any" | "today" | "this-weekend">("any");
+    const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
 
     const filteredEvents = initialEvents.filter(event => {
         // 1. Category Filter
@@ -173,95 +176,117 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [] }: 
                             {selectedCategory !== "All" && ` in ${selectedCategory}`}
                         </p>
                     </div>
-                    <Link href="/host/events/create">
-                        <Button variant="ghost" className="text-moss-700 hover:text-moss-800 hover:bg-moss-50 hidden sm:flex">
-                            <Plus className="h-4 w-4 mr-2" /> Host an Event
-                        </Button>
-                    </Link>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
-                    {filteredEvents.map((event: any) => (
-                        <Link href={`/events/${event.id}`} key={event.id} className="group block focus:outline-none">
-                            <article className="flex flex-col h-full">
-                                <div className="aspect-[4/3] w-full bg-stone-200 rounded-xl overflow-hidden relative mb-4 shadow-sm border border-stone-100 group-hover:shadow-md transition-all duration-300">
-                                    {event.image_url ? (
-                                        <img
-                                            src={event.image_url}
-                                            alt={event.title}
-                                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                        />
-                                    ) : (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-stone-100 text-stone-400 text-sm font-medium group-hover:scale-105 transition-transform duration-500">
-                                            [{event.imagePart || event.category || "Event"}]
-                                        </div>
-                                    )}
-
-                                    <div className="absolute top-3 left-3 flex gap-2">
-                                        <span className="px-2 py-1 rounded-md text-xs font-semibold backdrop-blur-md shadow-sm bg-white/90 text-stone-700 border border-stone-200">
-                                            {event.category || "General"}
-                                        </span>
-                                    </div>
-
-                                    <div className="absolute top-3 right-3 z-20">
-                                        <WishlistButton
-                                            eventId={event.id}
-                                            initialIsLiked={wishlistEventIds.includes(event.id)}
-                                        />
-                                    </div>
-
-                                    <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <span className="bg-white/90 backdrop-blur text-stone-900 px-4 py-2 rounded-full text-sm font-medium shadow-lg transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                            View Details
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="flex-1 flex flex-col space-y-2">
-                                    <div className="flex justify-between items-start">
-                                        <span className="text-xs font-bold uppercase tracking-wider text-moss-700 flex items-center gap-1.5">
-                                            <Calendar className="h-3 w-3" />
-                                            {formatDate(event.start_time)}
-                                        </span>
-                                    </div>
-
-                                    <h3 className="text-lg font-bold text-stone-900 leading-tight group-hover:text-moss-700 transition-colors line-clamp-2">
-                                        {event.title}
-                                    </h3>
-
-                                    <div className="flex items-center gap-2 text-sm text-stone-500">
-                                        <MapPin className="h-3.5 w-3.5" />
-                                        <span className="truncate">{event.city}</span>
-                                    </div>
-                                </div>
-
-                                <div className="mt-4 flex items-center justify-between border-t border-stone-100 pt-3">
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-lg font-bold text-stone-900">€{event.price}</span>
-                                    </div>
-                                    <span className="text-sm font-medium text-moss-600 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 flex items-center gap-1">
-                                        Details <ArrowRight className="h-3 w-3" />
-                                    </span>
-                                </div>
-                            </article>
+                    <div className="flex items-center gap-4">
+                        <Link href="/host/events/create">
+                            <Button variant="ghost" className="text-moss-700 hover:text-moss-800 hover:bg-moss-50 hidden sm:flex">
+                                <Plus className="h-4 w-4 mr-2" /> Host an Event
+                            </Button>
                         </Link>
-                    ))}
-
-                    {filteredEvents.length === 0 && (
-                        <div className="col-span-full py-12 text-center text-stone-500">
-                            No events found matching your filters.
-                            <div className="mt-4">
-                                <Button variant="link" onClick={() => {
-                                    setSelectedCategory("All");
-                                    setPriceFilter("any");
-                                    setDateFilter("any");
-                                }}>
-                                    Clear all filters
-                                </Button>
+                        {mapboxToken && (
+                            <div className="bg-stone-100 p-1 rounded-lg flex items-center border border-stone-200">
+                                <button
+                                    onClick={() => setViewMode("grid")}
+                                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${viewMode === 'grid' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+                                >
+                                    <GridIcon className="h-4 w-4" /> Grid
+                                </button>
+                                <button
+                                    onClick={() => setViewMode("map")}
+                                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${viewMode === 'map' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+                                >
+                                    <MapIcon className="h-4 w-4" /> Map
+                                </button>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
+
+                {viewMode === "map" && mapboxToken ? (
+                    <EventsMap events={filteredEvents} mapboxToken={mapboxToken} />
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
+                        {filteredEvents.map((event: any) => (
+                            <Link href={`/events/${event.id}`} key={event.id} className="group block focus:outline-none">
+                                <article className="flex flex-col h-full">
+                                    <div className="aspect-[4/3] w-full bg-stone-200 rounded-xl overflow-hidden relative mb-4 shadow-sm border border-stone-100 group-hover:shadow-md transition-all duration-300">
+                                        {event.image_url ? (
+                                            <img
+                                                src={event.image_url}
+                                                alt={event.title}
+                                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            />
+                                        ) : (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-stone-100 text-stone-400 text-sm font-medium group-hover:scale-105 transition-transform duration-500">
+                                                [{event.imagePart || event.category || "Event"}]
+                                            </div>
+                                        )}
+
+                                        <div className="absolute top-3 left-3 flex gap-2">
+                                            <span className="px-2 py-1 rounded-md text-xs font-semibold backdrop-blur-md shadow-sm bg-white/90 text-stone-700 border border-stone-200">
+                                                {event.category || "General"}
+                                            </span>
+                                        </div>
+
+                                        <div className="absolute top-3 right-3 z-20">
+                                            <WishlistButton
+                                                eventId={event.id}
+                                                initialIsLiked={wishlistEventIds.includes(event.id)}
+                                            />
+                                        </div>
+
+                                        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <span className="bg-white/90 backdrop-blur text-stone-900 px-4 py-2 rounded-full text-sm font-medium shadow-lg transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                                View Details
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex-1 flex flex-col space-y-2">
+                                        <div className="flex justify-between items-start">
+                                            <span className="text-xs font-bold uppercase tracking-wider text-moss-700 flex items-center gap-1.5">
+                                                <Calendar className="h-3 w-3" />
+                                                {formatDate(event.start_time)}
+                                            </span>
+                                        </div>
+
+                                        <h3 className="text-lg font-bold text-stone-900 leading-tight group-hover:text-moss-700 transition-colors line-clamp-2">
+                                            {event.title}
+                                        </h3>
+
+                                        <div className="flex items-center gap-2 text-sm text-stone-500">
+                                            <MapPin className="h-3.5 w-3.5" />
+                                            <span className="truncate">{event.city}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4 flex items-center justify-between border-t border-stone-100 pt-3">
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-lg font-bold text-stone-900">€{event.price}</span>
+                                        </div>
+                                        <span className="text-sm font-medium text-moss-600 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 flex items-center gap-1">
+                                            Details <ArrowRight className="h-3 w-3" />
+                                        </span>
+                                    </div>
+                                </article>
+                            </Link>
+                        ))}
+
+                        {filteredEvents.length === 0 && (
+                            <div className="col-span-full py-12 text-center text-stone-500">
+                                No events found matching your filters.
+                                <div className="mt-4">
+                                    <Button variant="link" onClick={() => {
+                                        setSelectedCategory("All");
+                                        setPriceFilter("any");
+                                        setDateFilter("any");
+                                    }}>
+                                        Clear all filters
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
             </section>
         </div>
     );

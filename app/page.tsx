@@ -77,6 +77,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
           initialEvents={displayEvents}
           isDemo={isDemo}
           wishlistEventIds={wishlistEventIds}
+          mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
         />
       </main>
       <Footer />
