@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "node -e \"const fs = require('fs'); const p = 'node_modules/@types/mapbox__point-geometry'; if (fs.existsSync(p)) fs.rmSync(p, {recursive: true, force: true});\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -23,8 +24,6 @@
     "@stripe/stripe-js": "^8.8.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.95.3",
-    "@types/mapbox-gl": "^3.4.1",
-    "@types/react-map-gl": "^6.1.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
