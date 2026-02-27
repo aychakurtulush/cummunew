@@ -12,7 +12,11 @@ const initialState = {
 }
 
 import { toBerlinInput } from "@/lib/date-utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import dynamic from 'next/dynamic';
+
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+import 'react-quill/dist/quill.snow.css';
 
 interface Studio {
     id: string;
@@ -45,8 +49,16 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
     const [price, setPrice] = useState<string>("");
     const [imageSelected, setImageSelected] = useState(false);
     const [clientError, setClientError] = useState('');
+    const [description, setDescription] = useState('');
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        if (!description.trim() || description === '<p><br></p>') {
+            e.preventDefault();
+            setClientError("An event description is required.");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
         if (!imageSelected) {
             e.preventDefault();
             setClientError("An image is required. Please upload a cover photo for your event.");
@@ -109,14 +121,25 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
                     </div>
 
                     <div className="space-y-2">
-                        <label htmlFor="description" className="text-sm font-semibold text-stone-700">Description</label>
-                        <textarea
-                            id="description"
-                            name="description"
-                            className="flex min-h-[120px] w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss-600/20 focus-visible:border-moss-600 disabled:cursor-not-allowed disabled:opacity-50"
-                            placeholder="Describe what people will do..."
-                            required
-                        />
+                        <label className="text-sm font-semibold text-stone-700">Description</label>
+                        <input type="hidden" name="description" value={description} />
+                        <div className="bg-white rounded-lg border border-stone-200 overflow-hidden [&_.ql-container]:min-h-[150px] [&_.ql-container]:text-sm [&_.ql-editor]:min-h-[150px]">
+                            <ReactQuill
+                                theme="snow"
+                                value={description}
+                                onChange={setDescription}
+                                placeholder="Describe the vibe, what people will do, and any requirements..."
+                                modules={{
+                                    toolbar: [
+                                        [{ 'header': [1, 2, false] }],
+                                        ['bold', 'italic', 'underline'],
+                                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                        ['link'],
+                                        ['clean']
+                                    ],
+                                }}
+                            />
+                        </div>
                     </div>
 
                     <div className="space-y-4">

@@ -187,9 +187,10 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                         {/* Description */}
                         <div className="prose prose-stone max-w-none">
                             <h3 className="text-xl font-serif font-semibold text-stone-900 mb-4">About this event</h3>
-                            <div className="whitespace-pre-line text-stone-600 leading-relaxed text-lg">
-                                {event.description}
-                            </div>
+                            <div
+                                className="text-stone-600 leading-relaxed text-lg [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-5 [&>ol]:list-decimal [&>ol]:pl-5 [&_a]:text-moss-600 [&_a]:underline"
+                                dangerouslySetInnerHTML={{ __html: event.description || '' }}
+                            />
                         </div>
 
                         <div>
