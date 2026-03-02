@@ -31,16 +31,6 @@ export function HeroSection() {
                         >
                             Explore Events
                         </Button>
-                        <Link href="/host/events/create" className="w-full sm:w-auto">
-                            <Button
-                                variant="outline"
-                                size="lg"
-                                className="rounded-full px-8 h-14 text-lg border-stone-300 hover:bg-white hover:text-moss-700 w-full sm:w-auto"
-                            >
-                                <Sparkles className="mr-2 h-4 w-4" />
-                                Host an Experience
-                            </Button>
-                        </Link>
                     </div>
                 </div>
             </div>
