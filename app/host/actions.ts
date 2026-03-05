@@ -211,29 +211,42 @@ export async function createStudio(prevState: any, formData: FormData) {
     try {
         // Handle Image Upload
         let imageUrls: string[] = [];
-        const imageFile = formData.get('image') as File;
+        const imageFiles = formData.getAll('images') as File[];
 
-        if (imageFile && imageFile.size > 0) {
+        if (imageFiles && imageFiles.length > 0) {
 
-            const fileExt = imageFile.name.split('.').pop();
-            const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-            const filePath = `${fileName}`;
+            // Limit to 5 max directly on the backend as secondary validation
+            const filesToProcess = imageFiles.slice(0, 5);
 
-            const { error: uploadError } = await supabase.storage
-                .from('studio-images')
-                .upload(filePath, imageFile);
+            const uploadPromises = filesToProcess.map(async (imageFile, index) => {
+                if (imageFile.size === 0) return null;
 
-            if (uploadError) {
-                console.error('[createStudio] STORAGE ERROR:', uploadError);
-                return { message: `Failed to upload image: ${uploadError.message}`, success: false };
+                const fileExt = imageFile.name.split('.').pop();
+                const fileName = `${user.id}/${Date.now()}-${index}.${fileExt}`;
+                const filePath = `${fileName}`;
+
+                const { error: uploadError } = await supabase.storage
+                    .from('studio-images')
+                    .upload(filePath, imageFile);
+
+                if (uploadError) {
+                    console.error('[createStudio] STORAGE ERROR:', uploadError);
+                    throw new Error(`Failed to upload ${imageFile.name}: ${uploadError.message}`);
+                }
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('studio-images')
+                    .getPublicUrl(filePath);
+
+                return publicUrl;
+            });
+
+            try {
+                const results = await Promise.all(uploadPromises);
+                imageUrls = results.filter((url): url is string => url !== null);
+            } catch (uploadError: any) {
+                return { message: uploadError.message, success: false };
             }
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('studio-images')
-                .getPublicUrl(filePath);
-
-            imageUrls.push(publicUrl);
-
         }
 
         // Parse Amenities
@@ -323,27 +336,42 @@ export async function updateStudio(prevState: any, formData: FormData) {
     try {
         // Handle Image Upload if provided (Optional update)
         let imageUrls: string[] | undefined = undefined;
-        const imageFile = formData.get('image') as File;
+        const imageFiles = formData.getAll('images') as File[];
 
-        if (imageFile && imageFile.size > 0) {
-            const fileExt = imageFile.name.split('.').pop();
-            const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-            const filePath = `${fileName}`;
+        if (imageFiles && imageFiles.length > 0) {
 
-            const { error: uploadError } = await supabase.storage
-                .from('studio-images')
-                .upload(filePath, imageFile);
+            const validFiles = imageFiles.filter(f => f.size > 0);
 
-            if (uploadError) {
-                console.error('[updateStudio] STORAGE ERROR:', uploadError);
-                return { message: `Failed to upload image: ${uploadError.message}`, success: false };
+            if (validFiles.length > 0) {
+                const filesToProcess = validFiles.slice(0, 5);
+                const uploadPromises = filesToProcess.map(async (imageFile, index) => {
+                    const fileExt = imageFile.name.split('.').pop();
+                    const fileName = `${user.id}/${Date.now()}-${index}.${fileExt}`;
+                    const filePath = `${fileName}`;
+
+                    const { error: uploadError } = await supabase.storage
+                        .from('studio-images')
+                        .upload(filePath, imageFile);
+
+                    if (uploadError) {
+                        console.error('[updateStudio] STORAGE ERROR:', uploadError);
+                        throw new Error(`Failed to upload ${imageFile.name}: ${uploadError.message}`);
+                    }
+
+                    const { data: { publicUrl } } = supabase.storage
+                        .from('studio-images')
+                        .getPublicUrl(filePath);
+
+                    return publicUrl;
+                });
+
+                try {
+                    const results = await Promise.all(uploadPromises);
+                    imageUrls = results.filter((url): url is string => url !== null);
+                } catch (uploadError: any) {
+                    return { message: uploadError.message, success: false };
+                }
             }
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('studio-images')
-                .getPublicUrl(filePath);
-
-            imageUrls = [publicUrl]; // Replacing existing for simplicity in this MVP, or could append
         }
 
         // Parse Amenities

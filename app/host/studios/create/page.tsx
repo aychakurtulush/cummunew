@@ -13,35 +13,55 @@ import { toast } from "sonner"
 export default function CreateStudioPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [imageSelected, setImageSelected] = useState(false);
+    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const router = useRouter();
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            // Check file size (max 4.5MB client side check to match Vercel/Next limit of 5MB safely)
-            if (file.size > 4.5 * 1024 * 1024) {
-                toast.error("Image too large. Please select an image under 4.5MB.");
-                e.target.value = ""; // Reset input
-                setImagePreview(null);
-                return;
-            }
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
 
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-                setImageSelected(true);
-            };
-            reader.readAsDataURL(file);
+        // Check if total exceeds 5
+        if (selectedFiles.length + files.length > 5) {
+            toast.error("You can only upload a maximum of 5 images.");
+            return;
         }
+
+        const validFiles: File[] = [];
+        const newPreviews: string[] = [];
+
+        files.forEach((file) => {
+            // Check file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                toast.error(`Image ${file.name} is too large. Please select images under 10MB.`);
+            } else {
+                validFiles.push(file);
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    newPreviews.push(reader.result as string);
+                    if (newPreviews.length === validFiles.length) {
+                        setImagePreviews(prev => [...prev, ...newPreviews]);
+                        setSelectedFiles(prev => [...prev, ...validFiles]);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Reset input so the same files can be selected again if removed
+        e.target.value = "";
+    };
+
+    const removeImage = (index: number) => {
+        setImagePreviews(prev => prev.filter((_, i) => i !== index));
+        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
     };
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        if (!imageSelected) {
-            setError("An image is required. Please upload a cover photo to publish your studio.");
+        if (selectedFiles.length === 0) {
+            setError("At least one image is required to publish your studio.");
             toast.error("Image is required.");
             scrollTo({ top: 0, behavior: 'smooth' });
             return;
@@ -51,6 +71,12 @@ export default function CreateStudioPage() {
         setError('');
 
         const formData = new FormData(event.currentTarget);
+        // Remove the default empty 'images' input from native form
+        formData.delete('images');
+        // Append all selected files
+        selectedFiles.forEach((file) => {
+            formData.append('images', file);
+        });
 
         try {
             console.log("Submitting form data...");
@@ -122,31 +148,46 @@ export default function CreateStudioPage() {
                     </div>
 
                     <div className="space-y-3">
-                        <label htmlFor="image" className="text-sm font-semibold text-stone-700">Cover Photo</label>
+                        <label htmlFor="images" className="text-sm font-semibold text-stone-700">Studio Photos (Max 5)</label>
                         <div className="flex flex-col gap-4">
                             <div className="flex items-center gap-4">
                                 <label
-                                    htmlFor="image"
-                                    className="cursor-pointer flex items-center justify-center gap-2 px-4 py-2 border border-stone-300 rounded-lg text-sm font-medium text-stone-700 hover:bg-stone-50 hover:text-stone-900 transition-colors bg-white shadow-sm"
+                                    htmlFor="images"
+                                    className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 border rounded-lg text-sm font-medium transition-colors shadow-sm ${selectedFiles.length >= 5 ? 'border-stone-200 bg-stone-100 text-stone-400 cursor-not-allowed' : 'border-stone-300 bg-white text-stone-700 hover:bg-stone-50 hover:text-stone-900'}`}
                                 >
                                     <Upload className="h-4 w-4" />
-                                    Choose Image
+                                    Choose Images
                                 </label>
                                 <Input
-                                    id="image"
-                                    name="image"
+                                    id="images"
+                                    name="images"
                                     type="file"
                                     accept="image/*"
+                                    multiple
                                     className="hidden"
-                                    required
                                     onChange={handleImageChange}
+                                    disabled={selectedFiles.length >= 5}
                                 />
-                                <span className="text-xs text-stone-500 italic">Required. Max 4.5MB.</span>
+                                <span className="text-xs text-stone-500 italic">Up to 5 images. Max 10MB each.</span>
                             </div>
 
-                            {imagePreview && (
-                                <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-stone-200 bg-stone-100 shadow-sm">
-                                    <img src={imagePreview} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
+                            {imagePreviews.length > 0 && (
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    {imagePreviews.map((preview, idx) => (
+                                        <div key={idx} className="relative aspect-video w-full rounded-lg overflow-hidden border border-stone-200 bg-stone-100 shadow-sm group">
+                                            <img src={preview} alt={`Preview ${idx + 1}`} className="absolute inset-0 w-full h-full object-cover" />
+                                            {idx === 0 && (
+                                                <Badge className="absolute top-2 left-2 bg-moss-600/90 hover:bg-moss-700 text-white border-0 shadow-sm">Cover</Badge>
+                                            )}
+                                            <button
+                                                type="button"
+                                                onClick={() => removeImage(idx)}
+                                                className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/80"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ))}
                                 </div>
                             )}
                         </div>
