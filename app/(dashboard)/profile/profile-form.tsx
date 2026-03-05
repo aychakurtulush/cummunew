@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Instagram, Globe } from "lucide-react";
 import { updateProfile } from "./actions"; // Import the server action
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -95,6 +96,36 @@ export function ProfileForm({ user, initialProfile }: { user: any, initialProfil
                             placeholder="Tell us a bit about yourself..."
                         />
                         <p className="text-xs text-stone-400">Brief description for your profile.</p>
+                    </div>
+
+                    <div className="space-y-4 pt-2">
+                        <h4 className="text-sm font-semibold text-stone-900 border-b border-stone-100 pb-2">Social Links</h4>
+
+                        <div className="space-y-1.5">
+                            <label htmlFor="instagram_url" className="text-sm font-medium text-stone-700 flex items-center gap-2">
+                                <Instagram className="h-4 w-4 text-stone-500" />
+                                Instagram
+                            </label>
+                            <Input
+                                id="instagram_url"
+                                name="instagram_url"
+                                defaultValue={initialProfile.social_links?.instagram || ''}
+                                placeholder="https://instagram.com/username"
+                            />
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label htmlFor="website_url" className="text-sm font-medium text-stone-700 flex items-center gap-2">
+                                <Globe className="h-4 w-4 text-stone-500" />
+                                Website
+                            </label>
+                            <Input
+                                id="website_url"
+                                name="website_url"
+                                defaultValue={initialProfile.social_links?.website || ''}
+                                placeholder="https://yourwebsite.com"
+                            />
+                        </div>
                     </div>
 
                     <div className="space-y-1.5">

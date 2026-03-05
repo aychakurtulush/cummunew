@@ -18,6 +18,14 @@ export async function updateProfile(prevState: any, formData: FormData) {
 
     const fullName = formData.get('full_name') as string;
     const bio = formData.get('bio') as string;
+    const instagramUrl = formData.get('instagram_url') as string;
+    const websiteUrl = formData.get('website_url') as string;
+
+    const socialLinks = {
+        instagram: instagramUrl || null,
+        website: websiteUrl || null
+    };
+
     const imageFile = formData.get('avatar') as File;
     let avatarUrl = null;
 
@@ -46,6 +54,7 @@ export async function updateProfile(prevState: any, formData: FormData) {
         user_id: user.id,
         full_name: fullName,
         bio: bio,
+        social_links: socialLinks,
         updated_at: new Date().toISOString(),
     };
 

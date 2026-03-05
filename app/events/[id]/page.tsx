@@ -213,7 +213,10 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                             </Avatar>
                             <div>
                                 <h3 className="text-lg font-serif font-semibold text-stone-900">
-                                    Hosted by {hostProfile?.full_name || "Community Member"}
+                                    Hosted by{" "}
+                                    <Link href={`/host/${event.creator_user_id}`} className="hover:text-moss-700 hover:underline transition-colors">
+                                        {hostProfile?.full_name || "Community Member"}
+                                    </Link>
                                     {event.studios && (
                                         <span className="font-normal text-stone-600">
                                             {' '}at <Link href={`/studios/${event.studio_id}`} className="hover:underline text-moss-700">{event.studios.name}</Link>
