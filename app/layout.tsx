@@ -19,6 +19,18 @@ import { RealtimeListener } from "@/components/notifications/realtime-listener";
 export const metadata: Metadata = {
   title: "Communew. | Local Hobby Events in Berlin",
   description: "Discover and book local hobby events, workshops, and meetups in Berlin.",
+  openGraph: {
+    title: "Communew. | Local Hobby Events in Berlin",
+    description: "Discover and book local hobby events, workshops, and meetups in Berlin.",
+    url: "https://communew.vercel.app", // Adjust if domain changes
+    siteName: "Communew.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Communew.",
+    description: "Discover and book local hobby events, workshops, and meetups in Berlin.",
+  },
 };
 
 export default function RootLayout({

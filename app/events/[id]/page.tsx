@@ -11,12 +11,58 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 import { ShareButton } from "@/components/event/share-button";
+import type { Metadata, ResolvingMetadata } from "next";
 
 
 
 import { WishlistButton } from "@/components/event/wishlist-button";
 import { BookingButton } from "@/components/event/booking-button";
 import { ReportButton } from "@/components/shared/report-button";
+
+export async function generateMetadata(
+    { params }: { params: Promise<{ id: string }> },
+    parent: ResolvingMetadata
+): Promise<Metadata> {
+    const { id } = await params;
+    const supabase = await createClient();
+
+    if (!supabase) return {};
+
+    const { data: event } = await supabase
+        .from('events')
+        .select('title, description, image_url, city')
+        .eq('id', id)
+        .single();
+
+    if (!event) return {};
+
+    // Remove HTML tags for clean description
+    const plainTextDescription = event.description ? event.description.replace(/<[^>]+>/g, '').substring(0, 160) + '...' : `Join this event in ${event.city} on Communew.`;
+
+    // Fetch parent OG images to fall back on if event has no image
+    const previousImages = (await parent).openGraph?.images || [];
+
+    const ogImages = event.image_url
+        ? [{ url: event.image_url, width: 1200, height: 630, alt: event.title }]
+        : previousImages;
+
+    return {
+        title: `${event.title} | Communew`,
+        description: plainTextDescription,
+        openGraph: {
+            title: event.title,
+            description: plainTextDescription,
+            images: ogImages,
+            type: "article",
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: event.title,
+            description: plainTextDescription,
+            images: event.image_url ? [event.image_url] : [],
+        },
+    };
+}
 
 export default async function EventPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
