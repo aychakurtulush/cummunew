@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 import { CancelBookingButton } from "@/components/event/cancel-booking-button";
 import { CancelInquiryButton } from "./components/cancel-inquiry-button";
+import { TicketModal } from "@/components/event/ticket-modal";
 
 export default async function BookingsPage() {
     const supabase = await createClient();
@@ -161,6 +162,10 @@ export default async function BookingsPage() {
                                     <Link href={linkHref}>
                                         <Button variant="ghost" size="sm">View {isEvent ? 'Event' : 'Studio'}</Button>
                                     </Link>
+
+                                    {isEvent && booking.status === 'confirmed' && (
+                                        <TicketModal booking={booking} />
+                                    )}
 
                                     {isEvent && booking.status === 'pending' && (
                                         <CancelBookingButton bookingId={booking.id} />

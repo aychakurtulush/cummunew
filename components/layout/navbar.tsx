@@ -1,6 +1,5 @@
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
-import { SearchInput } from "./search-input"
 import { Suspense } from "react"
 import { NavLinks } from "./nav-links"
 import { NavbarActions } from "./navbar-actions"
@@ -22,12 +21,7 @@ export async function Navbar() {
                     <MobileNav />
                 </div>
 
-                {/* Center: Search - Enforce min-width */}
-                <div className="hidden md:flex items-center justify-center flex-1 max-w-md mx-2 md:mx-4 min-w-[280px]">
-                    <Suspense fallback={<div className="w-full h-9 bg-stone-100 rounded-full animate-pulse" />}>
-                        <SearchInput />
-                    </Suspense>
-                </div>
+                <div className="flex-1" />
 
                 {/* Right: Actions */}
                 <NavbarActions user={user} />

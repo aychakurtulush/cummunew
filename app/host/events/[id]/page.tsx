@@ -7,6 +7,10 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { AttendanceToggle } from "@/components/host/attendance-toggle";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BroadcastForm } from "@/components/host/broadcast-form";
+import { QRScanner } from "@/components/host/qr-scanner";
+import { Mail, ClipboardList, LayoutDashboard, Scan } from "lucide-react";
 
 export default async function ManageEventPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -83,88 +87,165 @@ export default async function ManageEventPage({ params }: { params: Promise<{ id
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Main Content */}
-                <div className="md:col-span-2 space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg">Stats</CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid grid-cols-2 gap-4">
-                            <div className="bg-stone-50 p-4 rounded-lg">
-                                <div className="text-sm text-stone-500 mb-1">Total Bookings</div>
-                                <div className="text-2xl font-bold text-stone-900">{bookings?.length || 0}</div>
-                            </div>
-                            <div className="bg-stone-50 p-4 rounded-lg">
-                                <div className="text-sm text-stone-500 mb-1">Revenue</div>
-                                <div className="text-2xl font-bold text-stone-900">€0</div>
-                            </div>
-                        </CardContent>
-                    </Card>
+            <Tabs defaultValue="overview" className="w-full">
+                <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
+                    <TabsList className="bg-stone-100 p-1 mb-6 flex w-fit sm:w-full min-w-full">
+                        <TabsTrigger value="overview" className="gap-2">
+                            <LayoutDashboard className="h-4 w-4" /> Overview
+                        </TabsTrigger>
+                        <TabsTrigger value="attendees" className="gap-2">
+                            <ClipboardList className="h-4 w-4" /> Attendees
+                        </TabsTrigger>
+                        <TabsTrigger value="messaging" className="gap-2">
+                            <Mail className="h-4 w-4" /> Messaging
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
 
+                <TabsContent value="overview">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="md:col-span-2 space-y-6">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-lg">Event Performance</CardTitle>
+                                </CardHeader>
+                                <CardContent className="grid grid-cols-2 gap-4">
+                                    <div className="bg-stone-50 p-6 rounded-xl border border-stone-100">
+                                        <div className="text-sm text-stone-500 mb-1">Total Bookings</div>
+                                        <div className="text-3xl font-bold text-stone-900">{bookings?.length || 0}</div>
+                                    </div>
+                                    <div className="bg-stone-50 p-6 rounded-xl border border-stone-100">
+                                        <div className="text-sm text-stone-500 mb-1">Estimated Revenue</div>
+                                        <div className="text-3xl font-bold text-stone-900">€{(bookings?.filter(b => b.status === 'confirmed').length || 0) * event.price}</div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-lg">Quick Details</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-moss-50 rounded-lg">
+                                            <Calendar className="h-5 w-5 text-moss-600" />
+                                        </div>
+                                        <div>
+                                            <div className="text-xs text-stone-500 uppercase tracking-wider font-semibold">Date & Time</div>
+                                            <div className="text-stone-900">{new Date(event.start_time).toLocaleString()}</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-moss-50 rounded-lg">
+                                            <MapPin className="h-5 w-5 text-moss-600" />
+                                        </div>
+                                        <div>
+                                            <div className="text-xs text-stone-500 uppercase tracking-wider font-semibold">Location</div>
+                                            <div className="text-stone-900">{event.city}</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-moss-50 rounded-lg">
+                                            <Users className="h-5 w-5 text-moss-600" />
+                                        </div>
+                                        <div>
+                                            <div className="text-xs text-stone-500 uppercase tracking-wider font-semibold">Capacity</div>
+                                            <div className="text-stone-900">{bookings?.filter(b => b.status === 'confirmed').length || 0} / {event.capacity} confirmed</div>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        <div className="md:col-span-1">
+                            <Card className="h-full bg-stone-900 text-white overflow-hidden relative">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-moss-500/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                                <CardHeader>
+                                    <CardTitle className="text-lg text-stone-100 font-serif font-bold">Host Helper</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <p className="text-stone-400 text-sm leading-relaxed">
+                                        Need to update your guests? Head over to the <span className="text-moss-400 font-semibold italic">Messaging</span> tab to send a broadcast.
+                                    </p>
+                                    <div className="pt-2">
+                                        <Link href={`/host/events/${id}/edit`}>
+                                            <Button className="w-full bg-moss-600 hover:bg-moss-700 border-none shadow-lg shadow-moss-900/40">
+                                                Update Event Info
+                                            </Button>
+                                        </Link>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="attendees">
                     <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg">Recent Bookings</CardTitle>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                            <div className="space-y-1">
+                                <CardTitle className="text-lg font-serif">Guest List</CardTitle>
+                                <p className="text-xs text-stone-500 font-normal">{bookings?.length || 0} Total • {bookings?.filter(b => b.status === 'confirmed').length || 0} Confirmed</p>
+                            </div>
+                            <QRScanner eventId={id} />
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
                                 {bookings && bookings.length > 0 ? bookings.map((booking: any) => (
-                                    <div key={booking.id} className="flex items-center justify-between p-3 border border-stone-100 rounded-lg">
-                                        <div>
-                                            <div className="font-medium text-stone-900">{booking.profiles?.full_name || 'Guest'}</div>
-                                            <div className="text-xs text-stone-500">{new Date(booking.created_at).toLocaleDateString()}</div>
-                                        </div>
-                                        <Badge variant={booking.status === 'confirmed' ? 'default' : 'secondary'}>
-                                            {booking.status}
-                                        </Badge>
-                                        {booking.status === 'confirmed' && (
-                                            <div className="ml-4 pl-4 border-l border-stone-200">
-                                                <AttendanceToggle
-                                                    bookingId={booking.id}
-                                                    initialAttended={booking.attended || false}
-                                                />
+                                    <div key={booking.id} className="flex items-center justify-between p-4 border border-stone-100 rounded-xl hover:bg-stone-50 transition-colors">
+                                        <div className="flex items-center gap-4">
+                                            <div className="h-10 w-10 bg-stone-100 rounded-full flex items-center justify-center text-stone-500 font-bold border border-stone-200">
+                                                {booking.profiles?.full_name?.charAt(0) || 'G'}
                                             </div>
-                                        )}
+                                            <div>
+                                                <div className="font-bold text-stone-900">{booking.profiles?.full_name || 'Guest'}</div>
+                                                <div className="text-xs text-stone-500 flex items-center gap-1">
+                                                    <Calendar className="h-3 w-3" />
+                                                    {new Date(booking.created_at).toLocaleDateString()}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-4">
+                                            <Badge variant={booking.status === 'confirmed' ? 'default' : 'secondary'} className={booking.status === 'confirmed' ? 'bg-moss-100 text-moss-800 hover:bg-moss-100 border-moss-200' : ''}>
+                                                {booking.status}
+                                            </Badge>
+
+                                            {booking.status === 'confirmed' && (
+                                                <div className="pl-4 border-l border-stone-200">
+                                                    <AttendanceToggle
+                                                        bookingId={booking.id}
+                                                        initialAttended={booking.attended || false}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 )) : (
-                                    <div className="text-center text-stone-500 py-4">No bookings yet.</div>
+                                    <div className="text-center text-stone-500 py-12 flex flex-col items-center gap-3">
+                                        <Users className="h-12 w-12 text-stone-200" />
+                                        <p>No ones booked a spot yet.</p>
+                                    </div>
                                 )}
                             </div>
                         </CardContent>
                     </Card>
-                </div>
+                </TabsContent>
 
-                {/* Sidebar Details */}
-                <div className="md:col-span-1 space-y-6">
-                    <Card>
+                <TabsContent value="messaging">
+                    <Card className="border-moss-100 shadow-sm">
                         <CardHeader>
-                            <CardTitle className="text-lg">Details</CardTitle>
+                            <CardTitle className="text-lg font-serif flex items-center gap-2">
+                                <Mail className="h-5 w-5 text-moss-600" />
+                                Broadcast to Attendees
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4 text-sm">
-                            <div>
-                                <div className="font-medium text-stone-700 mb-1">Location</div>
-                                <div className="flex items-start gap-2 text-stone-600">
-                                    <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-                                    <span>{event.city}</span>
-                                </div>
-                            </div>
-                            <Separator />
-                            <div>
-                                <div className="font-medium text-stone-700 mb-1">Capacity</div>
-                                <div className="flex items-center gap-2 text-stone-600">
-                                    <Users className="h-4 w-4 shrink-0" />
-                                    <span>{bookings?.length || 0} / {event.capacity}</span>
-                                </div>
-                            </div>
-                            <Separator />
-                            <div>
-                                <div className="font-medium text-stone-700 mb-1">Price</div>
-                                <div className="text-stone-600">€{event.price}</div>
-                            </div>
+                        <CardContent>
+                            <BroadcastForm eventId={id} />
                         </CardContent>
                     </Card>
-                </div>
-            </div>
+                </TabsContent>
+            </Tabs>
         </div>
     );
 }

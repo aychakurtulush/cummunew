@@ -253,3 +253,105 @@ export async function sendWaitlistOpeningEmail(
         console.error("[Email] Failed to send waitlist opening email:", error);
     }
 }
+
+export async function sendEventReminderEmail(
+    userEmail: string,
+    eventData: {
+        title: string;
+        start_time: string;
+        city: string;
+        payment_instructions?: string;
+    }
+) {
+    if (!resend) return;
+
+    const formattedDate = new Intl.DateTimeFormat('en-DE', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        hour: '2-digit',
+        minute: '2-digit'
+    }).format(new Date(eventData.start_time));
+
+    try {
+        await resend.emails.send({
+            from: 'Communew <noreply@communew.com>',
+            to: userEmail,
+            subject: `Reminder: ${eventData.title} is coming up! 📅`,
+            html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #1c1917; margin-bottom: 24px;">See you soon! 👋</h2>
+                    <p style="color: #44403c; line-height: 1.6;">
+                        This is a friendly reminder that <strong>${eventData.title}</strong> is happening in about 48 hours.
+                    </p>
+                    
+                    <div style="background-color: #f5f5f4; border-radius: 8px; padding: 20px; margin: 24px 0;">
+                        <p style="margin: 0 0 10px 0; color: #57534e; font-size: 14px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.05em;">Event Details</p>
+                        <p style="margin: 0 0 5px 0; color: #1c1917; font-size: 16px;"><strong>Time:</strong> ${formattedDate}</p>
+                        <p style="margin: 0; color: #1c1917; font-size: 16px;"><strong>Location:</strong> ${eventData.city}</p>
+                    </div>
+
+                    ${eventData.payment_instructions ? `
+                    <div style="border-left: 4px solid #4a5d23; padding-left: 16px; margin: 24px 0;">
+                        <h3 style="color: #4a5d23; margin: 0 0 8px 0; font-size: 16px;">Host Payment Instructions</h3>
+                        <p style="color: #44403c; margin: 0; font-size: 14px; white-space: pre-wrap;">${eventData.payment_instructions}</p>
+                        <p style="color: #78716c; margin-top: 8px; font-size: 12px; font-style: italic;">Note: If you've already paid, please ignore this.</p>
+                    </div>
+                    ` : ''}
+
+                    <div style="margin-top: 32px;">
+                        <a href="${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/bookings" 
+                           style="background-color: #4a5d23; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                           View My Bookings
+                        </a>
+                    </div>
+                    
+                    <p style="color: #78716c; font-size: 12px; margin-top: 40px; border-top: 1px solid #e7e5e4; pt-20px;">
+                        Cancellation policy: You can cancel up to 24 hours before the event for a full refund.
+                    </p>
+                </div>
+            `
+        });
+    } catch (error) {
+        console.error("[Email] Failed to send reminder email:", error);
+    }
+}
+
+export async function sendBroadcastEmail(
+    userEmails: string[],
+    eventTitle: string,
+    message: string
+) {
+    if (!resend || userEmails.length === 0) return;
+
+    try {
+        // We use BCC to send to multiple users at once without exposing emails
+        await resend.emails.send({
+            from: 'Communew <noreply@communew.com>',
+            to: 'noreply@communew.com', // Placeholder
+            bcc: userEmails,
+            subject: `Update from your host for: ${eventTitle}`,
+            html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #1c1917; margin-bottom: 24px;">Message from your Host</h2>
+                    <p style="color: #44403c; line-height: 1.6; font-size: 16px;">
+                        A host for <strong>${eventTitle}</strong> sent a message to all attendees:
+                    </p>
+                    
+                    <div style="background-color: #f5f5f4; border-radius: 8px; padding: 24px; margin: 24px 0; border: 1px solid #e7e5e4;">
+                        <p style="margin: 0; color: #1c1917; line-height: 1.8; white-space: pre-wrap;">${message}</p>
+                    </div>
+
+                    <div style="margin-top: 32px;">
+                        <a href="${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/events" 
+                           style="background-color: #4a5d23; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                           View More Events
+                        </a>
+                    </div>
+                </div>
+            `
+        });
+    } catch (error) {
+        console.error("[Email] Failed to send broadcast email:", error);
+    }
+}

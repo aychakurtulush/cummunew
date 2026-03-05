@@ -529,3 +529,104 @@ export async function leaveWaitlist(eventId: string) {
     revalidatePath(`/events/${eventId}`)
     return { success: true }
 }
+
+export async function sendBroadcastMessage(eventId: string, message: string) {
+    const supabase = await createClient();
+    if (!supabase) return { error: "Database connection failed" };
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "Not authenticated" };
+
+    // 1. Verify Ownership
+    const { data: event } = await supabase
+        .from('events')
+        .select('creator_user_id, title')
+        .eq('id', eventId)
+        .single();
+
+    if (!event || event.creator_user_id !== user.id) {
+        return { error: "Unauthorized" };
+    }
+
+    // 2. Fetch all confirmed participants
+    const { data: bookings } = await supabase
+        .from('bookings')
+        .select('user_id')
+        .eq('event_id', eventId)
+        .eq('status', 'confirmed');
+
+    if (!bookings || bookings.length === 0) {
+        return { error: "No confirmed attendees to message" };
+    }
+
+    // 3. Get all emails
+    const { createServiceRoleClient } = await import('@/lib/supabase/service');
+    const adminSupabase = createServiceRoleClient();
+
+    const userIds = bookings.map(b => b.user_id);
+    const userEmails: string[] = [];
+
+    // Next.js/Supabase doesn't have a bulk 'getUsers' easily, so we loop or use a custom function.
+    // Given the small pilot scale, sequential is fine for now, but we can parallelize.
+    const emailPromises = userIds.map(id => adminSupabase.auth.admin.getUserById(id));
+    const userResults = await Promise.all(emailPromises);
+
+    userResults.forEach(res => {
+        if (res.data?.user?.email) {
+            userEmails.push(res.data.user.email);
+        }
+    });
+
+    if (userEmails.length === 0) {
+        return { error: "No emails found for attendees" };
+    }
+
+    // 4. Send Broadcast
+    const { sendBroadcastEmail } = await import('@/lib/email');
+    await sendBroadcastEmail(userEmails, event.title, message);
+
+    // 5. Log the message (optional)
+    // We could create a 'broadcasts' table later if needed.
+
+    return { success: true };
+}
+
+export async function toggleFollow(hostId: string) {
+    const supabase = await createClient();
+    if (!supabase) return { error: "Database connection failed" };
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "Not authenticated" };
+
+    if (user.id === hostId) return { error: "You cannot follow yourself" };
+
+    // Check if following
+    const { data: existing } = await supabase
+        .from('follows')
+        .select('id')
+        .eq('follower_id', user.id)
+        .eq('host_id', hostId)
+        .single();
+
+    if (existing) {
+        // Unfollow
+        const { error } = await supabase
+            .from('follows')
+            .delete()
+            .eq('id', existing.id);
+
+        if (error) return { error: error.message };
+        return { success: true, isFollowing: false };
+    } else {
+        // Follow
+        const { error } = await supabase
+            .from('follows')
+            .insert({
+                follower_id: user.id,
+                host_id: hostId
+            });
+
+        if (error) return { error: error.message };
+        return { success: true, isFollowing: true };
+    }
+}

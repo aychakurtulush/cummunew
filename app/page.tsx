@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { EventExplorer } from "@/components/home/event-explorer";
 import { HeroSection } from "@/components/home/hero-section";
 import { AtmosphereBackground } from "@/components/ui/atmosphere-background";
+import { Suspense } from "react";
+import { ExploreSkeleton } from "@/components/home/explore-skeleton";
 
 // Helper to format date
 const formatDate = (dateString?: string) => {
@@ -108,12 +110,14 @@ export default async function Home({ searchParams }: {
 
       <main className="flex-1">
         <HeroSection />
-        <EventExplorer
-          initialEvents={displayEvents}
-          isDemo={isDemo}
-          wishlistEventIds={wishlistEventIds}
-          mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-        />
+        <Suspense fallback={<ExploreSkeleton />}>
+          <EventExplorer
+            initialEvents={displayEvents}
+            isDemo={isDemo}
+            wishlistEventIds={wishlistEventIds}
+            mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+          />
+        </Suspense>
       </main>
       <Footer />
     </div>
