@@ -16,9 +16,11 @@ const formatDate = (dateString?: string) => {
 
 const FILTER_CATEGORIES = ["All", "Arts & Crafts", "Food & Drink", "Sports & Wellness", "Social & Games", "Language Exchange"];
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+export default async function Home({ searchParams }: {
+  searchParams: Promise<{ q?: string; category?: string; price?: string; date?: string }>
+}) {
   const supabase = await createClient();
-  const { q } = await searchParams;
+  const { q, category, price, date } = await searchParams;
 
   let events = [];
   let wishlistEventIds: string[] = [];
@@ -33,8 +35,41 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
         .eq('status', 'approved')
         .order('start_time', { ascending: true });
 
+      // 1. Text Search
       if (q) {
         query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%`);
+      }
+
+      // 2. Category Filter
+      if (category && category !== "All") {
+        query = query.eq('category', category);
+      }
+
+      // 3. Price Filter
+      if (price === "free") {
+        query = query.eq('price', 0);
+      } else if (price === "under-20") {
+        query = query.lt('price', 20);
+      }
+
+      // 4. Date Filter
+      if (date === "today") {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tonight = new Date();
+        tonight.setHours(23, 59, 59, 999);
+        query = query.gte('start_time', today.toISOString()).lte('start_time', tonight.toISOString());
+      } else if (date === "this-weekend") {
+        const today = new Date();
+        const friday = new Date(today);
+        friday.setDate(today.getDate() + (5 - today.getDay())); // Next Friday
+        friday.setHours(17, 0, 0, 0);
+
+        const sunday = new Date(friday);
+        sunday.setDate(friday.getDate() + 2); // Following Sunday
+        sunday.setHours(23, 59, 59, 999);
+
+        query = query.gte('start_time', friday.toISOString()).lte('start_time', sunday.toISOString());
       }
 
       const { data: eventsData, error: eventsError } = await query;

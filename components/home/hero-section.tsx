@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { HeroSearch } from "./hero-search";
 
 export function HeroSection() {
     return (
@@ -23,14 +24,8 @@ export function HeroSection() {
                         Join neighbors who share your passions.
                     </p>
 
-                    <div className="flex flex-col sm:flex-row items-start gap-4 pt-4">
-                        <Button
-                            size="lg"
-                            className="bg-moss-700 hover:bg-moss-800 text-white rounded-full px-8 h-14 text-lg w-full sm:w-auto shadow-lg hover:shadow-xl transition-all"
-                            onClick={() => document.getElementById('events-explorer')?.scrollIntoView({ behavior: 'smooth' })}
-                        >
-                            Explore Events
-                        </Button>
+                    <div className="w-full pt-4">
+                        <HeroSearch />
                     </div>
                 </div>
             </div>

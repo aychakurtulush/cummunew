@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Calendar, ArrowRight, Filter, Plus } from "lucide-react";
@@ -36,43 +37,29 @@ const EventsMap = dynamic(() => import('@/components/event/events-map').then(mod
 });
 
 export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], mapboxToken }: { initialEvents: any[], isDemo: boolean, wishlistEventIds?: string[], mapboxToken?: string }) {
-    const [selectedCategory, setSelectedCategory] = useState("All");
-    const [priceFilter, setPriceFilter] = useState<"any" | "free" | "under-20">("any");
-    const [dateFilter, setDateFilter] = useState<"any" | "today" | "this-weekend">("any");
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    const selectedCategory = searchParams.get("category") || "All";
+    const priceFilter = searchParams.get("price") || "any";
+    const dateFilter = searchParams.get("date") || "any";
+
     const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
 
-    const filteredEvents = initialEvents.filter(event => {
-        // 1. Category Filter
-        if (selectedCategory !== "All" && (event.category || "General") !== selectedCategory) {
-            return false;
-        }
-
-        // 2. Price Filter
-        if (priceFilter === "free" && event.price > 0) return false;
-        if (priceFilter === "under-20" && event.price >= 20) return false;
-
-        // 3. Date Filter
-        if (dateFilter !== "any") {
-            const eventDate = new Date(event.start_time);
-            const today = new Date();
-            const isToday = eventDate.toDateString() === today.toDateString();
-
-            if (dateFilter === "today" && !isToday) return false;
-
-            if (dateFilter === "this-weekend") {
-                // Simple weekend logic: Friday evening to Sunday night
-                const day = eventDate.getDay(); // 0 is Sunday, 6 is Saturday, 5 is Friday
-                const diff = eventDate.getDate() - today.getDate();
-                // This is a naive check, for production use date-fns or similar
-                // For now, let's just assume "weekend" means upcoming Friday/Saturday/Sunday
-                const isWeekendDay = day === 0 || day === 6 || day === 5;
-                // Ensure it's active or future
-                if (!isWeekendDay || eventDate < today) return false;
+    const updateFilters = (updates: Record<string, string | null>) => {
+        const params = new URLSearchParams(searchParams.toString());
+        Object.entries(updates).forEach(([key, value]) => {
+            if (value === null || value === "any" || (key === "category" && value === "All")) {
+                params.delete(key);
+            } else {
+                params.set(key, value);
             }
-        }
+        });
+        router.push(`${pathname}?${params.toString()}#events-explorer`, { scroll: false });
+    };
 
-        return true;
-    });
+    const filteredEvents = initialEvents; // Server already filtered them
 
     const activeFilterCount = (priceFilter !== "any" ? 1 : 0) + (dateFilter !== "any" ? 1 : 0);
 
@@ -108,26 +95,26 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], ma
                             <DropdownMenuContent align="start" className="w-56">
                                 <DropdownMenuLabel>Price</DropdownMenuLabel>
                                 <DropdownMenuGroup>
-                                    <DropdownMenuCheckboxItem checked={priceFilter === "any"} onCheckedChange={() => setPriceFilter("any")}>
+                                    <DropdownMenuCheckboxItem checked={priceFilter === "any"} onCheckedChange={() => updateFilters({ price: "any" })}>
                                         Any Price
                                     </DropdownMenuCheckboxItem>
-                                    <DropdownMenuCheckboxItem checked={priceFilter === "free"} onCheckedChange={() => setPriceFilter("free")}>
+                                    <DropdownMenuCheckboxItem checked={priceFilter === "free"} onCheckedChange={() => updateFilters({ price: "free" })}>
                                         Free
                                     </DropdownMenuCheckboxItem>
-                                    <DropdownMenuCheckboxItem checked={priceFilter === "under-20"} onCheckedChange={() => setPriceFilter("under-20")}>
+                                    <DropdownMenuCheckboxItem checked={priceFilter === "under-20"} onCheckedChange={() => updateFilters({ price: "under-20" })}>
                                         Under €20
                                     </DropdownMenuCheckboxItem>
                                 </DropdownMenuGroup>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuLabel>Date</DropdownMenuLabel>
                                 <DropdownMenuGroup>
-                                    <DropdownMenuCheckboxItem checked={dateFilter === "any"} onCheckedChange={() => setDateFilter("any")}>
+                                    <DropdownMenuCheckboxItem checked={dateFilter === "any"} onCheckedChange={() => updateFilters({ date: "any" })}>
                                         Any Date
                                     </DropdownMenuCheckboxItem>
-                                    <DropdownMenuCheckboxItem checked={dateFilter === "today"} onCheckedChange={() => setDateFilter("today")}>
+                                    <DropdownMenuCheckboxItem checked={dateFilter === "today"} onCheckedChange={() => updateFilters({ date: "today" })}>
                                         Today
                                     </DropdownMenuCheckboxItem>
-                                    <DropdownMenuCheckboxItem checked={dateFilter === "this-weekend"} onCheckedChange={() => setDateFilter("this-weekend")}>
+                                    <DropdownMenuCheckboxItem checked={dateFilter === "this-weekend"} onCheckedChange={() => updateFilters({ date: "this-weekend" })}>
                                         This Weekend
                                     </DropdownMenuCheckboxItem>
                                 </DropdownMenuGroup>
@@ -137,8 +124,7 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], ma
                                         <DropdownMenuItem
                                             className="text-red-600 focus:text-red-600 cursor-pointer justify-center font-medium"
                                             onSelect={() => {
-                                                setPriceFilter("any");
-                                                setDateFilter("any");
+                                                updateFilters({ price: "any", date: "any" });
                                             }}
                                         >
                                             Reset Filters
@@ -153,7 +139,7 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], ma
                         {FILTER_CATEGORIES.map((cat) => (
                             <button
                                 key={cat}
-                                onClick={() => setSelectedCategory(cat)}
+                                onClick={() => updateFilters({ category: cat })}
                                 className={`h-10 px-5 rounded-full text-sm font-medium transition-all ${selectedCategory === cat
                                     ? "bg-moss-700 text-white shadow-md shadow-moss-900/10"
                                     : "bg-white text-stone-600 border border-stone-200 hover:border-moss-300 hover:bg-moss-50/50 hover:text-moss-800"
@@ -277,16 +263,31 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], ma
                         ))}
 
                         {filteredEvents.length === 0 && (
-                            <div className="col-span-full py-12 text-center text-stone-500">
-                                No events found matching your filters.
-                                <div className="mt-4">
-                                    <Button variant="link" onClick={() => {
-                                        setSelectedCategory("All");
-                                        setPriceFilter("any");
-                                        setDateFilter("any");
-                                    }}>
-                                        Clear all filters
-                                    </Button>
+                            <div className="col-span-full py-24 text-center">
+                                <div className="max-w-md mx-auto space-y-6">
+                                    <div className="relative mx-auto w-24 h-24 bg-stone-100 rounded-full flex items-center justify-center mb-4">
+                                        <Filter className="h-10 w-10 text-stone-300" />
+                                        <div className="absolute top-0 right-0 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
+                                            <Badge variant="outline" className="text-[10px] p-0 px-1 border-stone-200">0</Badge>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-xl font-serif font-bold text-stone-900">No events found</h3>
+                                        <p className="text-stone-500">
+                                            We couldn't find any events matching your current filters. Try relaxing your search criteria or browse another category.
+                                        </p>
+                                    </div>
+                                    <div className="pt-2">
+                                        <Button
+                                            onClick={() => {
+                                                const params = new URLSearchParams();
+                                                router.push(`${pathname}?${params.toString()}#events-explorer`);
+                                            }}
+                                            className="bg-stone-900 hover:bg-stone-800 text-white rounded-full px-8"
+                                        >
+                                            Clear all filters
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         )}
