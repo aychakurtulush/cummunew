@@ -158,8 +158,12 @@ export async function cancelBooking(bookingId: string) {
     const { data: booking } = await supabase
         .from('bookings')
         .select(`
+            id,
             user_id,
+            status,
+            event_id,
             event:events (
+                id,
                 start_time,
                 title
             )
@@ -206,6 +210,48 @@ export async function cancelBooking(bookingId: string) {
     }
 
     revalidatePath('/bookings')
+
+    // --- Waitlist Notification Logic ---
+    // If a confirmed booking was cancelled, notify the first person on the waitlist
+    if (booking.status === 'confirmed') {
+        try {
+            const { data: waitlistEntry } = await supabase
+                .from('waitlist')
+                .select(`
+                    id,
+                    user_id
+                `)
+                .eq('event_id', booking.event_id)
+                .order('created_at', { ascending: true })
+                .limit(1)
+                .single();
+
+            if (waitlistEntry) {
+                // Fetch user email using admin client
+                const { createServiceRoleClient } = await import('@/lib/supabase/service');
+                const adminSupabase = createServiceRoleClient();
+                const { data: waitlistUser } = await adminSupabase.auth.admin.getUserById(waitlistEntry.user_id);
+
+                if (waitlistUser?.user?.email) {
+                    const { sendWaitlistOpeningEmail } = await import('@/lib/email');
+                    await sendWaitlistOpeningEmail(
+                        waitlistUser.user.email,
+                        eventTitle,
+                        booking.event_id
+                    );
+
+                    // Update notified_at to track notification
+                    await supabase
+                        .from('waitlist')
+                        .update({ notified_at: new Date().toISOString() })
+                        .eq('id', waitlistEntry.id);
+                }
+            }
+        } catch (waitlistError) {
+            console.error('Waitlist notification failed:', waitlistError);
+        }
+    }
+
     return { success: true }
 }
 
@@ -435,5 +481,51 @@ export async function deleteEvent(eventId: string) {
 
     revalidatePath('/host/events')
     revalidatePath('/')
+    return { success: true }
+}
+
+export async function joinWaitlist(eventId: string) {
+    const supabase = await createClient()
+    if (!supabase) return { error: "Backend not configured" }
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: "Not authenticated" }
+
+    const { error } = await supabase
+        .from('waitlist')
+        .insert({
+            event_id: eventId,
+            user_id: user.id
+        })
+
+    if (error) {
+        if (error.code === '23505') { // Unique violation
+            return { success: true, message: "Already on waitlist" }
+        }
+        return { error: error.message }
+    }
+
+    revalidatePath(`/events/${eventId}`)
+    return { success: true }
+}
+
+export async function leaveWaitlist(eventId: string) {
+    const supabase = await createClient()
+    if (!supabase) return { error: "Backend not configured" }
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: "Not authenticated" }
+
+    const { error } = await supabase
+        .from('waitlist')
+        .delete()
+        .eq('event_id', eventId)
+        .eq('user_id', user.id)
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    revalidatePath(`/events/${eventId}`)
     return { success: true }
 }

@@ -218,3 +218,38 @@ export async function sendBookingStatusEmail(
         console.error("[Email] Failed to send booking status notification:", error);
     }
 }
+
+export async function sendWaitlistOpeningEmail(
+    userEmail: string,
+    eventTitle: string,
+    eventId: string
+) {
+    if (!resend) return;
+
+    try {
+        await resend.emails.send({
+            from: 'Communew <noreply@communew.com>',
+            to: userEmail,
+            subject: `Spot Opened: ${eventTitle} 🎉`,
+            html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #1c1917; margin-bottom: 24px;">A spot opened up!</h2>
+                    <p style="color: #44403c; line-height: 1.6;">
+                        Good news! A spot has just become available for <strong>${eventTitle}</strong>.
+                    </p>
+                    <p style="color: #44403c; line-height: 1.6;">
+                        Since you were on the waitlist, we're letting you know first. Click the button below to claim your spot before someone else does!
+                    </p>
+                    <div style="margin-top: 32px;">
+                        <a href="${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/events/${eventId}" 
+                           style="background-color: #4a5d23; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                           View Event & Book
+                        </a>
+                    </div>
+                </div>
+            `
+        });
+    } catch (error) {
+        console.error("[Email] Failed to send waitlist opening email:", error);
+    }
+}

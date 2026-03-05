@@ -17,6 +17,7 @@ import type { Metadata, ResolvingMetadata } from "next";
 
 import { WishlistButton } from "@/components/event/wishlist-button";
 import { BookingButton } from "@/components/event/booking-button";
+import { WaitlistButton } from "@/components/event/waitlist-button";
 import { ReportButton } from "@/components/shared/report-button";
 
 export async function generateMetadata(
@@ -71,6 +72,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
     let event: any = null;
     let isLiked = false;
     let bookingStatus: string | null = null;
+    let isOnWaitlist = false;
 
     let hostProfile: any = null;
 
@@ -140,6 +142,18 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 
                 if (booking) {
                     bookingStatus = booking.status;
+                } else {
+                    const spotsLeft = Math.max(0, (event.capacity || 0) - (event.confirmed_count || 0));
+                    if (spotsLeft === 0) {
+                        const { data: waitlistEntry } = await supabase
+                            .from('waitlist')
+                            .select('id')
+                            .eq('user_id', user.id)
+                            .eq('event_id', id)
+                            .single();
+
+                        if (waitlistEntry) isOnWaitlist = true;
+                    }
                 }
             }
         } catch (e) {
@@ -319,16 +333,21 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                                     'Request Sent'}
                                         </Button>
                                     </Link>
+                                ) : spotsLeft === 0 ? (
+                                    <WaitlistButton
+                                        eventId={event.id}
+                                        hasAuth={!!supabase && await supabase.auth.getUser().then(r => !!r.data.user)}
+                                        isOnWaitlist={isOnWaitlist}
+                                    />
                                 ) : (
                                     <BookingButton
                                         eventId={event.id}
                                         price={event.price}
                                         hasAuth={!!supabase && await supabase.auth.getUser().then(r => !!r.data.user)}
-                                        isFull={spotsLeft === 0}
                                     />
                                 )}
                                 <p className="text-xs text-center text-stone-500">
-                                    {bookingStatus ? "View your bookings" : (spotsLeft === 0 ? "Event is full" : "No payment required to request to book.")}
+                                    {bookingStatus ? "View your bookings" : (spotsLeft === 0 ? "Event is at full capacity" : "No payment required to request to book.")}
                                 </p>
                                 <div className="text-xs text-center text-stone-500 bg-stone-50 py-2 rounded-md border border-stone-100 mt-2">
                                     <span className="font-semibold block mb-0.5">Cancellation Policy</span>
