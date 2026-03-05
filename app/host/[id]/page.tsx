@@ -82,7 +82,6 @@ export default async function HostProfilePage({ params }: { params: Promise<{ id
                                 <div className="flex flex-wrap justify-center md:justify-start items-center gap-6 text-stone-400 text-sm">
                                     <span className="flex items-center gap-1.5"><Users className="h-4 w-4 text-moss-500" /> {pastEvents.length} Events Hosted</span>
                                     <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4 text-moss-500" /> Joined {new Date(profile.created_at).getFullYear()}</span>
-                                    <span className="flex items-center gap-1.5 text-amber-400"><Star className="h-4 w-4 fill-current" /> 4.9 Rating</span>
                                 </div>
                             </div>
 
@@ -146,8 +145,8 @@ export default async function HostProfilePage({ params }: { params: Promise<{ id
                                         <div className="text-stone-400 text-sm">Total gatherings organized</div>
                                     </div>
                                     <div className="space-y-1">
-                                        <div className="text-3xl font-bold">128+</div>
-                                        <div className="text-stone-400 text-sm">Happy participants</div>
+                                        <div className="text-3xl font-bold text-moss-500">Active</div>
+                                        <div className="text-stone-400 text-sm">Community Status</div>
                                     </div>
                                 </CardContent>
                             </Card>
