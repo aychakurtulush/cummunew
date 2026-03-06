@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { BookingActionButtons } from "@/components/host/booking-action-buttons";
+import { ContactAttendeeButton } from "@/components/host/contact-attendee-button";
 
 export default async function AttendeesPage() {
     const supabase = await createClient();
@@ -116,9 +117,7 @@ export default async function AttendeesPage() {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex justify-end gap-2">
-                                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Contact (Coming Soon)">
-                                                <Mail className="h-4 w-4 text-stone-400 hover:text-stone-600" />
-                                            </Button>
+                                            <ContactAttendeeButton attendeeId={booking.user_id} eventId={booking.event_id} />
                                             <BookingActionButtons bookingId={booking.id} status={booking.status} />
                                         </div>
                                     </td>

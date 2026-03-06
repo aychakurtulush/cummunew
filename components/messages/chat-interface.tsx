@@ -82,27 +82,13 @@ export function ChatInterface({ initialMessages, currentUser, conversationId, ot
         setInputValue(""); // Clear immediately
         setIsSending(true);
 
-        // Optimistic Update
-        const optimisticId = `temp-${Date.now()}`;
-        const optimisticMsg: Message = {
-            id: optimisticId,
-            content: content,
-            created_at: new Date().toISOString(),
-            sender_user_id: currentUser.id
-        };
-
-        setMessages(prev => [...prev, optimisticMsg]);
-
         try {
             const result = await sendMessage(conversationId, content);
             if (result.error) {
-                // Remove optimistic message on error
-                setMessages(prev => prev.filter(m => m.id !== optimisticId));
                 toast.error("Failed to send message: " + result.error);
                 setInputValue(content); // Restore input
             }
         } catch (err) {
-            setMessages(prev => prev.filter(m => m.id !== optimisticId));
             toast.error("Failed to send message");
             setInputValue(content);
         } finally {

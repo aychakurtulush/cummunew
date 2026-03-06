@@ -92,25 +92,7 @@ export async function sendMessage(conversationId: string, content: string) {
                 ? conversation.participant2_id
                 : conversation.participant1_id;
 
-            // 2. Fetch Recipient Email (via Service Role)
-            const { createServiceRoleClient } = await import('@/lib/supabase/service');
-            const adminSupabase = createServiceRoleClient();
-
-            const { data: recipientUser } = await adminSupabase.auth.admin.getUserById(recipientId);
-
-            if (recipientUser?.user?.email) {
-                const { sendMessageReceivedEmail } = await import('@/lib/email');
-                const senderName = user.user_metadata?.full_name || 'A User';
-
-                await sendMessageReceivedEmail(
-                    recipientUser.user.email,
-                    senderName,
-                    content,
-                    conversationId
-                );
-            }
-
-            // 3. In-App Notification
+            // 2. In-App Notification (DO THIS FIRST)
             await supabase
                 .from('notifications')
                 .insert({
@@ -121,6 +103,29 @@ export async function sendMessage(conversationId: string, content: string) {
                     link: `/messages/${conversationId}`,
                     metadata: { conversation_id: conversationId }
                 });
+
+            // 3. Fetch Recipient Email (via Service Role)
+            try {
+                const { createServiceRoleClient } = await import('@/lib/supabase/service');
+                const adminSupabase = createServiceRoleClient();
+
+                const { data: recipientUser } = await adminSupabase.auth.admin.getUserById(recipientId);
+
+                if (recipientUser?.user?.email) {
+                    const { sendMessageReceivedEmail } = await import('@/lib/email');
+                    const senderName = user.user_metadata?.full_name || 'A User';
+
+                    await sendMessageReceivedEmail(
+                        recipientUser.user.email,
+                        senderName,
+                        content,
+                        conversationId
+                    );
+                }
+            } catch (emailErr) {
+                console.error("Failed to fetch recipient email or send email notification:", emailErr);
+                // Non-fatal, let it continue
+            }
         }
     } catch (notifyErr) {
         console.error("Failed to send message notification:", notifyErr);
