@@ -18,12 +18,35 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NotificationBell } from "./notification-bell";
 
+import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
+
 interface NavbarActionsProps {
-    user: any; // Using any for Supabase user object to avoid complex type imports for now
+    user: any; // Initial user from server
 }
 
-export function NavbarActions({ user }: NavbarActionsProps) {
+export function NavbarActions({ user: initialUser }: NavbarActionsProps) {
+    const [user, setUser] = useState(initialUser);
+    const supabase = createClient();
     const pathname = usePathname();
+
+    useEffect(() => {
+        // Update user state if initialUser changes (e.g. from server)
+        setUser(initialUser);
+    }, [initialUser]);
+
+    useEffect(() => {
+        // Listen for auth changes on client side for immediate sync
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (session?.user) {
+                setUser(session.user);
+            } else {
+                setUser(null);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [supabase]);
 
     const isHostActive = pathname.startsWith("/host");
 
