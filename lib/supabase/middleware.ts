@@ -33,13 +33,15 @@ export async function updateSession(request: NextRequest) {
     // supabase.auth.getUser().
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (
-        !user &&
-        !request.nextUrl.pathname.startsWith('/login') &&
-        !request.nextUrl.pathname.startsWith('/auth')
-    ) {
-        // no user, potentially respond by redirecting the user to the login page
-        // strict protected routes should be handled here or in specific layouts
+    // Protect internal routes
+    const protectedRoutes = ['/dashboard', '/bookings', '/settings', '/messages', '/profile', '/host', '/saved'];
+    const isProtectedRoute = protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route));
+
+    if (!user && isProtectedRoute) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/login';
+        url.searchParams.set('redirect_to', request.nextUrl.pathname);
+        return NextResponse.redirect(url);
     }
 
     return response

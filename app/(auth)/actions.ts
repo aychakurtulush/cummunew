@@ -33,7 +33,7 @@ export async function signup(formData: FormData) {
         redirect('/signup?error=Demo Mode: Backend not configured')
     }
 
-    const data = {
+    const signupData = {
         email: (formData.get('email') as string).trim(),
         password: (formData.get('password') as string).trim(),
         options: {
@@ -43,14 +43,21 @@ export async function signup(formData: FormData) {
         }
     }
 
-    const { error } = await supabase.auth.signUp(data)
+    const { data, error } = await supabase.auth.signUp(signupData)
 
     if (error) {
         redirect(`/signup?error=${encodeURIComponent(error.message)}`)
     }
 
+    // If session is null, it means either:
+    // 1. Email confirmation is required (Supabase default)
+    // 2. The user already exists (Supabase security feature: it returns success but no session to prevent enumeration)
+    if (!data.session) {
+        redirect('/signup?error=Please check your email to confirm your account and log in.')
+    }
+
     revalidatePath('/', 'layout')
-    redirect('/dashboard?welcome=true') // Or /verify-email if email confirmation is on
+    redirect('/dashboard?welcome=true')
 }
 
 export async function signout() {
