@@ -19,6 +19,7 @@ import { WishlistButton } from "@/components/event/wishlist-button";
 import { BookingButton } from "@/components/event/booking-button";
 import { WaitlistButton } from "@/components/event/waitlist-button";
 import { ReportButton } from "@/components/shared/report-button";
+import { ContactHostButton } from "@/components/event/contact-host-button";
 
 export async function generateMetadata(
     { params }: { params: Promise<{ id: string }> },
@@ -242,30 +243,35 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                         <Separator />
 
                         {/* Host Info */}
-                        <div className="flex items-start gap-4">
-                            <Avatar className="h-12 w-12 border border-stone-200">
-                                {/* Use Google/Auth avatar if available, else placeholder */}
-                                <AvatarFallback className="bg-stone-100 text-stone-500">
-                                    {(hostProfile?.full_name?.[0] || "H").toUpperCase()}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <h3 className="text-lg font-serif font-semibold text-stone-900">
-                                    Hosted by{" "}
-                                    <Link href={`/host/${event.creator_user_id}`} className="hover:text-moss-700 hover:underline transition-colors">
-                                        {hostProfile?.full_name || "Community Member"}
-                                    </Link>
-                                    {event.studios && (
-                                        <span className="font-normal text-stone-600">
-                                            {' '}at <Link href={`/studios/${event.studio_id}`} className="hover:underline text-moss-700">{event.studios.name}</Link>
-                                        </span>
-                                    )}
-                                </h3>
-                                <p className="text-stone-500 text-sm mb-2">Verified Host</p>
-                                <p className="text-stone-600 leading-relaxed text-sm max-w-lg">
-                                    This event is organized by {hostProfile?.full_name || "a member"}
-                                    {event.studios ? ` and hosted at ${event.studios.name}.` : "."}
-                                </p>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-stone-200">
+                            <div className="flex items-start gap-4">
+                                <Avatar className="h-12 w-12 border border-stone-200">
+                                    {/* Use Google/Auth avatar if available, else placeholder */}
+                                    <AvatarFallback className="bg-stone-100 text-stone-500">
+                                        {(hostProfile?.full_name?.[0] || "H").toUpperCase()}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <h3 className="text-lg font-serif font-semibold text-stone-900">
+                                        Hosted by{" "}
+                                        <Link href={`/host/${event.creator_user_id}`} className="hover:text-moss-700 hover:underline transition-colors">
+                                            {hostProfile?.full_name || "Community Member"}
+                                        </Link>
+                                        {event.studios && (
+                                            <span className="font-normal text-stone-600">
+                                                {' '}at <Link href={`/studios/${event.studio_id}`} className="hover:underline text-moss-700">{event.studios.name}</Link>
+                                            </span>
+                                        )}
+                                    </h3>
+                                    <p className="text-stone-500 text-sm mb-2">Verified Host</p>
+                                    <p className="text-stone-600 leading-relaxed text-sm max-w-lg">
+                                        This event is organized by {hostProfile?.full_name || "a member"}
+                                        {event.studios ? ` and hosted at ${event.studios.name}.` : "."}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex-shrink-0 w-full sm:w-auto">
+                                <ContactHostButton hostId={event.creator_user_id} eventId={event.id} />
                             </div>
                         </div>
 

@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function startConversation(otherUserId: string) {
+export async function startConversation(otherUserId: string, contextType: 'event' | 'studio' | 'booking' | 'inquiry', contextId: string) {
     const supabase = await createClient();
     if (!supabase) return { error: "Database unavailable" };
 
@@ -25,6 +25,8 @@ export async function startConversation(otherUserId: string) {
         .select('id')
         .eq('participant1_id', participant1)
         .eq('participant2_id', participant2)
+        .eq('context_type', contextType)
+        .eq('context_id', contextId)
         .single();
 
     if (existing) {
@@ -36,7 +38,9 @@ export async function startConversation(otherUserId: string) {
         .from('conversations')
         .insert({
             participant1_id: participant1,
-            participant2_id: participant2
+            participant2_id: participant2,
+            context_type: contextType,
+            context_id: contextId
         })
         .select('id')
         .single();
@@ -137,7 +141,7 @@ export async function getConversations() {
     // 1. Fetch conversations (raw)
     const { data: conversationsRaw, error } = await supabase
         .from('conversations')
-        .select('id, updated_at, participant1_id, participant2_id')
+        .select('id, updated_at, participant1_id, participant2_id, context_type, context_id')
         .or(`participant1_id.eq.${user.id},participant2_id.eq.${user.id}`)
         .order('updated_at', { ascending: false });
 
@@ -183,12 +187,24 @@ export async function getConversations() {
 
         const lastMessage = messages?.[0];
 
+        let contextName = null;
+        if (conv.context_type === 'event' && conv.context_id) {
+            const { data: event } = await supabase.from('events').select('title').eq('id', conv.context_id).single();
+            contextName = event?.title;
+        } else if (conv.context_type === 'studio' && conv.context_id) {
+            const { data: studio } = await supabase.from('studios').select('name').eq('id', conv.context_id).single();
+            contextName = studio?.name;
+        }
+
         return {
             id: conv.id,
             otherUser,
             lastMessage: lastMessage?.content || 'No messages yet',
             lastMessageTime: lastMessage?.created_at,
-            isUnread: false
+            isUnread: false,
+            contextType: conv.context_type,
+            contextId: conv.context_id,
+            contextName
         };
     }));
 
@@ -213,7 +229,7 @@ export async function getMessages(conversationId: string) {
     return messages || [];
 }
 
-export async function requestToHost(ownerId: string, studioName: string) {
+export async function requestToHost(ownerId: string, studioName: string, studioId: string) {
     const supabase = await createClient();
     if (!supabase) return { error: "Database unavailable" };
 
@@ -221,7 +237,7 @@ export async function requestToHost(ownerId: string, studioName: string) {
     if (!user) redirect('/login');
 
     // 1. Start/Get Conversation
-    const convResult = await startConversation(ownerId);
+    const convResult = await startConversation(ownerId, 'studio', studioId);
     if (convResult.error) return { error: convResult.error };
 
     const conversationId = convResult.conversationId;

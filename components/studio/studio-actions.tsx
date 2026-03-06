@@ -81,7 +81,7 @@ export function StudioActions({ studioId, studioName, isOwner, ownerId, hasAuth 
         }
 
         try {
-            const result = await startConversation(ownerId);
+            const result = await startConversation(ownerId, 'studio', studioId);
             if (result.error) {
                 toast.error(result.error);
             } else if (result.conversationId) {

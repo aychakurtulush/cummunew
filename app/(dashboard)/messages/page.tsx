@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Search, Send } from "lucide-react";
+import { Search, Send, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { getConversations } from "@/app/messages/actions";
 
@@ -47,13 +47,29 @@ export default async function MessagesPage() {
                                         <h4 className="text-sm font-medium text-stone-900 truncate">{chat.otherUser.name}</h4>
                                         <span className="text-xs text-stone-400 shrink-0">{formatDate(chat.lastMessageTime)}</span>
                                     </div>
+                                    {chat.contextName && (
+                                        <p className="text-[10px] font-medium text-moss-700 uppercase tracking-wider mb-1 truncate">
+                                            {chat.contextType}: {chat.contextName}
+                                        </p>
+                                    )}
                                     <p className="text-xs text-stone-500 truncate">{chat.lastMessage}</p>
                                 </div>
                             </div>
                         </Link>
                     )) : (
-                        <div className="p-8 text-center text-stone-500 text-sm">
-                            No messages yet.
+                        <div className="p-8 text-center flex flex-col items-center justify-center space-y-4">
+                            <MessageCircle className="h-10 w-10 text-stone-200" />
+                            <div className="text-stone-500 text-sm">
+                                Contextual conversations with hosts or guests will appear here.
+                            </div>
+                            <div className="flex gap-2">
+                                <Link href="/">
+                                    <Button variant="outline" size="sm">Browse Events</Button>
+                                </Link>
+                                <Link href="/studios">
+                                    <Button variant="outline" size="sm">Find Studios</Button>
+                                </Link>
+                            </div>
                         </div>
                     )}
                 </div>

@@ -58,7 +58,7 @@ export async function createInquiry(data: {
                 console.log("Skipping notification for self-booking");
             } else {
                 // 1. Ensure conversation exists
-                const convResult = await startConversation(studio.owner_user_id);
+                const convResult = await startConversation(studio.owner_user_id, 'inquiry', data.studioId);
 
                 if (convResult.error) {
                     console.error("Failed to start conversation for notification:", convResult.error);
