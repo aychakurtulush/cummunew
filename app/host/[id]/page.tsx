@@ -45,6 +45,25 @@ export default async function HostProfilePage({ params }: { params: Promise<{ id
         .eq('status', 'approved')
         .order('start_time', { ascending: true });
 
+    // 4. Fetch Rating Stats
+    const { data: ratingStats } = await supabase
+        .from('event_reviews')
+        .select('rating')
+        .eq('event_id', events?.map(e => e.id) || []); // This is a bit complex for a single query if many events, 
+    // but for pilot (5-20) it's fine. 
+    // Better: join with events.
+
+    // Let's do a proper aggregate via RPC or just fetch all ratings for host's events
+    const { data: allReviews } = await supabase
+        .from('event_reviews')
+        .select('rating, event_id')
+        .in('event_id', events?.map(e => e.id) || []);
+
+    const avgRating = allReviews && allReviews.length > 0
+        ? (allReviews.reduce((acc, r) => acc + r.rating, 0) / allReviews.length).toFixed(1)
+        : null;
+    const reviewCount = allReviews?.length || 0;
+
     const now = new Date();
     const upcomingEvents = events?.filter(e => new Date(e.start_time) > now) || [];
     const pastEvents = events?.filter(e => new Date(e.start_time) <= now) || [];
@@ -82,6 +101,9 @@ export default async function HostProfilePage({ params }: { params: Promise<{ id
                                 <div className="flex flex-wrap justify-center md:justify-start items-center gap-6 text-stone-400 text-sm">
                                     <span className="flex items-center gap-1.5"><Users className="h-4 w-4 text-moss-500" /> {pastEvents.length} Events Hosted</span>
                                     <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4 text-moss-500" /> Joined {new Date(profile.created_at).getFullYear()}</span>
+                                    {avgRating && (
+                                        <span className="flex items-center gap-1.5"><Star className="h-4 w-4 text-amber-500 fill-amber-500" /> {avgRating} ({reviewCount} reviews)</span>
+                                    )}
                                 </div>
                             </div>
 
@@ -144,6 +166,14 @@ export default async function HostProfilePage({ params }: { params: Promise<{ id
                                         <div className="text-3xl font-bold">{pastEvents.length + upcomingEvents.length}</div>
                                         <div className="text-stone-400 text-sm">Total gatherings organized</div>
                                     </div>
+                                    {avgRating && (
+                                        <div className="space-y-1">
+                                            <div className="text-3xl font-bold text-amber-500 flex items-center gap-2">
+                                                {avgRating} <Star className="h-6 w-6 fill-amber-500" />
+                                            </div>
+                                            <div className="text-stone-400 text-sm">Community Rating ({reviewCount})</div>
+                                        </div>
+                                    )}
                                     <div className="space-y-1">
                                         <div className="text-3xl font-bold text-moss-500">Active</div>
                                         <div className="text-stone-400 text-sm">Community Status</div>

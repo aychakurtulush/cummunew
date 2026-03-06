@@ -355,3 +355,41 @@ export async function sendBroadcastEmail(
         console.error("[Email] Failed to send broadcast email:", error);
     }
 }
+export async function sendReviewRequestEmail(
+    userEmail: string,
+    eventTitle: string,
+    hostName: string,
+    bookingId: string
+) {
+    if (!resend) return;
+
+    try {
+        await resend.emails.send({
+            from: 'Communew <noreply@communew.com>',
+            to: userEmail,
+            subject: `How was ${eventTitle}? ⭐`,
+            html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #1c1917; margin-bottom: 24px;">Hope you had a great time! 👋</h2>
+                    <p style="color: #44403c; line-height: 1.6;">
+                        You recently attended <strong>${eventTitle}</strong> hosted by <strong>${hostName}</strong>. 
+                        We'd love to hear about your experience to help keep the Communew community high-quality.
+                    </p>
+                    
+                    <div style="margin-top: 32px; text-align: center;">
+                        <a href="${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/reviews/${bookingId}" 
+                           style="background-color: #4a5d23; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                           Rate Your Experience
+                        </a>
+                    </div>
+                    
+                    <p style="color: #78716c; font-size: 14px; margin-top: 40px; text-align: center;">
+                        It only takes 30 seconds and helps hosts like ${hostName} grow!
+                    </p>
+                </div>
+            `
+        });
+    } catch (error) {
+        console.error("[Email] Failed to send review request email:", error);
+    }
+}

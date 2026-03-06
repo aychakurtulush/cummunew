@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { MapPin, Check, Globe } from "lucide-react";
+import { MapPin, Check, Globe, Star } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
@@ -104,6 +104,18 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 
                 if (!countError) {
                     event.confirmed_count = count || 0;
+                }
+
+                // Fetch event rating
+                const { data: reviews } = await supabase
+                    .from('event_reviews')
+                    .select('rating')
+                    .eq('event_id', id);
+
+                if (reviews && reviews.length > 0) {
+                    const avg = reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
+                    event.avg_rating = avg.toFixed(1);
+                    event.review_count = reviews.length;
                 }
 
                 // ... host profile fetch ...
@@ -209,9 +221,17 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                 {event.title}
                             </h1>
 
-                            <div className="flex items-center gap-2 text-stone-600">
-                                <MapPin className="h-4 w-4" />
-                                <span>{event.location_type === 'partner_venue' ? 'Partner Venue' : event.city}, {event.city}</span>
+                            <div className="flex items-center gap-4 text-stone-600">
+                                <div className="flex items-center gap-1.5">
+                                    <MapPin className="h-4 w-4" />
+                                    <span>{event.location_type === 'partner_venue' ? 'Partner Venue' : event.city}, {event.city}</span>
+                                </div>
+                                {event.avg_rating && (
+                                    <div className="flex items-center gap-1.5 text-amber-600 font-bold">
+                                        <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+                                        <span>{event.avg_rating} ({event.review_count})</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -289,9 +309,17 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                     <div className="lg:col-span-1">
                         <div className="sticky top-24 bg-white rounded-2xl border border-stone-200 shadow-soft p-6 space-y-6">
 
-                            <div>
-                                <span className="text-2xl font-bold text-stone-900">{event.price && event.price > 0 ? `€${event.price}` : 'Free'}</span>
-                                {event.price && event.price > 0 && <span className="text-stone-500 text-sm ml-1">per person</span>}
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <span className="text-2xl font-bold text-stone-900">{event.price && event.price > 0 ? `€${event.price}` : 'Free'}</span>
+                                    {event.price && event.price > 0 && <span className="text-stone-500 text-sm ml-1">per person</span>}
+                                </div>
+                                {event.avg_rating && (
+                                    <div className="flex items-center gap-1 text-sm font-bold text-amber-600">
+                                        <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+                                        {event.avg_rating}
+                                    </div>
+                                )}
                             </div>
 
                             {event.price && event.price > 0 && (
