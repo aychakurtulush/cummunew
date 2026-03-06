@@ -29,16 +29,13 @@ interface CreateEventFormProps {
     studios: Studio[];
     initialStartTime?: string;
     initialEndTime?: string;
+    initialStudioId?: string;
 }
 
-export default function CreateEventForm({ studios, initialStartTime, initialEndTime }: CreateEventFormProps) {
+export default function CreateEventForm({ studios, initialStartTime, initialEndTime, initialStudioId }: CreateEventFormProps) {
     const [state, formAction] = useActionState(createEvent, initialState)
-    const searchParams = useSearchParams();
 
-    // Auto-fill from URL params (e.g. converting a studio booking)
-    const studioIdParam = searchParams.get('studio_id');
-
-    const [locationType, setLocationType] = useState<string>(studioIdParam ? "studio" : "home");
+    const [locationType, setLocationType] = useState<string>(initialStudioId ? "studio" : "home");
     // Initialize state with Berlin time, handling conversion from UTC if necessary
     const [startTime, setStartTime] = useState<string>(
         initialStartTime ? toBerlinInput(initialStartTime) : ""
@@ -262,7 +259,7 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
                                         name="studio_id"
                                         className="flex h-10 w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss-600/20 focus-visible:border-moss-600"
                                         required
-                                        defaultValue={studioIdParam || ""}
+                                        defaultValue={initialStudioId || ""}
                                     >
                                         <option value="" disabled selected>Select a studio</option>
                                         {studios.map(studio => (

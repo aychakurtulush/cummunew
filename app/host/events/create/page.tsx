@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import CreateEventForm from "./create-event-form";
+import { Suspense } from "react";
 
 export default async function CreateEventPage({
     searchParams,
@@ -34,9 +35,6 @@ export default async function CreateEventPage({
         // Check if it's already in the list
         const exists = allStudios.find(s => s.id === studio_id);
 
-        // If not in the list (e.g. someone else's studio currently booked by me?), fetch it
-        // Note: For now, assuming host can only create events in their own studios or generic locations
-        // But if the use case is "turn a booking into an event", we might want to fetch that specific studio details
         if (!exists) {
             const { data: bookedStudio } = await supabase
                 .from("studios")
@@ -45,18 +43,19 @@ export default async function CreateEventPage({
                 .single();
 
             if (bookedStudio) {
-                // Determine if we should add it. This depends on business logic. 
-                // For now, let's add it so it appears in the dropdown as the selected option.
                 allStudios = [...allStudios, bookedStudio];
             }
         }
     }
 
     return (
-        <CreateEventForm
-            studios={allStudios}
-            initialStartTime={start_time}
-            initialEndTime={end_time}
-        />
+        <Suspense fallback={<div className="max-w-2xl mx-auto py-12 text-center">Loading form...</div>}>
+            <CreateEventForm
+                studios={allStudios}
+                initialStartTime={start_time}
+                initialEndTime={end_time}
+                initialStudioId={studio_id}
+            />
+        </Suspense>
     );
 }

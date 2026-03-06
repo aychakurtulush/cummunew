@@ -61,29 +61,40 @@ export async function createEvent(prevState: any, formData: FormData) {
     const location_type = formData.get('location_type') as string
     const studio_id = formData.get('studio_id') as string || null
     let city = formData.get('city') as string || ""
-    const price = parseFloat(formData.get('price') as string)
-    const capacity = parseInt(formData.get('capacity') as string)
+    const priceStr = formData.get('price') as string
+    const price = priceStr ? parseFloat(priceStr) : 0
+    const capacityStr = formData.get('capacity') as string
+    const capacity = capacityStr ? parseInt(capacityStr) : 0
+
+    if (isNaN(price) || isNaN(capacity)) {
+        return { message: "Price and capacity must be valid numbers." }
+    }
 
     const imageFile = formData.get('image') as File | null
     let image_url = null
 
     // Upload image if present
     if (imageFile && imageFile.size > 0) {
-        const fileExt = imageFile.name.split('.').pop()
-        const fileName = `${Math.random()}.${fileExt}`
-        const filePath = `${user.id}/${fileName}`
+        try {
+            const fileExt = imageFile.name.split('.').pop()
+            const fileName = `${Math.random()}.${fileExt}`
+            const filePath = `${user.id}/${fileName}`
 
-        const { error: uploadError } = await supabase.storage
-            .from('event-images')
-            .upload(filePath, imageFile)
+            const { error: uploadError } = await supabase.storage
+                .from('event-images')
+                .upload(filePath, imageFile)
 
-        if (uploadError) {
-            console.error('Image upload error:', uploadError)
-            return { message: "Failed to upload image" }
+            if (uploadError) {
+                console.error('Image upload error:', uploadError)
+                return { message: "Failed to upload image" }
+            }
+
+            const { data: publicUrlData } = supabase.storage.from('event-images').getPublicUrl(filePath)
+            image_url = publicUrlData.publicUrl
+        } catch (e) {
+            console.error('Image processing error:', e)
+            return { message: "Error processing image upload" }
         }
-
-        const { data: publicUrlData } = supabase.storage.from('event-images').getPublicUrl(filePath)
-        image_url = publicUrlData.publicUrl
     }
 
     const location_name = formData.get('location_name') as string || null
@@ -129,7 +140,7 @@ export async function createEvent(prevState: any, formData: FormData) {
     const payment_instructions = formData.get('payment_instructions') as string || null
 
     try {
-        const { error } = await supabase.from('events').insert({
+        const { error: insertError } = await supabase.from('events').insert({
             creator_user_id: user.id,
             studio_id: location_type === 'studio' ? studio_id : null,
             location_name,
@@ -151,19 +162,21 @@ export async function createEvent(prevState: any, formData: FormData) {
             status: 'approved' // Automatically approve for MVP
         })
 
-        if (error) {
-            console.error('Create event error:', error)
-            return { message: error.message }
+        if (insertError) {
+            console.error('Create event database error:', insertError)
+            return { message: insertError.message }
         }
 
         revalidatePath('/')
         revalidatePath('/host')
         revalidatePath('/host/events')
     } catch (err: any) {
-        // Essential: Next.js redirects work by throwing an error, so we must not catch it
-        if (err?.digest?.includes('NEXT_REDIRECT')) throw err
-        console.error('Unexpected error creating event:', err)
-        return { message: err.message || "An unexpected error occurred." }
+        // Next.js redirects work by throwing a special error
+        if (err?.digest?.includes('NEXT_REDIRECT')) {
+            throw err
+        }
+        console.error('Unexpected error in createEvent action:', err)
+        return { message: err.message || "An unexpected error occurred while saving the event." }
     }
 
     redirect('/host/events?success=created')
