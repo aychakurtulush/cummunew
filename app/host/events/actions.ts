@@ -87,9 +87,12 @@ export async function createEvent(prevState: any, formData: FormData) {
         image_url = publicUrlData.publicUrl
     }
 
+    const location_name = formData.get('location_name') as string || null
+    const location_address = formData.get('location_address') as string || null
+
     if (location_type === 'studio' && studio_id) {
         // 1. Fetch studio location to use as city
-        const { data: studio } = await supabase.from('studios').select('location').eq('id', studio_id).single()
+        const { data: studio } = await supabase.from('studios').select('location, name').eq('id', studio_id).single()
         city = studio?.location || "Berlin"
 
         // 2. Check for overlapping events in the same studio
@@ -114,6 +117,8 @@ export async function createEvent(prevState: any, formData: FormData) {
     const { error } = await supabase.from('events').insert({
         creator_user_id: user.id,
         studio_id: location_type === 'studio' ? studio_id : null,
+        location_name,
+        location_address,
         title,
         description,
         price,

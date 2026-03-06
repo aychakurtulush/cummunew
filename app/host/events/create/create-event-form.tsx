@@ -280,10 +280,20 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
                                 </div>
                             )
                         ) : (
-                            <div className="space-y-2">
-                                <label htmlFor="city" className="text-sm font-semibold text-stone-700">City / District</label>
-                                <Input id="city" name="city" placeholder="e.g. Kreuzberg" required />
-                            </div>
+                            <>
+                                <div className="space-y-2">
+                                    <label htmlFor="location_name" className="text-sm font-semibold text-stone-700">Venue Name</label>
+                                    <Input id="location_name" name="location_name" placeholder="e.g. Mauerpark, My Apartment, etc." required />
+                                </div>
+                                <div className="space-y-2">
+                                    <label htmlFor="location_address" className="text-sm font-semibold text-stone-700">Full Address</label>
+                                    <Input id="location_address" name="location_address" placeholder="e.g. Bernauer Str. 63, 13355 Berlin" required />
+                                </div>
+                                <div className="space-y-2">
+                                    <label htmlFor="city" className="text-sm font-semibold text-stone-700">District (for search)</label>
+                                    <Input id="city" name="city" placeholder="e.g. Prenzlauer Berg" required />
+                                </div>
+                            </>
                         )}
                     </div>
 

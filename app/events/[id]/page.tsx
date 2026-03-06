@@ -224,7 +224,11 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                             <div className="flex items-center gap-4 text-stone-600">
                                 <div className="flex items-center gap-1.5">
                                     <MapPin className="h-4 w-4" />
-                                    <span>{event.location_type === 'partner_venue' ? 'Partner Venue' : event.city}, {event.city}</span>
+                                    <span>
+                                        {event.studio_id
+                                            ? `${event.studios?.name}, ${event.city}`
+                                            : `${event.location_name}, ${event.location_address}`}
+                                    </span>
                                 </div>
                                 {event.avg_rating && (
                                     <div className="flex items-center gap-1.5 text-amber-600 font-bold">
