@@ -30,17 +30,15 @@ const ZOOM_LEVEL = 11;
 export function EventsMap({ events, mapboxToken }: { events: any[], mapboxToken: string }) {
     // Filter events that actually have coordinates (for MVP, we'll fake some coordinates around Berlin if they don't have them)
     const mapEvents = useMemo(() => {
-        return events.map((event) => {
-            const hasCoords = event.latitude && event.longitude;
-            const randLat = 52.48 + (Math.random() * 0.08);
-            const randLng = 13.35 + (Math.random() * 0.15);
-
-            return {
-                ...event,
-                latitude: hasCoords ? Number(event.latitude) : randLat,
-                longitude: hasCoords ? Number(event.longitude) : randLng,
-            };
-        });
+        return events
+            .filter(event => event.latitude && event.longitude)
+            .map((event) => {
+                return {
+                    ...event,
+                    latitude: Number(event.latitude),
+                    longitude: Number(event.longitude),
+                };
+            });
     }, [events]);
 
     if (!mapboxToken) return null;

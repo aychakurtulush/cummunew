@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
 import { parseBerlinInput } from '@/lib/date-utils';
+import { geocodeAddress } from '@/lib/geocoding';
 
 export async function createEvent(prevState: any, formData: FormData) {
     const supabase = await createClient()
@@ -66,16 +67,17 @@ export async function createEvent(prevState: any, formData: FormData) {
     }
 
     // Basic validation could go here
+    const location_type = formData.get('location_type') as 'home' | 'studio' | 'partner_venue';
     let city = formData.get('city') as string;
-    const studioId = formData.get('studio_id') as string || null;
+    const studio_id = formData.get('studio_id') as string || null;
 
     // If studio_id is present but city is missing (likely hidden in form), fetch studio location
-    if (studioId && !city) {
+    if (studio_id && !city) {
         try {
             const { data: studio } = await supabase
                 .from('studios')
                 .select('location')
-                .eq('id', studioId)
+                .eq('id', studio_id)
                 .single();
 
             if (studio && studio.location) {
@@ -88,6 +90,27 @@ export async function createEvent(prevState: any, formData: FormData) {
         }
     }
 
+    const location_name = formData.get('location_name') as string || null;
+    const location_address = formData.get('location_address') as string || null;
+
+    let latitude = null;
+    let longitude = null;
+
+    if (location_type === 'studio' && studio_id) {
+        // 1. Fetch studio location and coordinates
+        const { data: studio } = await supabase.from('studios').select('location, latitude, longitude').eq('id', studio_id).single();
+        city = studio?.location?.split(',')[0].trim() || "Berlin";
+        latitude = studio?.latitude;
+        longitude = studio?.longitude;
+    } else if (location_address) {
+        // Geocode custom address
+        const geoResult = await geocodeAddress(location_address);
+        if (geoResult) {
+            latitude = geoResult.latitude;
+            longitude = geoResult.longitude;
+        }
+    }
+
     const rawData = {
         creator_user_id: user.id,
         title: formData.get('title') as string,
@@ -97,15 +120,19 @@ export async function createEvent(prevState: any, formData: FormData) {
         start_time: startTime.toISOString(),
         end_time: endTime.toISOString(),
         location_type: formData.get('location_type') as 'home' | 'studio' | 'partner_venue',
-        city: city || 'Berlin', // Fallback to Berlin if all else fails
+        city: city || 'Berlin',
         category: formData.get('category') as string,
         image_url: imageUrl,
-        studio_id: studioId,
-        status: 'pending', // Default to pending for approval flow, or 'approved' for MVP
+        studio_id: studio_id,
+        status: 'pending',
         seating_type: formData.get('seating_type') || 'mixed',
         materials_provided: formData.get('materials_provided') === 'true',
         is_guided: formData.get('is_guided') === 'true',
-        payment_instructions: formData.get('payment_instructions') as string || null
+        payment_instructions: formData.get('payment_instructions') as string || null,
+        location_name,
+        location_address,
+        latitude,
+        longitude
     }
 
     // For MVP, auto-approve
@@ -156,6 +183,7 @@ export async function updateEvent(prevState: any, formData: FormData) {
         return { message: "End time must be after the start time." };
     }
 
+    const location_type = formData.get('location_type') as 'home' | 'studio' | 'partner_venue';
     const rawData = {
         title: formData.get('title') as string,
         description: formData.get('description') as string,
@@ -163,7 +191,7 @@ export async function updateEvent(prevState: any, formData: FormData) {
         capacity: parseInt(formData.get('capacity') as string),
         start_time: startTime.toISOString(),
         end_time: endTime.toISOString(),
-        location_type: formData.get('location_type') as 'home' | 'studio' | 'partner_venue',
+        location_type: location_type,
         city: formData.get('city') as string,
         category: formData.get('category') as string,
         studio_id: formData.get('studio_id') as string || null,
@@ -171,11 +199,37 @@ export async function updateEvent(prevState: any, formData: FormData) {
         materials_provided: formData.get('materials_provided') === 'true',
         is_guided: formData.get('is_guided') === 'true',
         payment_instructions: formData.get('payment_instructions') as string || null
+    };
+
+    const location_name = formData.get('location_name') as string || null;
+    const location_address = formData.get('location_address') as string || null;
+
+    let latitude = null;
+    let longitude = null;
+
+    if (location_type === 'studio' && rawData.studio_id) {
+        const { data: studio } = await supabase.from('studios').select('latitude, longitude').eq('id', rawData.studio_id).single();
+        latitude = studio?.latitude;
+        longitude = studio?.longitude;
+    } else if (location_address) {
+        const geoResult = await geocodeAddress(location_address);
+        if (geoResult) {
+            latitude = geoResult.latitude;
+            longitude = geoResult.longitude;
+        }
     }
+
+    const updateData: any = {
+        ...rawData,
+        location_name,
+        location_address,
+        latitude,
+        longitude
+    };
 
     const { error } = await supabase
         .from('events')
-        .update(rawData)
+        .update(updateData)
         .eq('id', eventId)
         .eq('creator_user_id', user.id); // Security check
 
@@ -186,7 +240,7 @@ export async function updateEvent(prevState: any, formData: FormData) {
 
     revalidatePath('/host');
     revalidatePath(`/events/${eventId}`);
-    revalidatePath(`/host/events/${eventId}/edit`);
+    revalidatePath(`/ host / events / ${eventId}/edit`);
 
     return { message: 'Success' }
 }
@@ -255,11 +309,25 @@ export async function createStudio(prevState: any, formData: FormData) {
             ? amenitiesString.split(',').map(s => s.trim()).filter(s => s.length > 0)
             : [];
 
+        const location = formData.get('location') as string;
+        let latitude = null;
+        let longitude = null;
+
+        if (location) {
+            const geoResult = await geocodeAddress(location);
+            if (geoResult) {
+                latitude = geoResult.latitude;
+                longitude = geoResult.longitude;
+            }
+        }
+
         const rawData = {
             owner_user_id: user.id,
             name: formData.get('name') as string,
             description: formData.get('description') as string,
-            location: formData.get('location') as string,
+            location: location,
+            latitude: latitude,
+            longitude: longitude,
             price_per_hour: parseFloat(formData.get('price_per_hour') as string) || 0,
             capacity: parseInt(formData.get('capacity') as string) || 0,
             amenities: amenities,
@@ -380,13 +448,28 @@ export async function updateStudio(prevState: any, formData: FormData) {
             ? amenitiesString.split(',').map(s => s.trim()).filter(s => s.length > 0)
             : undefined; // undefined means don't update if not present? Form likely has it.
 
+        const location = formData.get('location') as string;
+        let latitude = undefined;
+        let longitude = undefined;
+
+        if (location) {
+            const geoResult = await geocodeAddress(location);
+            if (geoResult) {
+                latitude = geoResult.latitude;
+                longitude = geoResult.longitude;
+            }
+        }
+
         const rawData: any = {
             name: formData.get('name') as string,
             description: formData.get('description') as string,
-            location: formData.get('location') as string,
+            location: location,
             price_per_hour: parseFloat(formData.get('price_per_hour') as string) || 0,
             capacity: parseInt(formData.get('capacity') as string) || 0,
         };
+
+        if (latitude !== undefined) rawData.latitude = latitude;
+        if (longitude !== undefined) rawData.longitude = longitude;
 
         if (amenities !== undefined) rawData.amenities = amenities;
 

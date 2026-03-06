@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { geocodeAddress } from "@/lib/geocoding"
 
 export async function toggleAttendance(bookingId: string, attended: boolean) {
     const supabase = await createClient()
@@ -100,6 +101,24 @@ export async function createEvent(prevState: any, formData: FormData) {
     const location_name = formData.get('location_name') as string || null
     const location_address = formData.get('location_address') as string || null
 
+    let latitude = null
+    let longitude = null
+
+    if (location_type === 'studio' && studio_id) {
+        // 1. Fetch studio location to use as city and get coordinates
+        const { data: studio } = await supabase.from('studios').select('location, latitude, longitude').eq('id', studio_id).single()
+        city = studio?.location || "Berlin"
+        latitude = studio?.latitude
+        longitude = studio?.longitude
+    } else if (location_address) {
+        // Geocode custom address
+        const geoResult = await geocodeAddress(location_address)
+        if (geoResult) {
+            latitude = geoResult.latitude
+            longitude = geoResult.longitude
+        }
+    }
+
     let start_time: string, end_time: string
     try {
         const startStr = formData.get('start_time') as string
@@ -131,7 +150,6 @@ export async function createEvent(prevState: any, formData: FormData) {
         if (overlappingEvents && overlappingEvents.length > 0) {
             return { message: "Studio is already booked for this time." }
         }
-
     }
 
     if (!city) {
@@ -160,6 +178,8 @@ export async function createEvent(prevState: any, formData: FormData) {
             materials_provided,
             is_guided,
             payment_instructions,
+            latitude,
+            longitude,
             status: 'approved' // Automatically approve for MVP
         })
 
