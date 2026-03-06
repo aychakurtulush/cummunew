@@ -204,6 +204,45 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
                         </div>
                     </div>
 
+                    {/* Availability Section */}
+                    <div className="mt-12 p-6 bg-white rounded-2xl border border-stone-100 shadow-sm">
+                        <div className="flex items-center gap-2 mb-6">
+                            <CalendarPlus className="h-5 w-5 text-moss-600" />
+                            <h2 className="text-xl font-serif font-bold text-stone-900">Studio Availability</h2>
+                        </div>
+
+                        {studio.upcomingEvents.length > 0 ? (
+                            <div className="space-y-3">
+                                {studio.upcomingEvents
+                                    .sort((a: any, b: any) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+                                    .map((event: any) => {
+                                        const start = new Date(event.start_time);
+                                        const end = new Date(event.end_time);
+                                        return (
+                                            <div key={event.id} className="flex items-center justify-between p-3 rounded-lg bg-stone-50 border border-stone-100">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 text-center py-1 px-2 bg-white rounded border border-stone-200 shadow-sm">
+                                                        <span className="text-[10px] uppercase font-bold text-stone-400 block leading-none">{start.toLocaleString('default', { month: 'short' })}</span>
+                                                        <span className="text-lg font-bold text-stone-800 leading-none">{start.getDate()}</span>
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-semibold text-stone-900">{event.title}</p>
+                                                        <p className="text-xs text-stone-500">
+                                                            {start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <Badge variant="outline" className="text-stone-400 border-stone-200 bg-white">Booked</Badge>
+                                            </div>
+                                        );
+                                    })
+                                }
+                            </div>
+                        ) : (
+                            <p className="text-stone-500 italic text-center py-4">No bookings scheduled.</p>
+                        )}
+                    </div>
+
                     {/* Events Section */}
                     <div className="mt-12 space-y-6">
                         <div className="flex items-center justify-between">

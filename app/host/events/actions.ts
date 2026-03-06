@@ -88,9 +88,23 @@ export async function createEvent(prevState: any, formData: FormData) {
     }
 
     if (location_type === 'studio' && studio_id) {
-        // Fetch studio location to use as city
+        // 1. Fetch studio location to use as city
         const { data: studio } = await supabase.from('studios').select('location').eq('id', studio_id).single()
         city = studio?.location || "Berlin"
+
+        // 2. Check for overlapping events in the same studio
+        const { data: overlappingEvents } = await supabase
+            .from('events')
+            .select('id')
+            .eq('studio_id', studio_id)
+            .eq('status', 'approved')
+            .lt('start_time', end_time)
+            .gt('end_time', start_time)
+            .limit(1);
+
+        if (overlappingEvents && overlappingEvents.length > 0) {
+            return { message: "Studio is already booked for this time." }
+        }
     }
 
     if (!city) {
