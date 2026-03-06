@@ -15,8 +15,7 @@ import { toBerlinInput } from "@/lib/date-utils";
 import { useState, useEffect } from "react";
 import dynamic from 'next/dynamic';
 
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
-import 'react-quill/dist/quill.snow.css';
+
 
 interface Studio {
     id: string;
@@ -30,9 +29,10 @@ interface CreateEventFormProps {
     initialStartTime?: string;
     initialEndTime?: string;
     initialStudioId?: string;
+    initialStudioBookingId?: string;
 }
 
-export default function CreateEventForm({ studios, initialStartTime, initialEndTime, initialStudioId }: CreateEventFormProps) {
+export default function CreateEventForm({ studios, initialStartTime, initialEndTime, initialStudioId, initialStudioBookingId }: CreateEventFormProps) {
     const [state, formAction] = useActionState(createEvent, initialState)
 
     const [locationType, setLocationType] = useState<string>(initialStudioId ? "studio" : "home");
@@ -45,6 +45,7 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
     );
     const [price, setPrice] = useState<string>("");
     const [imageSelected, setImageSelected] = useState(false);
+    const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
     const [clientError, setClientError] = useState('');
     const [description, setDescription] = useState('');
 
@@ -119,24 +120,15 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
 
                     <div className="space-y-2">
                         <label className="text-sm font-semibold text-stone-700">Description</label>
-                        <input type="hidden" name="description" value={description} />
-                        <div className="bg-white rounded-lg border border-stone-200 overflow-hidden [&_.ql-container]:min-h-[150px] [&_.ql-container]:text-sm [&_.ql-editor]:min-h-[150px]">
-                            <ReactQuill
-                                theme="snow"
-                                value={description}
-                                onChange={setDescription}
-                                placeholder="Describe the vibe, what people will do, and any requirements..."
-                                modules={{
-                                    toolbar: [
-                                        [{ 'header': [1, 2, false] }],
-                                        ['bold', 'italic', 'underline'],
-                                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                                        ['link'],
-                                        ['clean']
-                                    ],
-                                }}
-                            />
-                        </div>
+                        <textarea
+                            id="description"
+                            name="description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Describe the vibe, what people will do, and any requirements. (Use line breaks for formatting)"
+                            className="flex min-h-[150px] w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss-600/20 focus-visible:border-moss-600 resize-y"
+                            required
+                        />
                     </div>
 
                     <div className="space-y-4">
@@ -153,23 +145,24 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
                                     if (file) {
                                         const reader = new FileReader();
                                         reader.onloadend = () => {
-                                            const preview = document.getElementById('image-preview') as HTMLImageElement;
-                                            if (preview) preview.src = reader.result as string;
-                                            document.getElementById('preview-container')?.classList.remove('hidden');
+                                            setImagePreviewUrl(reader.result as string);
                                             setImageSelected(true);
                                         };
                                         reader.readAsDataURL(file);
                                     } else {
                                         setImageSelected(false);
+                                        setImagePreviewUrl(null);
                                     }
                                 }}
                             />
-                            <div id="preview-container" className="hidden">
-                                <p className="text-xs text-stone-500 mb-2">Preview:</p>
-                                <div className="relative aspect-[16/9] w-full max-w-sm rounded-lg overflow-hidden border border-stone-200 bg-stone-100">
-                                    <img id="image-preview" src="" alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
+                            {imagePreviewUrl && (
+                                <div>
+                                    <p className="text-xs text-stone-500 mb-2">Preview:</p>
+                                    <div className="relative aspect-[16/9] w-full max-w-sm rounded-lg overflow-hidden border border-stone-200 bg-stone-100">
+                                        <img src={imagePreviewUrl} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                             <p className="text-xs text-stone-500 italic">Square or landscape images work best.</p>
                         </div>
                     </div>

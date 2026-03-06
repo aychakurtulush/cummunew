@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BroadcastForm } from "@/components/host/broadcast-form";
 import { Mail, ClipboardList, LayoutDashboard, UserCheck, UserMinus } from "lucide-react";
 import { CheckInButton } from "@/components/host/check-in-button";
+import { formatEventDate } from "@/lib/date-utils";
 
 export default async function ManageEventPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -70,7 +71,7 @@ export default async function ManageEventPage({ params }: { params: Promise<{ id
                     <div className="flex items-center gap-2 text-stone-500 text-sm">
                         <Badge variant="outline" className="mr-2">{event.status}</Badge>
                         <Calendar className="h-3 w-3" />
-                        <span>{new Date(event.start_time).toLocaleDateString()}</span>
+                        <span>{formatEventDate(event.start_time, 'dd/MM/yyyy')}</span>
                     </div>
                 </div>
                 <div className="ml-auto flex gap-2">
@@ -210,7 +211,7 @@ export default async function ManageEventPage({ params }: { params: Promise<{ id
                                                 <div className="font-bold text-stone-900">{booking.profiles?.full_name || 'Guest'}</div>
                                                 <div className="text-xs text-stone-500 flex items-center gap-1">
                                                     <Calendar className="h-3 w-3" />
-                                                    {new Date(booking.created_at).toLocaleDateString()}
+                                                    {formatEventDate(booking.created_at, 'dd/MM/yyyy')}
                                                 </div>
                                             </div>
                                         </div>

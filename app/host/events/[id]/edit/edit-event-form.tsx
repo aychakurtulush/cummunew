@@ -9,10 +9,7 @@ import { useActionState } from 'react'
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
 
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
-import 'react-quill/dist/quill.snow.css';
 
 const initialState = {
     message: '',
@@ -108,24 +105,15 @@ export default function EditEventForm({ event, studios }: EditEventFormProps) {
 
                     <div className="space-y-2">
                         <label className="text-sm font-semibold text-stone-700">Description</label>
-                        <input type="hidden" name="description" value={description} />
-                        <div className="bg-white rounded-lg border border-stone-200 overflow-hidden [&_.ql-container]:min-h-[150px] [&_.ql-container]:text-sm [&_.ql-editor]:min-h-[150px]">
-                            <ReactQuill
-                                theme="snow"
-                                value={description}
-                                onChange={setDescription}
-                                placeholder="Describe the vibe, what people will do, and any requirements..."
-                                modules={{
-                                    toolbar: [
-                                        [{ 'header': [1, 2, false] }],
-                                        ['bold', 'italic', 'underline'],
-                                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                                        ['link'],
-                                        ['clean']
-                                    ],
-                                }}
-                            />
-                        </div>
+                        <textarea
+                            id="description"
+                            name="description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Describe the vibe, what people will do, and any requirements. (Use line breaks for formatting)"
+                            className="flex min-h-[150px] w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss-600/20 focus-visible:border-moss-600 resize-y"
+                            required
+                        />
                     </div>
                 </div>
 

@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { StudioActions } from "@/components/studio/studio-actions";
 import { ReportButton } from "@/components/shared/report-button";
+import { formatEventDate } from "@/lib/date-utils";
 
 async function getStudio(id: string) {
     const supabase = await createClient();
@@ -267,7 +268,7 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
                                             </div>
                                             <CardHeader className="p-4 flex-grow">
                                                 <span className="text-xs font-bold uppercase tracking-wider text-moss-700 block mb-1">
-                                                    {new Date(event.start_time).toLocaleDateString()}
+                                                    {formatEventDate(event.start_time)}
                                                 </span>
                                                 <CardTitle className="text-base leading-tight group-hover:text-moss-700 transition-colors line-clamp-2">
                                                     {event.title}

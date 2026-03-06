@@ -131,6 +131,7 @@ export async function createEvent(prevState: any, formData: FormData) {
         if (overlappingEvents && overlappingEvents.length > 0) {
             return { message: "Studio is already booked for this time." }
         }
+
     }
 
     if (!city) {

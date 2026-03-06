@@ -104,12 +104,14 @@ export default async function BookingsPage() {
                 <div className="space-y-4">
                     {allBookings.map((booking: any) => {
                         const isEvent = booking.type === 'event';
+                        const studio = !isEvent ? (Array.isArray(booking.raw.studio) ? booking.raw.studio[0] : booking.raw.studio) : null;
+
                         const title = isEvent ? booking.events.title : booking.details.title;
                         const location = isEvent ? booking.events.city : booking.details.location;
                         const startTime = isEvent ? booking.events.start_time : booking.details.start_time;
                         const imageUrl = isEvent ? booking.events.image_url : booking.details.image_url;
                         const category = isEvent ? booking.events.category : 'Studio';
-                        const linkHref = isEvent ? `/events/${booking.events.id}` : `/studios/${booking.raw.studio.id}`;
+                        const linkHref = isEvent ? `/events/${booking.events.id}` : `/studios/${studio?.id}`;
 
                         return (
                             <div key={booking.id} className="bg-white rounded-xl border border-stone-200 p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 hover:shadow-sm transition-shadow">
@@ -148,7 +150,7 @@ export default async function BookingsPage() {
                                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-stone-600">
                                         <div className="flex items-center gap-1.5">
                                             <Calendar className="h-3.5 w-3.5" />
-                                            {formatEventDate(startTime, 'EEE, MMM d, HH:mm')}
+                                            {formatEventDate(startTime, 'dd/MM/yyyy, HH:mm')}
                                         </div>
                                         <div className="flex items-center gap-1.5">
                                             <MapPin className="h-3.5 w-3.5" />
@@ -168,12 +170,13 @@ export default async function BookingsPage() {
                                     )}
 
                                     {!isEvent && (booking.status === 'approved' || booking.status === 'confirmed') && (
-                                        <Link href={`/host/events/create?studio_id=${booking.raw.studio?.id}&start_time=${encodeURIComponent(booking.raw.start_time)}&end_time=${encodeURIComponent(booking.raw.end_time)}`}>
+                                        <Link href={`/host/events/create?studio_id=${studio?.id}&start_time=${encodeURIComponent(booking.raw.start_time)}&end_time=${encodeURIComponent(booking.raw.end_time)}&studio_booking_id=${booking.id}`}>
                                             <Button size="sm" className="bg-moss-600 hover:bg-moss-700 text-white">
                                                 Create Event
                                             </Button>
                                         </Link>
                                     )}
+
 
                                     {!isEvent && booking.status === 'pending' && (
                                         <CancelInquiryButton inquiryId={booking.id} />

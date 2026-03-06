@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { FollowButton } from "@/components/host/follow-button";
+import { formatEventDate } from "@/lib/date-utils";
 
 export default async function HostProfilePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -206,7 +207,7 @@ export default async function HostProfilePage({ params }: { params: Promise<{ id
                                                 <CardContent className="p-6">
                                                     <h3 className="text-xl font-bold text-stone-900 mb-3 line-clamp-1 group-hover:text-moss-700 transition-colors uppercase tracking-tight">{event.title}</h3>
                                                     <div className="flex flex-col gap-2 text-stone-500 text-sm">
-                                                        <span className="flex items-center gap-2"><Calendar className="h-4 w-4 text-moss-500" /> {new Date(event.start_time).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                                                        <span className="flex items-center gap-2"><Calendar className="h-4 w-4 text-moss-500" /> {formatEventDate(event.start_time, 'dd/MM/yyyy')}</span>
                                                         <span className="flex items-center gap-2"><MapPin className="h-4 w-4 text-moss-500" /> {event.city}</span>
                                                     </div>
                                                     <div className="mt-6 flex items-center justify-between pt-4 border-t border-stone-100">
@@ -245,7 +246,7 @@ export default async function HostProfilePage({ params }: { params: Promise<{ id
                                                         </div>
                                                         <div>
                                                             <h4 className="font-bold text-stone-700 group-hover:text-stone-900 transition-colors uppercase tracking-tighter">{event.title}</h4>
-                                                            <p className="text-xs text-stone-500">{new Date(event.start_time).toLocaleDateString()}</p>
+                                                            <p className="text-xs text-stone-500">{formatEventDate(event.start_time, 'dd/MM/yyyy')}</p>
                                                         </div>
                                                     </div>
                                                     <Badge variant="outline" className="text-stone-400 border-stone-200 font-normal">Concluded</Badge>

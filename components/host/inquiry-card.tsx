@@ -9,6 +9,7 @@ import { updateInquiryStatus, deleteInquiry } from "@/app/host/inquiries/actions
 import { toast } from "sonner";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { formatEventDate } from "@/lib/date-utils";
 import { Trash2 } from "lucide-react";
 
 export function InquiryCard({ inquiry }: { inquiry: any }) {
@@ -81,7 +82,7 @@ export function InquiryCard({ inquiry }: { inquiry: any }) {
                             </Avatar>
                             <div>
                                 <h3 className="font-semibold text-stone-900">{inquiry.requester.name}</h3>
-                                <p className="text-xs text-stone-500">Requested {new Date(inquiry.created_at).toLocaleDateString()}</p>
+                                <p className="text-xs text-stone-500">Requested {formatEventDate(inquiry.created_at)}</p>
                             </div>
                         </div>
                         <Badge variant="secondary" className={cn("capitalize", statusColors[inquiry.status as keyof typeof statusColors])}>
@@ -92,7 +93,7 @@ export function InquiryCard({ inquiry }: { inquiry: any }) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div className="flex items-center gap-2 text-sm text-stone-600">
                             <Calendar className="h-4 w-4 text-stone-400" />
-                            <span>{new Date(inquiry.start_time).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</span>
+                            <span>{formatEventDate(inquiry.start_time, 'dd/MM/yyyy')}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-stone-600">
                             <Clock className="h-4 w-4 text-stone-400" />

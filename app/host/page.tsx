@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { BookingActionButtons } from "@/components/host/booking-action-buttons";
+import { formatEventDate } from "@/lib/date-utils";
 
 export default async function HostDashboardOverview() {
     const supabase = await createClient();
@@ -188,7 +189,7 @@ export default async function HostDashboardOverview() {
                                                 {inquiry.requester_name} wants to book {inquiry.studio?.name}
                                             </h4>
                                             <p className="text-xs text-stone-500">
-                                                {new Date(inquiry.start_time).toLocaleDateString()} • {new Date(inquiry.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(inquiry.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                {formatEventDate(inquiry.start_time, 'dd/MM/yyyy')} • {new Date(inquiry.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(inquiry.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </div>
                                     </div>
@@ -216,7 +217,7 @@ export default async function HostDashboardOverview() {
                                         </div>
                                         <div>
                                             <h4 className="font-semibold text-stone-900 text-sm">Request for "{booking.events?.title}"</h4>
-                                            <p className="text-xs text-stone-500">Received {new Date(booking.created_at).toLocaleDateString()}</p>
+                                            <p className="text-xs text-stone-500">Received {formatEventDate(booking.created_at, 'dd/MM/yyyy')}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
@@ -248,7 +249,7 @@ export default async function HostDashboardOverview() {
                                 <div>
                                     <h4 className="font-semibold text-stone-900 text-sm">{event.title}</h4>
                                     <p className="text-xs text-stone-500">
-                                        {new Date(event.start_time).toLocaleDateString()} • {event.capacity} spots
+                                        {formatEventDate(event.start_time, 'dd/MM/yyyy')} • {event.capacity} spots
                                     </p>
                                 </div>
                                 <Button variant="ghost" size="sm" asChild>

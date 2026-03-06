@@ -7,7 +7,7 @@ const BERLIN_TZ = 'Europe/Berlin';
  * Formats a date string (ISO) into a localized date string in Berlin Time.
  * Example: "Sat, Oct 27"
  */
-export const formatEventDate = (dateString?: string, formatStr: string = 'EEE, MMM d') => {
+export const formatEventDate = (dateString?: string, formatStr: string = 'dd/MM/yyyy') => {
     if (!dateString) return "Date TBD";
     try {
         const date = new Date(dateString);

@@ -12,6 +12,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { DeleteEventMenuItem } from "./components/delete-event-menu-item";
+import { formatEventDate } from "@/lib/date-utils";
 
 export default async function HostEventsPage() {
     const supabase = await createClient();
@@ -27,7 +28,7 @@ export default async function HostEventsPage() {
             events = data.map((e: any) => ({
                 id: e.id,
                 title: e.title,
-                date: new Date(e.start_time).toLocaleDateString(),
+                date: formatEventDate(e.start_time, 'dd/MM/yyyy'),
                 status: e.status === 'approved' ? 'Active' : 'Draft',
                 sold: 0, // Implement real booking count later
                 capacity: e.capacity,

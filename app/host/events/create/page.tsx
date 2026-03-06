@@ -6,12 +6,13 @@ import { Suspense } from "react";
 export default async function CreateEventPage({
     searchParams,
 }: {
-    searchParams: Promise<{ studio_id?: string; start_time?: string; end_time?: string }>
+    searchParams: Promise<{ studio_id?: string; start_time?: string; end_time?: string; studio_booking_id?: string }>
 }) {
     const supabase = await createClient();
-    const { studio_id, start_time, end_time } = await searchParams;
+    const { studio_id, start_time, end_time, studio_booking_id } = await searchParams;
 
     if (!supabase) {
+
         return <div>Database connection error</div>;
     }
 
@@ -55,7 +56,9 @@ export default async function CreateEventPage({
                 initialStartTime={start_time}
                 initialEndTime={end_time}
                 initialStudioId={studio_id}
+                initialStudioBookingId={studio_booking_id}
             />
+
         </Suspense>
     );
 }

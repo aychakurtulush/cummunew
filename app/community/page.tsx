@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Suspense } from "react";
 import { CommunitySkeleton } from "@/components/community/community-skeleton";
+import { formatEventDate } from "@/lib/date-utils";
 
 export default async function CommunityPage() {
     const supabase = await createClient();
@@ -106,7 +107,7 @@ export default async function CommunityPage() {
                                             <div className="absolute top-0 -left-[9px] w-4 h-4 rounded-full bg-stone-200 border-4 border-stone-50 group-hover:bg-moss-500 transition-colors"></div>
                                             <div className="space-y-3">
                                                 <div className="flex items-center gap-2 text-xs text-stone-400 font-medium">
-                                                    <span>{new Date(event.created_at).toLocaleDateString()}</span>
+                                                    <span>{formatEventDate(event.created_at, 'dd/MM/yyyy')}</span>
                                                     <span>•</span>
                                                     <span className="text-moss-600 font-bold uppercase tracking-wider">New Event published</span>
                                                 </div>
@@ -146,7 +147,7 @@ export default async function CommunityPage() {
                                                 <div className="absolute top-0 -left-[9px] w-4 h-4 rounded-full bg-stone-200 border-4 border-stone-50 group-hover:bg-amber-500 transition-colors"></div>
                                                 <div className="space-y-1">
                                                     <div className="flex items-center gap-2 text-xs text-stone-400 font-medium">
-                                                        <span>{new Date(booking.created_at).toLocaleDateString()}</span>
+                                                        <span>{formatEventDate(booking.created_at, 'dd/MM/yyyy')}</span>
                                                         <span>•</span>
                                                         <span className="text-amber-600 font-bold uppercase tracking-wider">New Spot Claimed</span>
                                                     </div>

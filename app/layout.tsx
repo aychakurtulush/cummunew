@@ -39,9 +39,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${fontSerif.variable} ${fontSans.variable} font-sans antialiased`} // Modified className
+        className={`${fontSerif.variable} ${fontSans.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
         {children}

@@ -345,7 +345,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                             className="flex justify-between items-center w-full p-3 rounded-lg border text-sm transition-all border-moss-600 bg-moss-50 ring-2 ring-moss-600 ring-opacity-20"
                                         >
                                             <div className="flex flex-col items-start">
-                                                <span className="font-medium">{formatEventDate(event.start_time)}</span>
+                                                <span className="font-medium">{formatEventDate(event.start_time, 'dd/MM/yyyy')}</span>
                                                 <span className="text-xs">{formatEventTime(event.start_time)} - {formatEventTime(event.end_time)}</span>
                                             </div>
                                             <div className="text-xs font-medium text-moss-700">

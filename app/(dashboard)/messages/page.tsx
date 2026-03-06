@@ -6,6 +6,8 @@ import { Search, Send } from "lucide-react";
 import Link from "next/link";
 import { getConversations } from "@/app/messages/actions";
 
+import { formatEventDate } from "@/lib/date-utils";
+
 const formatDate = (dateString?: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -13,8 +15,9 @@ const formatDate = (dateString?: string) => {
     if (date.toDateString() === now.toDateString()) {
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
-    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    return formatEventDate(dateString, 'dd/MM/yyyy');
 }
+
 
 export default async function MessagesPage() {
     const conversations = await getConversations();
