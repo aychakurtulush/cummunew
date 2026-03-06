@@ -27,6 +27,33 @@ export async function createInquiry(data: {
         return { error: "Cannot book in the past" };
     }
 
+    // Overlap Check: Prevent booking if there's already an 'approved' request for this time
+    const { data: overlappingInquiries } = await supabase
+        .from('studio_inquiries')
+        .select('id')
+        .eq('studio_id', data.studioId)
+        .eq('status', 'approved')
+        .lt('start_time', data.endTime)
+        .gt('end_time', data.startTime)
+        .limit(1);
+
+    if (overlappingInquiries && overlappingInquiries.length > 0) {
+        return { error: "This time slot is no longer available." };
+    }
+
+    // Overlap Check: Prevent booking if there's an event happening at the studio
+    const { data: overlappingEvents } = await supabase
+        .from('events')
+        .select('id')
+        .eq('studio_id', data.studioId)
+        .lt('start_time', data.endTime)
+        .gt('end_time', data.startTime)
+        .limit(1);
+
+    if (overlappingEvents && overlappingEvents.length > 0) {
+        return { error: "The studio is hosting an event during this time." };
+    }
+
     // Insert Inquiry
     const { error } = await supabase
         .from('studio_inquiries')
@@ -192,6 +219,45 @@ export async function updateInquiryStatus(inquiryId: string, newStatus: 'approve
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: "Unauthorized" };
 
+    // Fetch inquiry before updating to get times and verify overlap
+    const { data: inquiryToApprove } = await supabase
+        .from('studio_inquiries')
+        .select('studio_id, start_time, end_time')
+        .eq('id', inquiryId)
+        .single();
+
+    if (!inquiryToApprove) return { error: "Inquiry not found" };
+
+    if (newStatus === 'approved') {
+        // Check for overlapping APPROVED inquiries for the same studio
+        const { data: overlappingInquiries } = await supabase
+            .from('studio_inquiries')
+            .select('id')
+            .eq('studio_id', inquiryToApprove.studio_id)
+            .eq('status', 'approved')
+            .neq('id', inquiryId) // don't overlap with itself
+            .lt('start_time', inquiryToApprove.end_time)
+            .gt('end_time', inquiryToApprove.start_time)
+            .limit(1);
+
+        if (overlappingInquiries && overlappingInquiries.length > 0) {
+            return { error: "Studio is already booked by another confirmed request during this time." };
+        }
+
+        // Also check if an event is already taking place at this studio
+        const { data: overlappingEvents } = await supabase
+            .from('events')
+            .select('id')
+            .eq('studio_id', inquiryToApprove.studio_id)
+            .lt('start_time', inquiryToApprove.end_time)
+            .gt('end_time', inquiryToApprove.start_time)
+            .limit(1);
+
+        if (overlappingEvents && overlappingEvents.length > 0) {
+            return { error: "You are already hosting an event at this studio during this time." };
+        }
+    }
+
     // Update
     const { data: inquiry, error } = await supabase
         .from('studio_inquiries')
@@ -265,22 +331,35 @@ export async function deleteInquiry(inquiryId: string) {
     // But let's check existence first to be nice.
 
     // 1. Fetch Inquiry to check time and ownership
+    // 1. Fetch Inquiry to check time and ownership
     const { data: inquiry } = await supabase
         .from('studio_inquiries')
-        .select('requester_id, start_time')
+        .select(`
+            requester_id, 
+            start_time,
+            studio:studios(owner_user_id)
+        `)
         .eq('id', inquiryId)
         .single();
 
     if (!inquiry) return { error: "Inquiry not found" };
-    if (inquiry.requester_id !== user.id) return { error: "Unauthorized" };
 
-    // 2. 24h Cancellation Policy Check
-    const startTime = new Date(inquiry.start_time);
-    const now = new Date();
-    const hoursDifference = (startTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+    // Allow either the requester OR the studio owner to delete
+    // @ts-ignore
+    const isOwner = inquiry.studio?.owner_user_id === user.id;
+    const isRequester = inquiry.requester_id === user.id;
 
-    if (hoursDifference < 24) {
-        return { error: "Cannot cancel less than 24 hours before the booking." };
+    if (!isRequester && !isOwner) return { error: "Unauthorized" };
+
+    // 2. 24h Cancellation Policy Check (Bypass for Host)
+    if (isRequester && !isOwner) {
+        const startTime = new Date(inquiry.start_time);
+        const now = new Date();
+        const hoursDifference = (startTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+        if (hoursDifference < 24) {
+            return { error: "Cannot cancel less than 24 hours before the booking." };
+        }
     }
 
     // 3. Delete

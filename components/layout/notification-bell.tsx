@@ -154,15 +154,16 @@ export function NotificationBell() {
             <DropdownMenuContent align="end" className="w-80 p-0 overflow-hidden bg-white/95 backdrop-blur-sm border-stone-200 shadow-xl rounded-xl">
                 <div className="flex items-center justify-between p-4 bg-stone-50/50 border-b border-stone-100">
                     <span className="font-serif font-semibold text-stone-900">Notifications</span>
-                    {unreadCount > 0 && (
+                    {notifications.length > 0 && (
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="h-auto p-0 text-xs text-moss-600 hover:text-moss-700 font-medium"
+                            className="h-auto p-0 text-xs text-moss-600 hover:text-moss-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                             onClick={(e) => {
                                 e.preventDefault();
                                 handleMarkAllRead();
                             }}
+                            disabled={unreadCount === 0}
                         >
                             Mark all read
                         </Button>
