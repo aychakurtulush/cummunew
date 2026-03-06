@@ -9,8 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { AttendanceToggle } from "@/components/host/attendance-toggle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BroadcastForm } from "@/components/host/broadcast-form";
-import { QRScanner } from "@/components/host/qr-scanner";
-import { Mail, ClipboardList, LayoutDashboard, Scan } from "lucide-react";
+import { Mail, ClipboardList, LayoutDashboard, UserCheck, UserMinus } from "lucide-react";
+import { CheckInButton } from "@/components/host/check-in-button";
 
 export default async function ManageEventPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -109,14 +109,22 @@ export default async function ManageEventPage({ params }: { params: Promise<{ id
                                 <CardHeader>
                                     <CardTitle className="text-lg">Event Performance</CardTitle>
                                 </CardHeader>
-                                <CardContent className="grid grid-cols-2 gap-4">
+                                <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     <div className="bg-stone-50 p-6 rounded-xl border border-stone-100">
                                         <div className="text-sm text-stone-500 mb-1">Total Bookings</div>
                                         <div className="text-3xl font-bold text-stone-900">{bookings?.length || 0}</div>
                                     </div>
                                     <div className="bg-stone-50 p-6 rounded-xl border border-stone-100">
-                                        <div className="text-sm text-stone-500 mb-1">Estimated Revenue</div>
-                                        <div className="text-3xl font-bold text-stone-900">€{(bookings?.filter(b => b.status === 'confirmed').length || 0) * event.price}</div>
+                                        <div className="text-sm text-stone-500 mb-1">Checked In</div>
+                                        <div className="text-3xl font-bold text-moss-600">{bookings?.filter(b => b.checked_in).length || 0}</div>
+                                    </div>
+                                    <div className="bg-stone-50 p-6 rounded-xl border border-stone-100">
+                                        <div className="text-sm text-stone-500 mb-1">No Shows</div>
+                                        <div className="text-3xl font-bold text-red-600">
+                                            {event.start_time && new Date(event.start_time) < new Date()
+                                                ? (bookings?.filter(b => b.status === 'confirmed' && !b.checked_in).length || 0)
+                                                : 0}
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -185,9 +193,10 @@ export default async function ManageEventPage({ params }: { params: Promise<{ id
                         <CardHeader className="flex flex-row items-center justify-between space-y-0">
                             <div className="space-y-1">
                                 <CardTitle className="text-lg font-serif">Guest List</CardTitle>
-                                <p className="text-xs text-stone-500 font-normal">{bookings?.length || 0} Total • {bookings?.filter(b => b.status === 'confirmed').length || 0} Confirmed</p>
+                                <p className="text-xs text-stone-500 font-normal">
+                                    {bookings?.length || 0} Total • {bookings?.filter(b => b.status === 'confirmed').length || 0} Confirmed • {bookings?.filter(b => b.checked_in).length || 0} Checked In
+                                </p>
                             </div>
-                            <QRScanner eventId={id} />
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
@@ -212,12 +221,10 @@ export default async function ManageEventPage({ params }: { params: Promise<{ id
                                             </Badge>
 
                                             {booking.status === 'confirmed' && (
-                                                <div className="pl-4 border-l border-stone-200">
-                                                    <AttendanceToggle
-                                                        bookingId={booking.id}
-                                                        initialAttended={booking.attended || false}
-                                                    />
-                                                </div>
+                                                <CheckInButton
+                                                    bookingId={booking.id}
+                                                    initialCheckedIn={booking.checked_in || false}
+                                                />
                                             )}
                                         </div>
                                     </div>

@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 import { CancelBookingButton } from "@/components/event/cancel-booking-button";
 import { CancelInquiryButton } from "./components/cancel-inquiry-button";
-import { TicketModal } from "@/components/event/ticket-modal";
 
 export default async function BookingsPage() {
     const supabase = await createClient();
@@ -132,10 +131,11 @@ export default async function BookingsPage() {
                                             booking.status === 'confirmed' || booking.status === 'approved' ? 'default' :
                                                 booking.status === 'declined' || booking.status === 'rejected' ? 'destructive' : 'secondary'
                                         } className={
-                                            booking.status === 'confirmed' || booking.status === 'approved' ? 'bg-moss-600 hover:bg-moss-700' :
-                                                booking.status === 'pending' ? 'bg-amber-100 text-amber-800 hover:bg-amber-200 border-amber-200' : ''
+                                            booking.checked_in ? 'bg-moss-900 border-moss-700' :
+                                                booking.status === 'confirmed' || booking.status === 'approved' ? 'bg-moss-600 hover:bg-moss-700' :
+                                                    booking.status === 'pending' ? 'bg-amber-100 text-amber-800 hover:bg-amber-200 border-amber-200' : ''
                                         }>
-                                            {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                            {booking.checked_in ? 'Attended' : booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                                         </Badge>
                                         <Badge variant="outline" className="text-stone-500 border-stone-200">
                                             {isEvent ? 'Event' : 'Studio'}
@@ -162,10 +162,6 @@ export default async function BookingsPage() {
                                     <Link href={linkHref}>
                                         <Button variant="ghost" size="sm">View {isEvent ? 'Event' : 'Studio'}</Button>
                                     </Link>
-
-                                    {isEvent && booking.status === 'confirmed' && (
-                                        <TicketModal booking={booking} />
-                                    )}
 
                                     {isEvent && booking.status === 'pending' && (
                                         <CancelBookingButton bookingId={booking.id} />
