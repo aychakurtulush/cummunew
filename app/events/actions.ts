@@ -57,6 +57,7 @@ export async function bookEvent(formData: FormData) {
 
     // --- Email Notification Start ---
     try {
+        // 1. Notify Host in-app
         await supabase
             .from('notifications')
             .insert({
@@ -65,15 +66,32 @@ export async function bookEvent(formData: FormData) {
                 title: 'New Booking Request',
                 message: `${user.user_metadata?.full_name || 'Someone'} requested to join "${eventData.title}"`,
                 link: '/host/events',
-                metadata: { event_id: eventId, booking_id: 'pending' }
+                metadata: { event_id: eventId, booking_id: insertedBooking.id }
             });
 
+        // 2. Fetch Host email and notify via email
+        const { createServiceRoleClient } = await import('@/lib/supabase/service');
+        const adminSupabase = createServiceRoleClient();
+        const { data: hostUser } = await adminSupabase.auth.admin.getUserById(eventData.creator_user_id);
+
+        if (hostUser?.user?.email) {
+            const { sendBookingRequestToHostEmail } = await import('@/lib/email');
+            const requesterName = user.user_metadata?.full_name || 'A Guest';
+            await sendBookingRequestToHostEmail(
+                hostUser.user.email,
+                requesterName,
+                eventData.title,
+                eventId
+            );
+        }
+
+        // 3. Notify Guest (Confirmation that request was sent)
         if (user.email) {
             const { sendBookingNotification } = await import('@/lib/email');
             await sendBookingNotification(user.email, eventData.title, eventId);
         }
     } catch (notificationError) {
-        console.error('[bookEvent] Notification failed');
+        console.error('[bookEvent] Notification failed:', notificationError);
     }
 
     revalidatePath('/bookings')

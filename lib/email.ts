@@ -5,6 +5,10 @@ const resend = process.env.RESEND_API_KEY
     ? new Resend(process.env.RESEND_API_KEY)
     : null;
 
+if (!resend && process.env.NODE_ENV === 'production') {
+    console.error("[Email] CRITICAL: RESEND_API_KEY is missing in production environment.");
+}
+
 export async function sendBookingNotification(
     userEmail: string,
     eventTitle: string,
@@ -42,6 +46,42 @@ export async function sendBookingNotification(
         console.log(`[Email] Successfully sent to ${userEmail}`);
     } catch (error) {
         console.error("[Email] Failed to send:", error);
+    }
+}
+
+export async function sendBookingRequestToHostEmail(
+    hostEmail: string,
+    requesterName: string,
+    eventTitle: string,
+    eventId: string
+) {
+    if (!resend) return;
+
+    try {
+        await resend.emails.send({
+            from: 'Communew <noreply@communew.com>',
+            to: hostEmail,
+            subject: `New Request: ${eventTitle} 📅`,
+            html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #4a5d23; margin-bottom: 24px;">New Booking Request!</h2>
+                    <p style="color: #44403c; line-height: 1.6;">
+                        <strong>${requesterName}</strong> has requested to join your event: <strong>${eventTitle}</strong>.
+                    </p>
+                    <p style="color: #44403c; line-height: 1.6;">
+                        Please log in to your host dashboard to review and approve this request.
+                    </p>
+                    <div style="margin-top: 32px;">
+                        <a href="${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/host/events" 
+                           style="background-color: #4a5d23; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                           Review Requests
+                        </a>
+                    </div>
+                </div>
+            `
+        });
+    } catch (error) {
+        console.error("[Email] Failed to send host booking notification:", error);
     }
 }
 

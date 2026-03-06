@@ -72,7 +72,19 @@ export async function createInquiry(data: {
                     }
                 }
 
-                // 3. Send Email Notification to Host
+                // 3. Send explicit in-app notification to host
+                await supabase
+                    .from('notifications')
+                    .insert({
+                        user_id: studio.owner_user_id,
+                        type: 'studio_inquiry',
+                        title: 'New Studio Request',
+                        message: `${user.user_metadata?.full_name || 'Someone'} requested to book ${studio.name}`,
+                        link: '/host/inquiries',
+                        metadata: { studio_id: data.studioId }
+                    });
+
+                // 4. Send Email Notification to Host
                 try {
                     const { createServiceRoleClient } = await import('@/lib/supabase/service');
                     const adminSupabase = createServiceRoleClient();
