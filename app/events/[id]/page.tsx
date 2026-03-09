@@ -21,6 +21,7 @@ import { WaitlistButton } from "@/components/event/waitlist-button";
 import { ReportButton } from "@/components/shared/report-button";
 import { ContactHostButton } from "@/components/event/contact-host-button";
 import { ImageGallery } from "@/components/shared/image-gallery";
+import { getTranslations } from 'next-intl/server';
 
 export async function generateMetadata(
     { params }: { params: Promise<{ id: string }> },
@@ -78,6 +79,8 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
     let isHost = false;
 
     let hostProfile: any = null;
+    const t = await getTranslations('event');
+    const tCommon = await getTranslations('common');
 
     if (supabase) {
         try {
@@ -191,10 +194,10 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 
             <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
 
-                {/* Breadcrumb / Back */}
+                {/* Back */}
                 <div className="mb-6">
                     <Link href="/" className="text-sm font-medium text-stone-500 hover:text-stone-900 transition-colors">
-                        ← Back to Explore
+                        {tCommon('backToExplore')}
                     </Link>
                 </div>
 
@@ -242,24 +245,23 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-stone-200">
                             <div className="flex items-start gap-4">
                                 <Avatar className="h-12 w-12 border border-stone-200">
-                                    {/* Use Google/Auth avatar if available, else placeholder */}
                                     <AvatarFallback className="bg-stone-100 text-stone-500">
                                         {(hostProfile?.full_name?.[0] || "H").toUpperCase()}
                                     </AvatarFallback>
                                 </Avatar>
                                 <div>
                                     <h3 className="text-lg font-serif font-semibold text-stone-900">
-                                        Hosted by{" "}
+                                        {t('hostedBy')}{" "}
                                         <Link href={`/host/${event.creator_user_id}`} className="hover:text-moss-700 hover:underline transition-colors">
                                             {hostProfile?.full_name || "Community Member"}
                                         </Link>
                                         {event.studios && (
                                             <span className="font-normal text-stone-600">
-                                                {' '}at <Link href={`/studios/${event.studio_id}`} className="hover:underline text-moss-700">{event.studios.name}</Link>
+                                                {' '}{t('at')} <Link href={`/studios/${event.studio_id}`} className="hover:underline text-moss-700">{event.studios.name}</Link>
                                             </span>
                                         )}
                                     </h3>
-                                    <p className="text-stone-500 text-sm mb-2">Verified Host</p>
+                                    <p className="text-stone-500 text-sm mb-2">{t('verifiedHost')}</p>
                                     <p className="text-stone-600 leading-relaxed text-sm max-w-lg">
                                         This event is organized by {hostProfile?.full_name || "a member"}
                                         {event.studios ? ` and hosted at ${event.studios.name}.` : "."}
@@ -275,7 +277,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 
                         {/* Description */}
                         <div className="prose prose-stone max-w-none">
-                            <h3 className="text-xl font-serif font-semibold text-stone-900 mb-4">About this event</h3>
+                            <h3 className="text-xl font-serif font-semibold text-stone-900 mb-4">{t('aboutEvent')}</h3>
                             <div
                                 className="text-stone-600 leading-relaxed text-lg [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-5 [&>ol]:list-decimal [&>ol]:pl-5 [&_a]:text-moss-600 [&_a]:underline"
                                 dangerouslySetInnerHTML={{ __html: event.description || '' }}
@@ -283,7 +285,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                         </div>
 
                         <div>
-                            <h3 className="text-lg font-serif font-semibold text-stone-900 mb-4">Event Details</h3>
+                            <h3 className="text-lg font-serif font-semibold text-stone-900 mb-4">{t('eventDetails')}</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-stone-600">
                                 {event.materials_provided && (
                                     <div className="flex items-center gap-2">
@@ -350,8 +352,8 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 flex items-start gap-2">
                                     <div className="mt-0.5">ℹ️</div>
                                     <div>
-                                        <strong>Payment handled directly by host.</strong><br />
-                                        <span className="opacity-80">You will receive payment instructions once your booking request is approved.</span>
+                                        <strong>{t('paymentNote')}</strong><br />
+                                        <span className="opacity-80">{t('paymentNoteBody')}</span>
                                     </div>
                                 </div>
                             )}
@@ -380,15 +382,15 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                 {isHost ? (
                                     <Link href={`/host/events/${event.id}/edit`}>
                                         <Button className="w-full h-12 text-base bg-stone-900 hover:bg-stone-800 text-white shadow-md">
-                                            Manage Event
+                                            {t('manageEvent')}
                                         </Button>
                                     </Link>
                                 ) : bookingStatus ? (
                                     <Link href="/bookings">
                                         <Button className="w-full h-12 text-base bg-emerald-600 hover:bg-emerald-700 shadow-md">
-                                            {bookingStatus === 'confirmed' ? 'Booking Confirmed' :
-                                                bookingStatus === 'declined' ? 'Booking Declined' :
-                                                    'Request Sent'}
+                                            {bookingStatus === 'confirmed' ? t('bookingConfirmed') :
+                                                bookingStatus === 'declined' ? t('bookingDeclined') :
+                                                    t('requestSent')}
                                         </Button>
                                     </Link>
                                 ) : spotsLeft === 0 ? (
@@ -406,15 +408,15 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                 )}
                                 {!isHost && (
                                     <p className="text-xs text-center text-stone-500">
-                                        {bookingStatus ? "View your bookings" : (spotsLeft === 0 ? "Event is at full capacity" : "No payment required to request to book.")}
+                                        {bookingStatus ? t('viewBookings') : (spotsLeft === 0 ? t('eventFull') : t('noPaymentRequired'))}
                                     </p>
                                 )}
                                 <div className="text-xs text-center text-stone-500 bg-stone-50 py-2 rounded-md border border-stone-100 mt-2">
-                                    <span className="font-semibold block mb-0.5">Cancellation Policy</span>
-                                    Cancel up to 24 hours before for a full refund.
+                                    <span className="font-semibold block mb-0.5">{t('cancellationPolicy')}</span>
+                                    {t('cancellationText')}
                                 </div>
                                 <div className="text-[10px] text-center text-stone-400 italic leading-tight px-2">
-                                    Communew connects hosts and guests. Hosts are responsible for the events they organize.
+                                    {t('communewDisclaimer')}
                                 </div>
                             </div>
 
@@ -433,7 +435,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                 <ReportButton
                                     targetId={event.id}
                                     targetType="event"
-                                    buttonText="Report Event"
+                                    buttonText={t('reportEvent')}
                                     className="text-stone-400 hover:text-red-600 hover:bg-red-50"
                                 />
                             </div>

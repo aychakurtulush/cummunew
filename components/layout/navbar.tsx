@@ -4,6 +4,7 @@ import { Suspense } from "react"
 import { NavLinks } from "./nav-links"
 import { NavbarActions } from "./navbar-actions"
 import { MobileNav } from "./mobile-nav"
+import { LanguageSwitcher } from "./language-switcher"
 
 export async function Navbar() {
     const supabase = await createClient()
@@ -12,7 +13,7 @@ export async function Navbar() {
     return (
         <header className="sticky top-0 z-50 w-full border-b border-stone-200 bg-white/90 backdrop-blur-md supports-[backdrop-filter]:bg-white/60">
             <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-                {/* Left: Logo */}
+                {/* Left: Logo + Nav */}
                 <div className="flex items-center gap-4 md:gap-6">
                     <Link href="/" className="text-2xl font-serif font-bold tracking-tight text-stone-900">
                         Communew.
@@ -23,8 +24,11 @@ export async function Navbar() {
 
                 <div className="flex-1" />
 
-                {/* Right: Actions */}
-                <NavbarActions user={user} />
+                {/* Right: Language switcher + Actions */}
+                <div className="flex items-center gap-3">
+                    <LanguageSwitcher />
+                    <NavbarActions user={user} />
+                </div>
             </div>
         </header>
     )

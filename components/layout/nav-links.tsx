@@ -3,15 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useTranslations } from 'next-intl';
 
 export function NavLinks() {
     const pathname = usePathname();
+    const t = useTranslations('nav');
 
     const links = [
-        { href: "/", label: "Explore" },
-        { href: "/studios", label: "Studios" },
-        { href: "/community", label: "Community" },
-        { href: "/about", label: "About" },
+        { href: "/", label: t('explore') },
+        { href: "/studios", label: t('studios') },
+        { href: "/community", label: t('community') },
+        { href: "/about", label: t('about') },
     ];
 
     return (

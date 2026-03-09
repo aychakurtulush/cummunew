@@ -13,6 +13,7 @@ import { StudioActions } from "@/components/studio/studio-actions";
 import { ReportButton } from "@/components/shared/report-button";
 import { formatEventDate } from "@/lib/date-utils";
 import { ImageGallery } from "@/components/shared/image-gallery";
+import { getTranslations } from 'next-intl/server';
 
 async function getStudio(id: string) {
     const supabase = await createClient();
@@ -49,6 +50,8 @@ async function getStudio(id: string) {
 export default async function StudioPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const studio = await getStudio(id);
+    const t = await getTranslations('studio');
+    const tCommon = await getTranslations('common');
 
     if (!studio) {
         return notFound();
@@ -118,15 +121,15 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
                             {/* Left Column: Description & Amenities */}
                             <div className="lg:col-span-2 space-y-8">
                                 <section className="space-y-4">
-                                    <h2 className="text-xl font-bold text-stone-900 font-serif">About the Space</h2>
+                                    <h2 className="text-xl font-bold text-stone-900 font-serif">{t('aboutSpace')}</h2>
                                     <p className="text-stone-600 leading-relaxed text-lg">
-                                        {studio.description || "No description provided."}
+                                        {studio.description || t('noDescription')}
                                     </p>
                                 </section>
 
                                 {studio.amenities && studio.amenities.length > 0 && (
                                     <section className="space-y-4">
-                                        <h2 className="text-xl font-bold text-stone-900 font-serif">Amenities</h2>
+                                        <h2 className="text-xl font-bold text-stone-900 font-serif">{t('amenities')}</h2>
                                         <div className="flex flex-wrap gap-2">
                                             {studio.amenities.map((amenity: string, i: number) => (
                                                 <Badge key={i} variant="secondary" className="px-3 py-1 bg-stone-100 text-stone-700 hover:bg-stone-200">
@@ -139,7 +142,7 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
 
                                 {studio.features && studio.features.length > 0 && (
                                     <section className="space-y-4">
-                                        <h2 className="text-xl font-bold text-stone-900 font-serif">Features</h2>
+                                        <h2 className="text-xl font-bold text-stone-900 font-serif">{t('features')}</h2>
                                         <div className="grid grid-cols-2 gap-3">
                                             {studio.features.map((feature: string, i: number) => (
                                                 <div key={i} className="flex items-center gap-2 text-stone-600">
@@ -153,7 +156,7 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
 
                                 {studio.space_rules && (
                                     <section className="space-y-4">
-                                        <h2 className="text-xl font-bold text-stone-900 font-serif">Space Rules</h2>
+                                        <h2 className="text-xl font-bold text-stone-900 font-serif">{t('spaceRules')}</h2>
                                         <div className="bg-stone-50 border border-stone-100 rounded-xl p-6 text-stone-600 leading-relaxed whitespace-pre-wrap">
                                             {studio.space_rules}
                                         </div>
@@ -164,21 +167,21 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
                             {/* Right Column: Pricing & Info */}
                             <div className="space-y-6">
                                 <div className="bg-stone-50 rounded-xl p-6 space-y-4 border border-stone-100">
-                                    <h3 className="font-semibold text-stone-900">Rental Rates</h3>
+                                    <h3 className="font-semibold text-stone-900">{t('rentalRates')}</h3>
                                     <div className="flex items-baseline gap-1">
                                         <span className="text-3xl font-bold text-stone-900">€{studio.price_per_hour}</span>
-                                        <span className="text-stone-500">/ hour</span>
+                                        <span className="text-stone-500">{t('perHour')}</span>
                                     </div>
                                     <div className="text-sm text-stone-500 space-y-2">
-                                        <p>• Minimum 2 hours booking</p>
-                                        <p>• Cleaning fee included</p>
+                                        <p>• {t('minimumBooking')}</p>
+                                        <p>• {t('cleaningFee')}</p>
                                     </div>
 
                                     <Separator />
 
                                     <div className="text-xs text-stone-500">
-                                        <span className="font-semibold text-stone-900 block mb-1">Cancellation Policy</span>
-                                        Cancel up to 24 hours before your booking start time for a full refund.
+                                        <span className="font-semibold text-stone-900 block mb-1">{t('cancellationPolicy')}</span>
+                                        {t('cancellationText')}
                                     </div>
                                 </div>
 
@@ -195,7 +198,7 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
                                     <ReportButton
                                         targetId={studio.id}
                                         targetType="studio"
-                                        buttonText="Report Studio"
+                                        buttonText={t('reportStudio')}
                                         className="text-stone-400 hover:text-red-600 hover:bg-red-50"
                                     />
                                 </div>
@@ -207,7 +210,7 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
                     <div className="mt-12 p-6 bg-white rounded-2xl border border-stone-100 shadow-sm">
                         <div className="flex items-center gap-2 mb-6">
                             <CalendarPlus className="h-5 w-5 text-moss-600" />
-                            <h2 className="text-xl font-serif font-bold text-stone-900">Studio Availability</h2>
+                            <h2 className="text-xl font-serif font-bold text-stone-900">{t('studioAvailability')}</h2>
                         </div>
 
                         {studio.upcomingEvents.length > 0 ? (
@@ -231,21 +234,21 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <Badge variant="outline" className="text-stone-400 border-stone-200 bg-white">Booked</Badge>
+                                                <Badge variant="outline" className="text-stone-400 border-stone-200 bg-white">{t('booked')}</Badge>
                                             </div>
                                         );
                                     })
                                 }
                             </div>
                         ) : (
-                            <p className="text-stone-500 italic text-center py-4">No bookings scheduled.</p>
+                            <p className="text-stone-500 italic text-center py-4">{t('noBookings')}</p>
                         )}
                     </div>
 
                     {/* Events Section */}
                     <div className="mt-12 space-y-6">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-2xl font-serif font-bold text-stone-900">Upcoming Events</h2>
+                            <h2 className="text-2xl font-serif font-bold text-stone-900">{t('upcomingEvents')}</h2>
                             {/* <Button variant="ghost" className="text-moss-700">View All</Button> */}
                         </div>
 

@@ -7,16 +7,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useTranslations } from 'next-intl';
 
 export function MobileNav() {
     const pathname = usePathname();
     const [open, setOpen] = useState(false);
+    const t = useTranslations('nav');
 
     const links = [
-        { href: "/", label: "Explore" },
-        { href: "/studios", label: "Studios" },
-        { href: "/community", label: "Community" },
-        { href: "/about", label: "About" },
+        { href: "/", label: t('explore') },
+        { href: "/studios", label: t('studios') },
+        { href: "/community", label: t('community') },
+        { href: "/about", label: t('about') },
     ];
 
     return (
@@ -24,7 +26,7 @@ export function MobileNav() {
             <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden">
                     <Menu className="h-6 w-6 text-stone-700" />
-                    <span className="sr-only">Toggle menu</span>
+                    <span className="sr-only">{t('toggleMenu')}</span>
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[400px]">
@@ -54,7 +56,7 @@ export function MobileNav() {
                     <div className="mt-4">
                         <Link href="/host/events/create" onClick={() => setOpen(false)}>
                             <Button className="w-full bg-moss-600 text-white">
-                                Host an Event
+                                {t('hostAnEvent')}
                             </Button>
                         </Link>
                     </div>

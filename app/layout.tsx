@@ -3,6 +3,9 @@ import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages, getLocale } from 'next-intl/server';
+import { RealtimeListener } from "@/components/notifications/realtime-listener";
 
 const fontSans = Inter({
   subsets: ["latin"],
@@ -14,15 +17,13 @@ const fontSerif = Fraunces({
   variable: "--font-serif",
 });
 
-import { RealtimeListener } from "@/components/notifications/realtime-listener";
-
 export const metadata: Metadata = {
   title: "Communew. | Local Hobby Events in Berlin",
   description: "Discover and book local hobby events, workshops, and meetups in Berlin.",
   openGraph: {
     title: "Communew. | Local Hobby Events in Berlin",
     description: "Discover and book local hobby events, workshops, and meetups in Berlin.",
-    url: "https://communew.vercel.app", // Adjust if domain changes
+    url: "https://communew.vercel.app",
     siteName: "Communew.",
     type: "website",
   },
@@ -33,19 +34,25 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body
         className={`${fontSerif.variable} ${fontSans.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
-        {children}
-        <Toaster />
+        <NextIntlClientProvider messages={messages}>
+          {children}
+          <RealtimeListener />
+          <Toaster />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

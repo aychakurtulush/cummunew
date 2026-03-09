@@ -17,26 +17,25 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NotificationBell } from "./notification-bell";
-
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
+import { useTranslations } from 'next-intl';
 
 interface NavbarActionsProps {
-    user: any; // Initial user from server
+    user: any;
 }
 
 export function NavbarActions({ user: initialUser }: NavbarActionsProps) {
     const [user, setUser] = useState(initialUser);
     const supabase = createClient();
     const pathname = usePathname();
+    const t = useTranslations('nav');
 
     useEffect(() => {
-        // Update user state if initialUser changes (e.g. from server)
         setUser(initialUser);
     }, [initialUser]);
 
     useEffect(() => {
-        // Listen for auth changes on client side for immediate sync
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             if (session?.user) {
                 setUser(session.user);
@@ -62,7 +61,7 @@ export function NavbarActions({ user: initialUser }: NavbarActionsProps) {
                             : "text-stone-600 hover:text-moss-700 hover:bg-stone-50"
                     )}
                 >
-                    Become a host
+                    {t('becomeHost')}
                 </Button>
             </Link>
             <div className="h-6 w-px bg-stone-200 hidden sm:block" />
@@ -93,12 +92,12 @@ export function NavbarActions({ user: initialUser }: NavbarActionsProps) {
                                 <Link href="/bookings">
                                     <DropdownMenuItem className="cursor-pointer">
                                         <User className="mr-2 h-4 w-4" />
-                                        <span>My Bookings</span>
+                                        <span>{t('myBookings')}</span>
                                     </DropdownMenuItem>
                                 </Link>
                                 <Link href="/host">
                                     <DropdownMenuItem className="cursor-pointer lg:hidden">
-                                        <span>Host Dashboard</span>
+                                        <span>{t('hostDashboard')}</span>
                                     </DropdownMenuItem>
                                 </Link>
                             </DropdownMenuGroup>
@@ -107,7 +106,7 @@ export function NavbarActions({ user: initialUser }: NavbarActionsProps) {
                                 <form action={signout} className="w-full">
                                     <button type="submit" className="flex w-full items-center text-red-600">
                                         <LogOut className="mr-2 h-4 w-4" />
-                                        <span>Sign out</span>
+                                        <span>{t('signOut')}</span>
                                     </button>
                                 </form>
                             </DropdownMenuItem>
@@ -118,12 +117,12 @@ export function NavbarActions({ user: initialUser }: NavbarActionsProps) {
                 <>
                     <Link href="/login">
                         <Button variant="ghost" size="sm" className="font-medium text-stone-900">
-                            Log in
+                            {t('login')}
                         </Button>
                     </Link>
                     <Link href="/signup">
                         <Button size="sm" className="bg-moss-600 hover:bg-moss-700 text-white rounded-full px-5">
-                            Sign up
+                            {t('signup')}
                         </Button>
                     </Link>
                 </>
