@@ -20,6 +20,7 @@ import { BookingButton } from "@/components/event/booking-button";
 import { WaitlistButton } from "@/components/event/waitlist-button";
 import { ReportButton } from "@/components/shared/report-button";
 import { ContactHostButton } from "@/components/event/contact-host-button";
+import { ImageGallery } from "@/components/shared/image-gallery";
 
 export async function generateMetadata(
     { params }: { params: Promise<{ id: string }> },
@@ -202,21 +203,13 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                     {/* Left Column: Content */}
                     <div className="lg:col-span-2 space-y-8">
 
-                        {/* Gallery Placeholder */}
-                        <div className="aspect-[16/9] w-full bg-stone-200 rounded-2xl overflow-hidden relative group">
-                            {event.image_url ? (
-                                <img
-                                    src={event.image_url}
-                                    alt={event.title}
-                                    className="absolute inset-0 w-full h-full object-cover"
-                                />
-                            ) : (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-stone-100 text-stone-300">
-                                    <Globe className="h-16 w-16 mb-2 opacity-20" />
-                                    <span className="text-sm font-medium opacity-40">No Cover Image</span>
-                                </div>
-                            )}
-                            <Badge className="absolute top-4 left-4 bg-white/90 text-stone-900 shadow-sm hover:bg-white">{event.category || "General"}</Badge>
+                        {/* Photo Gallery */}
+                        <div className="relative">
+                            <ImageGallery
+                                images={event.image_url ? [event.image_url] : []}
+                                alt={event.title}
+                            />
+                            <Badge className="absolute top-4 left-4 bg-white/90 text-stone-900 shadow-sm hover:bg-white z-10">{event.category || "General"}</Badge>
                         </div>
 
                         {/* Header */}

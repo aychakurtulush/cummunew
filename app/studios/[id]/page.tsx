@@ -4,14 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Card, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"; // Adjusted imports
-import { MapPin, Globe, Users, Coins, Image as ImageIcon, CalendarPlus, Check } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { MapPin, Globe, Users, CalendarPlus, Check } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { StudioActions } from "@/components/studio/studio-actions";
 import { ReportButton } from "@/components/shared/report-button";
 import { formatEventDate } from "@/lib/date-utils";
+import { ImageGallery } from "@/components/shared/image-gallery";
 
 async function getStudio(id: string) {
     const supabase = await createClient();
@@ -53,37 +54,25 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
         return notFound();
     }
 
-    const coverImage = studio.images?.[0];
-
     return (
         <div className="min-h-screen bg-stone-50 flex flex-col">
             <Navbar />
 
             <main className="flex-1">
-                {/* Cover Image */}
-                <div className="h-64 md:h-96 w-full bg-stone-200 relative overflow-hidden group">
-                    {coverImage ? (
-                        <img
-                            src={coverImage}
-                            alt={studio.name}
-                            className="w-full h-full object-cover"
-                        />
-                    ) : (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-stone-400 bg-stone-100">
-                            <ImageIcon className="h-12 w-12 mb-2 opacity-50" />
-                            <span className="font-medium">No Cover Image</span>
-                        </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60" />
+                {/* Photo Gallery */}
+                <div className="bg-stone-900 px-4 sm:px-6 lg:px-8 pt-6 pb-0">
+                    <div className="container mx-auto">
+                        <ImageGallery images={studio.images || []} alt={studio.name} />
+                    </div>
                 </div>
 
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 -mt-24 relative z-10 pb-12">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-6 pb-12">
                     <div className="bg-white rounded-2xl shadow-xl border border-stone-100 p-6 md:p-8 flex flex-col gap-8">
 
                         {/* Header Section */}
                         <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
                             {/* Avatar */}
-                            <Avatar className="h-28 w-28 md:h-32 md:w-32 border-4 border-white shadow-lg -mt-16 bg-stone-100 shrink-0">
+                            <Avatar className="h-28 w-28 md:h-32 md:w-32 border-4 border-white shadow-lg bg-stone-100 shrink-0">
                                 <AvatarImage src={studio.avatar_url} />
                                 <AvatarFallback className="text-3xl bg-moss-50 text-moss-700 font-serif">
                                     {studio.name?.substring(0, 2).toUpperCase()}
