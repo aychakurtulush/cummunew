@@ -118,7 +118,7 @@ export default function CreateEventForm({
                             </li>
                         ))}
                     </ul>
-                    <Link href="/host/profile">
+                    <Link href="/profile">
                         <Button className="bg-amber-600 hover:bg-amber-700 text-white w-full sm:w-auto">
                             Complete My Profile
                         </Button>
