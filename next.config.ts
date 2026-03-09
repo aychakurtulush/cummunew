@@ -9,6 +9,15 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '50mb',
     },
   },
+  async redirects() {
+    return [
+      {
+        source: '/host/dashboard',
+        destination: '/host',
+        permanent: true,
+      },
+    ]
+  },
 };
 
 export default withNextIntl(nextConfig);
