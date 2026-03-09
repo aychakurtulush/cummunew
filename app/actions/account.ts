@@ -26,7 +26,7 @@ export async function deleteAccountAction() {
 
     } catch (e: any) {
         console.error("Critical error in deleteAccountAction:", e)
-        return { error: 'An unexpected error occurred.' }
+        return { error: e.message || 'An unexpected error occurred.' }
     }
 
     redirect('/?deleted=true')
