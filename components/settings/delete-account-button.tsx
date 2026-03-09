@@ -28,6 +28,8 @@ export function DeleteAccountButton() {
             if (result && result.error) {
                 toast.error(result.error)
                 setIsDeleting(false)
+            } else if (result && result.success) {
+                window.location.href = '/?deleted=true'
             }
         } catch (error) {
             toast.error("Something went wrong.")

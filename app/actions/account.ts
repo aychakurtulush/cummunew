@@ -29,5 +29,5 @@ export async function deleteAccountAction() {
         return { error: e.message || 'An unexpected error occurred.' }
     }
 
-    redirect('/?deleted=true')
+    return { success: true }
 }
