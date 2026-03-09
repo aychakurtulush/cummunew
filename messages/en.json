@@ -180,6 +180,17 @@
     "communewDisclaimer": "Communew connects hosts and guests. Hosts are responsible for the events they organize."
   },
   "host": {
+    "nav": {
+      "overview": "Overview",
+      "inquiries": "Inquiries",
+      "manageEvents": "Manage Events",
+      "attendees": "Attendees",
+      "earnings": "Earnings",
+      "settings": "Settings",
+      "studios": "Studios",
+      "createEvent": "Create Event",
+      "switchToUser": "Switch to User View"
+    },
     "dashboard": "Host Dashboard",
     "myEvents": "My Events",
     "myStudios": "My Studios",

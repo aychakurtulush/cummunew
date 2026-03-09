@@ -88,8 +88,8 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
         <>
             <div className="w-full rounded-2xl overflow-hidden shadow-sm border border-stone-200">
                 {validImages.length === 2 ? (
-                    <div className="grid grid-cols-3 gap-1.5 h-64 md:h-[480px]">
-                        <GalleryThumb src={mainImage} alt={`${alt} 1`} onClick={() => openLightbox(0)} className="col-span-2 relative" />
+                    <div className="grid grid-cols-4 gap-1.5 h-64 md:h-[480px]">
+                        <GalleryThumb src={mainImage} alt={`${alt} 1`} onClick={() => openLightbox(0)} className="col-span-3 relative" />
                         <GalleryThumb src={sideImages[0]} alt={`${alt} 2`} onClick={() => openLightbox(1)} className="col-span-1 relative" />
                     </div>
                 ) : validImages.length === 3 ? (

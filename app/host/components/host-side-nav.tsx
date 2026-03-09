@@ -17,18 +17,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-
-const HOST_SIDEBAR_ITEMS = [
-    { icon: LayoutDashboard, label: "Overview", href: "/host" },
-    { icon: Inbox, label: "Inquiries", href: "/host/inquiries" },
-    { icon: Calendar, label: "Manage Events", href: "/host/events" },
-    { icon: Users, label: "Attendees", href: "/host/attendees" },
-    { icon: DollarSign, label: "Earnings", href: "/host/earnings" },
-    { icon: Settings, label: "Settings", href: "/host/settings" },
-];
+import { useTranslations } from 'next-intl';
 
 export function HostSideNav() {
     const pathname = usePathname();
+    const t = useTranslations('host.nav');
+
+    const HOST_SIDEBAR_ITEMS = [
+        { icon: LayoutDashboard, label: t('overview'), href: "/host" },
+        { icon: Inbox, label: t('inquiries'), href: "/host/inquiries" },
+        { icon: Calendar, label: t('manageEvents'), href: "/host/events" },
+        { icon: Users, label: t('attendees'), href: "/host/attendees" },
+        { icon: DollarSign, label: t('earnings'), href: "/host/earnings" },
+        { icon: Settings, label: t('settings'), href: "/host/settings" },
+    ];
 
     const isActive = (href: string) => {
         if (href === "/host") {
@@ -43,7 +45,7 @@ export function HostSideNav() {
                 <Link href="/host/events/create">
                     <Button className="w-full bg-moss-600 hover:bg-moss-700 text-white gap-2 shadow-sm">
                         <PlusCircle className="h-4 w-4" />
-                        Create Event
+                        {t('createEvent')}
                     </Button>
                 </Link>
             </div>
@@ -77,7 +79,7 @@ export function HostSideNav() {
                         )}
                     >
                         <Building2 className="h-4 w-4" />
-                        Studios
+                        {t('studios')}
                         <Badge className="ml-auto bg-stone-100 text-stone-600 hover:bg-stone-200" variant="secondary">New</Badge>
                     </Button>
                 </Link>
@@ -87,7 +89,7 @@ export function HostSideNav() {
 
             <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-stone-500 hover:text-stone-900 hover:bg-stone-50 transition-colors">
                 <User className="h-4 w-4" />
-                Switch to User View
+                {t('switchToUser')}
             </Link>
         </div>
     );

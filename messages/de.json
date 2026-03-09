@@ -180,6 +180,17 @@
         "communewDisclaimer": "Communew verbindet Gastgeber und Gäste. Gastgeber sind für die von ihnen organisierten Events verantwortlich."
     },
     "host": {
+        "nav": {
+            "overview": "Übersicht",
+            "inquiries": "Anfragen",
+            "manageEvents": "Events verwalten",
+            "attendees": "Teilnehmer",
+            "earnings": "Einnahmen",
+            "settings": "Einstellungen",
+            "studios": "Studios",
+            "createEvent": "Event erstellen",
+            "switchToUser": "Zur Nutzeransicht wechseln"
+        },
         "dashboard": "Gastgeber-Dashboard",
         "myEvents": "Meine Events",
         "myStudios": "Meine Studios",
