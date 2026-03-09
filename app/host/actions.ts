@@ -158,7 +158,10 @@ export async function createEvent(prevState: any, formData: FormData) {
         location_name,
         location_address,
         latitude,
-        longitude
+        longitude,
+        difficulty_level: formData.get('difficulty_level') as string || null,
+        languages: (formData.get('languages') as string)?.split(',').map(s => s.trim()).filter(s => s.length > 0) || [],
+        age_range: formData.get('age_range') as string || null
     }
 
     // For MVP, auto-approve
@@ -234,7 +237,10 @@ export async function updateEvent(prevState: any, formData: FormData) {
         seating_type: formData.get('seating_type') || 'mixed',
         materials_provided: formData.get('materials_provided') === 'true',
         is_guided: formData.get('is_guided') === 'true',
-        payment_instructions: formData.get('payment_instructions') as string || null
+        payment_instructions: formData.get('payment_instructions') as string || null,
+        difficulty_level: formData.get('difficulty_level') as string || null,
+        languages: (formData.get('languages') as string)?.split(',').map(s => s.trim()).filter(s => s.length > 0) || [],
+        age_range: formData.get('age_range') as string || null
     };
 
     const location_name = formData.get('location_name') as string || null;
@@ -392,7 +398,8 @@ export async function createStudio(prevState: any, formData: FormData) {
             amenities: amenities,
             features: formData.getAll('features') as string[],
             images: imageUrls,
-            status: 'active'
+            status: 'active',
+            space_rules: formData.get('space_rules') as string || null
         }
 
 
@@ -536,6 +543,7 @@ export async function updateStudio(prevState: any, formData: FormData) {
             location: location,
             price_per_hour: parseFloat(formData.get('price_per_hour') as string) || 0,
             capacity: parseInt(formData.get('capacity') as string) || 0,
+            space_rules: formData.get('space_rules') as string || null,
         };
 
         if (latitude !== undefined) rawData.latitude = latitude;

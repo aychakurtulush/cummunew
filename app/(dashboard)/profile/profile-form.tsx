@@ -97,6 +97,17 @@ export function ProfileForm({ user, initialProfile }: { user: any, initialProfil
                         </div>
 
                         <div className="space-y-2">
+                            <label htmlFor="city" className="text-sm font-semibold text-stone-700">Home City</label>
+                            <Input
+                                id="city"
+                                name="city"
+                                defaultValue={initialProfile.city || ''}
+                                placeholder="e.g. Amsterdam, NL"
+                                className="h-11 rounded-xl"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
                             <div className="flex justify-between items-center">
                                 <label htmlFor="bio" className="text-sm font-semibold text-stone-700">Short Biography</label>
                                 <span className={cn(

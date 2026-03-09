@@ -25,7 +25,7 @@ const formatDate = (dateString?: string) => {
     return new Intl.DateTimeFormat('en-DE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(date);
 }
 
-const FILTER_CATEGORIES = ["All", "Arts & Crafts", "Food & Drink", "Sports & Wellness", "Social & Games", "Language Exchange"];
+const FILTER_CATEGORIES = ["All", "Arts & Crafts", "Food & Drink", "Sports & Wellness", "Social & Games", "Language Exchange", "Music & Performance", "Learning & Tech", "Outdoors & Nature", "Kids & Family", "Community & Volunteering", "Other"];
 
 import { WishlistButton } from "@/components/event/wishlist-button";
 import { Map as MapIcon, Grid as GridIcon } from "lucide-react";
@@ -118,13 +118,48 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], ma
                                         This Weekend
                                     </DropdownMenuCheckboxItem>
                                 </DropdownMenuGroup>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuLabel>Difficulty</DropdownMenuLabel>
+                                <DropdownMenuGroup>
+                                    <DropdownMenuCheckboxItem checked={searchParams.get("difficulty") === "any" || !searchParams.get("difficulty")} onCheckedChange={() => updateFilters({ difficulty: "any" })}>
+                                        Any Level
+                                    </DropdownMenuCheckboxItem>
+                                    <DropdownMenuCheckboxItem checked={searchParams.get("difficulty") === "beginner"} onCheckedChange={() => updateFilters({ difficulty: "beginner" })}>
+                                        Beginner
+                                    </DropdownMenuCheckboxItem>
+                                    <DropdownMenuCheckboxItem checked={searchParams.get("difficulty") === "intermediate"} onCheckedChange={() => updateFilters({ difficulty: "intermediate" })}>
+                                        Intermediate
+                                    </DropdownMenuCheckboxItem>
+                                    <DropdownMenuCheckboxItem checked={searchParams.get("difficulty") === "advanced"} onCheckedChange={() => updateFilters({ difficulty: "advanced" })}>
+                                        Advanced
+                                    </DropdownMenuCheckboxItem>
+                                </DropdownMenuGroup>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuLabel>Age Range</DropdownMenuLabel>
+                                <DropdownMenuGroup>
+                                    <DropdownMenuCheckboxItem checked={searchParams.get("age") === "any" || !searchParams.get("age")} onCheckedChange={() => updateFilters({ age: "any" })}>
+                                        Any Age
+                                    </DropdownMenuCheckboxItem>
+                                    <DropdownMenuCheckboxItem checked={searchParams.get("age") === "adults"} onCheckedChange={() => updateFilters({ age: "adults" })}>
+                                        Adults (18+)
+                                    </DropdownMenuCheckboxItem>
+                                    <DropdownMenuCheckboxItem checked={searchParams.get("age") === "teens"} onCheckedChange={() => updateFilters({ age: "teens" })}>
+                                        Teens (13-17)
+                                    </DropdownMenuCheckboxItem>
+                                    <DropdownMenuCheckboxItem checked={searchParams.get("age") === "kids"} onCheckedChange={() => updateFilters({ age: "kids" })}>
+                                        Kids
+                                    </DropdownMenuCheckboxItem>
+                                    <DropdownMenuCheckboxItem checked={searchParams.get("age") === "family"} onCheckedChange={() => updateFilters({ age: "family" })}>
+                                        Family Friendly
+                                    </DropdownMenuCheckboxItem>
+                                </DropdownMenuGroup>
                                 {(activeFilterCount > 0) && (
                                     <>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem
                                             className="text-red-600 focus:text-red-600 cursor-pointer justify-center font-medium"
                                             onSelect={() => {
-                                                updateFilters({ price: "any", date: "any" });
+                                                updateFilters({ price: "any", date: "any", difficulty: "any", age: "any" });
                                             }}
                                         >
                                             Reset Filters

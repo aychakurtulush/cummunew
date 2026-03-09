@@ -310,7 +310,25 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                         <span className="capitalize">{event.seating_type} seating</span>
                                     </div>
                                 )}
-                                {!event.materials_provided && !event.is_guided && !event.seating_type && (
+                                {event.difficulty_level && event.difficulty_level !== 'all' && (
+                                    <div className="flex items-center gap-2">
+                                        <Check className="h-4 w-4 text-moss-600" />
+                                        <span className="capitalize">Level: {event.difficulty_level}</span>
+                                    </div>
+                                )}
+                                {event.age_range && event.age_range !== 'all' && (
+                                    <div className="flex items-center gap-2">
+                                        <Check className="h-4 w-4 text-moss-600" />
+                                        <span className="capitalize">Age: {event.age_range.replace('_', ' ')}</span>
+                                    </div>
+                                )}
+                                {event.languages && event.languages.length > 0 && (
+                                    <div className="flex items-center gap-2">
+                                        <Globe className="h-4 w-4 text-moss-600" />
+                                        <span>{event.languages.join(', ')}</span>
+                                    </div>
+                                )}
+                                {!event.materials_provided && !event.is_guided && !event.seating_type && !event.difficulty_level && !event.age_range && (!event.languages || event.languages.length === 0) && (
                                     <span className="text-sm italic text-stone-400">No specific details listed.</span>
                                 )}
                             </div>

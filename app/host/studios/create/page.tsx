@@ -253,6 +253,16 @@ export default function CreateStudioPage() {
                             ))}
                         </div>
                     </div>
+
+                    <div className="space-y-3">
+                        <label htmlFor="space_rules" className="text-sm font-semibold text-stone-700">Space Rules</label>
+                        <textarea
+                            id="space_rules"
+                            name="space_rules"
+                            className="flex min-h-[100px] w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss-600/20 focus-visible:border-moss-600 focus:bg-white transition-colors"
+                            placeholder="e.g. No smoking indoors, keep noise down after 10 PM, etc."
+                        />
+                    </div>
                 </div>
 
                 <div className="pt-6 flex justify-end">

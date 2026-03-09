@@ -40,27 +40,43 @@ export default async function CommunityPage() {
         .limit(10);
 
     // Fetch total members
-    const { count: memberCount } = await supabase
+    // Fetch total members
+    const { data: memberData, count: memberCount, error: memberError } = await supabase
         .from('profiles')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: false })
+        .limit(1);
+
+    const finalMemberCount = memberCount ?? memberData?.length ?? 0;
+
+    if (memberError) console.error("CommunityPage: Error fetching member count:", memberError);
 
     // Fetch events this week
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    const { count: eventsThisWeek } = await supabase
+    const { count: eventsThisWeek, data: weeklyData, error: weeklyError } = await supabase
         .from('events')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', oneWeekAgo.toISOString());
+        .select('*', { count: 'exact', head: false })
+        .gte('created_at', oneWeekAgo.toISOString())
+        .limit(1);
+
+    const finalEventsThisWeek = eventsThisWeek ?? weeklyData?.length ?? 0;
+
+    if (weeklyError) console.error("CommunityPage: Error fetching weekly events:", weeklyError);
 
     // Fetch categories with counts
-    const { data: categoryCounts } = await supabase
+    const { data: categoryCounts, error: catError } = await supabase
         .from('events')
         .select('category');
+
+    if (catError) console.error("CommunityPage: Error fetching category counts:", catError);
 
     const catMap: Record<string, number> = {};
     categoryCounts?.forEach(e => {
         if (e.category) catMap[e.category] = (catMap[e.category] || 0) + 1;
     });
+
+    const categoriesCount = categoryCounts?.length || 0;
+    console.log("CommunityPage data:", { finalMemberCount, finalEventsThisWeek, categoriesCount });
 
     const categories = [
         { name: "Workshops", icon: <Sparkles className="h-4 w-4" />, count: catMap["Arts & Crafts"] || 0 },
@@ -81,10 +97,10 @@ export default async function CommunityPage() {
                         </div>
                         <div className="flex flex-wrap gap-2 relative z-10">
                             <Badge variant="secondary" className="bg-moss-50 text-moss-700 border-moss-100 flex gap-1.5 py-1.5 px-4 rounded-full">
-                                <Users className="h-3.5 w-3.5" /> {(memberCount || 0).toLocaleString()}+ Members
+                                <Users className="h-3.5 w-3.5" /> {finalMemberCount.toLocaleString()}+ Members
                             </Badge>
                             <Badge variant="secondary" className="bg-amber-50 text-amber-700 border-amber-100 flex gap-1.5 py-1.5 px-4 rounded-full">
-                                <Sparkles className="h-3.5 w-3.5" /> {eventsThisWeek || 0} Events this week
+                                <Sparkles className="h-3.5 w-3.5" /> {finalEventsThisWeek || 0} Events this week
                             </Badge>
                         </div>
                         <div className="absolute top-0 right-0 w-64 h-64 bg-moss-500/5 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-moss-500/10 transition-colors duration-700"></div>

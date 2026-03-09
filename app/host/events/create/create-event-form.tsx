@@ -149,6 +149,12 @@ export default function CreateEventForm({
                             <option value="Sports & Wellness">Sports & Wellness</option>
                             <option value="Social & Games">Social & Games</option>
                             <option value="Language Exchange">Language Exchange</option>
+                            <option value="Music & Performance">Music & Performance</option>
+                            <option value="Learning & Tech">Learning & Tech</option>
+                            <option value="Outdoors & Nature">Outdoors & Nature</option>
+                            <option value="Kids & Family">Kids & Family</option>
+                            <option value="Community & Volunteering">Community & Volunteering</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
 
@@ -249,6 +255,48 @@ export default function CreateEventForm({
                                 >
                                     Guided Session
                                 </label>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                                <label htmlFor="difficulty_level" className="text-xs font-medium text-stone-600">Difficulty Level</label>
+                                <select
+                                    id="difficulty_level"
+                                    name="difficulty_level"
+                                    className="flex h-10 w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss-600/20"
+                                >
+                                    <option value="all">All Levels</option>
+                                    <option value="beginner">Beginner</option>
+                                    <option value="intermediate">Intermediate</option>
+                                    <option value="advanced">Advanced</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label htmlFor="age_range" className="text-xs font-medium text-stone-600">Age Range</label>
+                                <select
+                                    id="age_range"
+                                    name="age_range"
+                                    className="flex h-10 w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss-600/20"
+                                >
+                                    <option value="all">All Ages</option>
+                                    <option value="adults">Adults only (18+)</option>
+                                    <option value="teens">Teens (13-17)</option>
+                                    <option value="kids">Kids</option>
+                                    <option value="family">Family Friendly</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label htmlFor="languages" className="text-xs font-medium text-stone-600">Languages</label>
+                                <Input
+                                    id="languages"
+                                    name="languages"
+                                    placeholder="English, German, etc."
+                                    className="h-10 text-sm"
+                                />
+                                <p className="text-[10px] text-stone-400">Separate with commas</p>
                             </div>
                         </div>
                     </div>

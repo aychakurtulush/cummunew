@@ -161,6 +161,15 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
                                         </div>
                                     </section>
                                 )}
+
+                                {studio.space_rules && (
+                                    <section className="space-y-4">
+                                        <h2 className="text-xl font-bold text-stone-900 font-serif">Space Rules</h2>
+                                        <div className="bg-stone-50 border border-stone-100 rounded-xl p-6 text-stone-600 leading-relaxed whitespace-pre-wrap">
+                                            {studio.space_rules}
+                                        </div>
+                                    </section>
+                                )}
                             </div>
 
                             {/* Right Column: Pricing & Info */}

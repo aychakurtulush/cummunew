@@ -31,8 +31,17 @@ export async function submitReport(formData: {
         return { error: error.message }
     }
 
-    // Notify Admin (Conceptual - depends on how admin notifications are handled)
-    // For now, we rely on the database entry. If there's an admin user ID, we could send a notification.
+    // Notify Admin actively
+    try {
+        await supabase.from('notifications').insert({
+            user_id: null, // Global admin alert
+            type: 'admin_alert',
+            title: 'New Report Submitted',
+            content: `A report has been submitted for a ${formData.targetType}. Reason: ${formData.reason}`,
+        });
+    } catch (nError) {
+        console.error('Failed to notify admin of report:', nError);
+    }
 
     return { success: true }
 }

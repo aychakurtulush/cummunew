@@ -16,13 +16,13 @@ const formatDate = (dateString?: string) => {
 }
 
 
-const FILTER_CATEGORIES = ["All", "Arts & Crafts", "Food & Drink", "Sports & Wellness", "Social & Games", "Language Exchange"];
+const FILTER_CATEGORIES = ["All", "Arts & Crafts", "Food & Drink", "Sports & Wellness", "Social & Games", "Language Exchange", "Music & Performance", "Learning & Tech", "Outdoors & Nature", "Kids & Family", "Community & Volunteering", "Other"];
 
 export default async function Home({ searchParams }: {
-  searchParams: Promise<{ q?: string; category?: string; price?: string; date?: string }>
+  searchParams: Promise<{ q?: string; category?: string; price?: string; date?: string; difficulty?: string; age?: string }>
 }) {
   const supabase = await createClient();
-  const { q, category, price, date } = await searchParams;
+  const { q, category, price, date, difficulty, age } = await searchParams;
 
   let events = [];
   let wishlistEventIds: string[] = [];
@@ -72,6 +72,16 @@ export default async function Home({ searchParams }: {
         sunday.setHours(23, 59, 59, 999);
 
         query = query.gte('start_time', friday.toISOString()).lte('start_time', sunday.toISOString());
+      }
+
+      // 5. Difficulty Filter
+      if (difficulty && difficulty !== "any") {
+        query = query.eq('difficulty_level', difficulty);
+      }
+
+      // 6. Age Range Filter
+      if (age && age !== "any") {
+        query = query.eq('age_range', age);
       }
 
       const { data: eventsData, error: eventsError } = await query;

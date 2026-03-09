@@ -18,6 +18,7 @@ export async function updateProfile(prevState: any, formData: FormData) {
 
     const fullName = formData.get('full_name') as string;
     const bio = formData.get('bio') as string;
+    const city = formData.get('city') as string;
     const instagramUrl = formData.get('instagram_url') as string;
     const websiteUrl = formData.get('website_url') as string;
 
@@ -53,6 +54,7 @@ export async function updateProfile(prevState: any, formData: FormData) {
     const updates: any = {
         full_name: fullName,
         bio: bio,
+        city: city,
         social_links: socialLinks,
         updated_at: new Date().toISOString(),
     };
