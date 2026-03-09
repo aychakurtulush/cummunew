@@ -13,6 +13,52 @@
     "hostAnEvent": "Host an Event",
     "toggleMenu": "Toggle menu"
   },
+  "home": {
+    "hero": {
+      "badge": "Berlin Community Platform",
+      "title": "Find your people.",
+      "subtitle": "Discover local workshops, gatherings, and creative spaces. Join neighbors who share your passions."
+    },
+    "explore": {
+      "title": "Explore Events",
+      "subtitle": "Discover what's happening in your community.",
+      "filters": "Filters",
+      "price": "Price",
+      "anyPrice": "Any Price",
+      "free": "Free",
+      "under20": "Under €20",
+      "date": "Date",
+      "anyDate": "Any Date",
+      "today": "Today",
+      "thisWeekend": "This Weekend",
+      "difficulty": "Difficulty",
+      "anyLevel": "Any Level",
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced",
+      "ageRange": "Age Range",
+      "anyAge": "Any Age",
+      "adults": "Adults (18+)",
+      "teens": "Teens (13-17)",
+      "kids": "Kids",
+      "family": "Family Friendly",
+      "resetFilters": "Reset Filters",
+      "upcomingEvents": "Upcoming Events",
+      "showing": "Showing",
+      "event": "event",
+      "events": "events",
+      "in": "in",
+      "hostEvent": "Host an Event",
+      "grid": "Grid",
+      "map": "Map",
+      "demoMode": "Demo Mode",
+      "viewDetails": "View Details",
+      "details": "Details",
+      "noEventsFound": "No events found",
+      "noEventsDesc": "We couldn't find any events matching your current filters. Try relaxing your search criteria or browse another category.",
+      "clearAllFilters": "Clear all filters"
+    }
+  },
   "auth": {
     "login": {
       "title": "Welcome back",

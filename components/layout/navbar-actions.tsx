@@ -61,7 +61,7 @@ export function NavbarActions({ user: initialUser }: NavbarActionsProps) {
                             : "text-stone-600 hover:text-moss-700 hover:bg-stone-50"
                     )}
                 >
-                    {t('becomeHost')}
+                    {t('hostAnEvent')}
                 </Button>
             </Link>
             <div className="h-6 w-px bg-stone-200 hidden sm:block" />

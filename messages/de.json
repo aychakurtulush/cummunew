@@ -13,6 +13,52 @@
         "hostAnEvent": "Event erstellen",
         "toggleMenu": "Menü öffnen"
     },
+    "home": {
+        "hero": {
+            "badge": "Berlin Community Plattform",
+            "title": "Finde deine Leute.",
+            "subtitle": "Entdecke lokale Workshops, Treffen und kreative Räume. Schließe dich Nachbarn an, die deine Leidenschaften teilen."
+        },
+        "explore": {
+            "title": "Events erkunden",
+            "subtitle": "Entdecke, was in deiner Community passiert.",
+            "filters": "Filter",
+            "price": "Preis",
+            "anyPrice": "Beliebiger Preis",
+            "free": "Kostenlos",
+            "under20": "Unter 20 €",
+            "date": "Datum",
+            "anyDate": "Beliebiges Datum",
+            "today": "Heute",
+            "thisWeekend": "Dieses Wochenende",
+            "difficulty": "Schwierigkeit",
+            "anyLevel": "Jedes Level",
+            "beginner": "Anfänger",
+            "intermediate": "Fortgeschritten",
+            "advanced": "Experte",
+            "ageRange": "Altersgruppe",
+            "anyAge": "Jedes Alter",
+            "adults": "Erwachsene (18+)",
+            "teens": "Teenager (13-17)",
+            "kids": "Kinder",
+            "family": "Familienfreundlich",
+            "resetFilters": "Filter zurücksetzen",
+            "upcomingEvents": "Kommende Events",
+            "showing": "Zeige",
+            "event": "Event",
+            "events": "Events",
+            "in": "in",
+            "hostEvent": "Event erstellen",
+            "grid": "Raster",
+            "map": "Karte",
+            "demoMode": "Demo-Modus",
+            "viewDetails": "Details ansehen",
+            "details": "Details",
+            "noEventsFound": "Keine Events gefunden",
+            "noEventsDesc": "Wir konnten leider keine Events finden, die deinen aktuellen Filtern entsprechen. Versuche, deine Suchkriterien zu lockern.",
+            "clearAllFilters": "Alle Filter löschen"
+        }
+    },
     "auth": {
         "login": {
             "title": "Willkommen zurück",

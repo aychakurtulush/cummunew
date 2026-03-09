@@ -19,10 +19,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 // Helper to format date
-const formatDate = (dateString?: string) => {
+const formatDate = (dateString: string | undefined, locale: string) => {
     if (!dateString) return "Date TBD";
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-DE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(date);
+    const resolvedLocale = locale === 'de' ? 'de-DE' : 'en-DE';
+    return new Intl.DateTimeFormat(resolvedLocale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(date);
 }
 
 const FILTER_CATEGORIES = ["All", "Arts & Crafts", "Food & Drink", "Sports & Wellness", "Social & Games", "Language Exchange", "Music & Performance", "Learning & Tech", "Outdoors & Nature", "Kids & Family", "Community & Volunteering", "Other"];
@@ -30,6 +31,7 @@ const FILTER_CATEGORIES = ["All", "Arts & Crafts", "Food & Drink", "Sports & Wel
 import { WishlistButton } from "@/components/event/wishlist-button";
 import { Map as MapIcon, Grid as GridIcon } from "lucide-react";
 import dynamic from 'next/dynamic';
+import { useTranslations, useLocale } from 'next-intl';
 
 const EventsMap = dynamic(() => import('@/components/event/events-map').then(mod => mod.EventsMap), {
     ssr: false,
@@ -40,6 +42,8 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], ma
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const t = useTranslations('home.explore');
+    const locale = useLocale();
 
     const selectedCategory = searchParams.get("category") || "All";
     const priceFilter = searchParams.get("price") || "any";
@@ -71,8 +75,8 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], ma
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-stone-100 pb-8">
                     <div className="space-y-1">
-                        <h2 className="text-3xl font-serif font-bold text-stone-900">Explore Events</h2>
-                        <p className="text-stone-500">Discover what's happening in your community.</p>
+                        <h2 className="text-3xl font-serif font-bold text-stone-900">{t('title')}</h2>
+                        <p className="text-stone-500">{t('subtitle')}</p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
@@ -84,7 +88,7 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], ma
                                     className={`h-10 rounded-full gap-2 border-stone-300 px-5 transition-colors ${activeFilterCount > 0 ? 'bg-stone-900 text-white hover:bg-stone-800' : 'bg-white text-stone-700 hover:bg-stone-50'}`}
                                 >
                                     <Filter className="h-3.5 w-3.5" />
-                                    <span>Filters</span>
+                                    <span>{t('filters')}</span>
                                     {activeFilterCount > 0 && (
                                         <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px] font-bold ml-1">
                                             {activeFilterCount}
@@ -93,64 +97,64 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], ma
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="start" className="w-56">
-                                <DropdownMenuLabel>Price</DropdownMenuLabel>
+                                <DropdownMenuLabel>{t('price')}</DropdownMenuLabel>
                                 <DropdownMenuGroup>
                                     <DropdownMenuCheckboxItem checked={priceFilter === "any"} onCheckedChange={() => updateFilters({ price: "any" })}>
-                                        Any Price
+                                        {t('anyPrice')}
                                     </DropdownMenuCheckboxItem>
                                     <DropdownMenuCheckboxItem checked={priceFilter === "free"} onCheckedChange={() => updateFilters({ price: "free" })}>
-                                        Free
+                                        {t('free')}
                                     </DropdownMenuCheckboxItem>
                                     <DropdownMenuCheckboxItem checked={priceFilter === "under-20"} onCheckedChange={() => updateFilters({ price: "under-20" })}>
-                                        Under €20
+                                        {t('under20')}
                                     </DropdownMenuCheckboxItem>
                                 </DropdownMenuGroup>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuLabel>Date</DropdownMenuLabel>
+                                <DropdownMenuLabel>{t('date')}</DropdownMenuLabel>
                                 <DropdownMenuGroup>
                                     <DropdownMenuCheckboxItem checked={dateFilter === "any"} onCheckedChange={() => updateFilters({ date: "any" })}>
-                                        Any Date
+                                        {t('anyDate')}
                                     </DropdownMenuCheckboxItem>
                                     <DropdownMenuCheckboxItem checked={dateFilter === "today"} onCheckedChange={() => updateFilters({ date: "today" })}>
-                                        Today
+                                        {t('today')}
                                     </DropdownMenuCheckboxItem>
                                     <DropdownMenuCheckboxItem checked={dateFilter === "this-weekend"} onCheckedChange={() => updateFilters({ date: "this-weekend" })}>
-                                        This Weekend
+                                        {t('thisWeekend')}
                                     </DropdownMenuCheckboxItem>
                                 </DropdownMenuGroup>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuLabel>Difficulty</DropdownMenuLabel>
+                                <DropdownMenuLabel>{t('difficulty')}</DropdownMenuLabel>
                                 <DropdownMenuGroup>
                                     <DropdownMenuCheckboxItem checked={searchParams.get("difficulty") === "any" || !searchParams.get("difficulty")} onCheckedChange={() => updateFilters({ difficulty: "any" })}>
-                                        Any Level
+                                        {t('anyLevel')}
                                     </DropdownMenuCheckboxItem>
                                     <DropdownMenuCheckboxItem checked={searchParams.get("difficulty") === "beginner"} onCheckedChange={() => updateFilters({ difficulty: "beginner" })}>
-                                        Beginner
+                                        {t('beginner')}
                                     </DropdownMenuCheckboxItem>
                                     <DropdownMenuCheckboxItem checked={searchParams.get("difficulty") === "intermediate"} onCheckedChange={() => updateFilters({ difficulty: "intermediate" })}>
-                                        Intermediate
+                                        {t('intermediate')}
                                     </DropdownMenuCheckboxItem>
                                     <DropdownMenuCheckboxItem checked={searchParams.get("difficulty") === "advanced"} onCheckedChange={() => updateFilters({ difficulty: "advanced" })}>
-                                        Advanced
+                                        {t('advanced')}
                                     </DropdownMenuCheckboxItem>
                                 </DropdownMenuGroup>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuLabel>Age Range</DropdownMenuLabel>
+                                <DropdownMenuLabel>{t('ageRange')}</DropdownMenuLabel>
                                 <DropdownMenuGroup>
                                     <DropdownMenuCheckboxItem checked={searchParams.get("age") === "any" || !searchParams.get("age")} onCheckedChange={() => updateFilters({ age: "any" })}>
-                                        Any Age
+                                        {t('anyAge')}
                                     </DropdownMenuCheckboxItem>
                                     <DropdownMenuCheckboxItem checked={searchParams.get("age") === "adults"} onCheckedChange={() => updateFilters({ age: "adults" })}>
-                                        Adults (18+)
+                                        {t('adults')}
                                     </DropdownMenuCheckboxItem>
                                     <DropdownMenuCheckboxItem checked={searchParams.get("age") === "teens"} onCheckedChange={() => updateFilters({ age: "teens" })}>
-                                        Teens (13-17)
+                                        {t('teens')}
                                     </DropdownMenuCheckboxItem>
                                     <DropdownMenuCheckboxItem checked={searchParams.get("age") === "kids"} onCheckedChange={() => updateFilters({ age: "kids" })}>
-                                        Kids
+                                        {t('kids')}
                                     </DropdownMenuCheckboxItem>
                                     <DropdownMenuCheckboxItem checked={searchParams.get("age") === "family"} onCheckedChange={() => updateFilters({ age: "family" })}>
-                                        Family Friendly
+                                        {t('family')}
                                     </DropdownMenuCheckboxItem>
                                 </DropdownMenuGroup>
                                 {(activeFilterCount > 0) && (
@@ -162,7 +166,7 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], ma
                                                 updateFilters({ price: "any", date: "any", difficulty: "any", age: "any" });
                                             }}
                                         >
-                                            Reset Filters
+                                            {t('resetFilters')}
                                         </DropdownMenuItem>
                                     </>
                                 )}
@@ -192,20 +196,20 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], ma
                 <div className="flex items-end justify-between mb-8">
                     <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-stone-900">Upcoming Events</h2>
+                            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-stone-900">{t('upcomingEvents')}</h2>
                             {isDemo && (
-                                <Badge variant="outline" className="text-stone-400 border-dashed border-stone-300">Demo Mode</Badge>
+                                <Badge variant="outline" className="text-stone-400 border-dashed border-stone-300">{t('demoMode')}</Badge>
                             )}
                         </div>
                         <p className="text-stone-500">
-                            Showing {filteredEvents.length} {filteredEvents.length === 1 ? 'event' : 'events'}
-                            {selectedCategory !== "All" && ` in ${selectedCategory}`}
+                            {t('showing')} {filteredEvents.length} {filteredEvents.length === 1 ? t('event') : t('events')}
+                            {selectedCategory !== "All" && ` ${t('in')} ${selectedCategory}`}
                         </p>
                     </div>
                     <div className="flex items-center gap-4">
                         <Link href="/host/events/create">
                             <Button variant="ghost" className="text-moss-700 hover:text-moss-800 hover:bg-moss-50 hidden sm:flex">
-                                <Plus className="h-4 w-4 mr-2" /> Host an Event
+                                <Plus className="h-4 w-4 mr-2" /> {t('hostEvent')}
                             </Button>
                         </Link>
                         {mapboxToken && (
@@ -214,13 +218,13 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], ma
                                     onClick={() => setViewMode("grid")}
                                     className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${viewMode === 'grid' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
                                 >
-                                    <GridIcon className="h-4 w-4" /> Grid
+                                    <GridIcon className="h-4 w-4" /> {t('grid')}
                                 </button>
                                 <button
                                     onClick={() => setViewMode("map")}
                                     className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${viewMode === 'map' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
                                 >
-                                    <MapIcon className="h-4 w-4" /> Map
+                                    <MapIcon className="h-4 w-4" /> {t('map')}
                                 </button>
                             </div>
                         )}
@@ -262,7 +266,7 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], ma
 
                                         <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                             <span className="bg-white/90 backdrop-blur text-stone-900 px-4 py-2 rounded-full text-sm font-medium shadow-lg transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                                View Details
+                                                {t('viewDetails')}
                                             </span>
                                         </div>
                                     </div>
@@ -271,7 +275,7 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], ma
                                         <div className="flex justify-between items-start">
                                             <span className="text-xs font-bold uppercase tracking-wider text-moss-700 flex items-center gap-1.5">
                                                 <Calendar className="h-3 w-3" />
-                                                {formatDate(event.start_time)}
+                                                {formatDate(event.start_time, locale)}
                                             </span>
                                         </div>
 
@@ -290,7 +294,7 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], ma
                                             <span className="text-lg font-bold text-stone-900">€{event.price}</span>
                                         </div>
                                         <span className="text-sm font-medium text-moss-600 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 flex items-center gap-1">
-                                            Details <ArrowRight className="h-3 w-3" />
+                                            {t('details')} <ArrowRight className="h-3 w-3" />
                                         </span>
                                     </div>
                                 </article>
@@ -307,9 +311,9 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], ma
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <h3 className="text-xl font-serif font-bold text-stone-900">No events found</h3>
+                                        <h3 className="text-xl font-serif font-bold text-stone-900">{t('noEventsFound')}</h3>
                                         <p className="text-stone-500">
-                                            We couldn't find any events matching your current filters. Try relaxing your search criteria or browse another category.
+                                            {t('noEventsDesc')}
                                         </p>
                                     </div>
                                     <div className="pt-2">
@@ -320,7 +324,7 @@ export function EventExplorer({ initialEvents, isDemo, wishlistEventIds = [], ma
                                             }}
                                             className="bg-stone-900 hover:bg-stone-800 text-white rounded-full px-8"
                                         >
-                                            Clear all filters
+                                            {t('clearAllFilters')}
                                         </Button>
                                     </div>
                                 </div>
