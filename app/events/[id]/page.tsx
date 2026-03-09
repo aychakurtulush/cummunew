@@ -337,8 +337,8 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <span className="text-2xl font-bold text-stone-900">{event.price && event.price > 0 ? `€${event.price}` : 'Free'}</span>
-                                    {event.price && event.price > 0 && <span className="text-stone-500 text-sm ml-1">per person</span>}
+                                    <span className="text-2xl font-bold text-stone-900">{event.price !== null && event.price > 0 ? `€${event.price}` : 'Free'}</span>
+                                    {event.price !== null && event.price > 0 && <span className="text-stone-500 text-sm ml-1">per person</span>}
                                 </div>
                                 {event.avg_rating && (
                                     <div className="flex items-center gap-1 text-sm font-bold text-amber-600">
@@ -348,7 +348,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                 )}
                             </div>
 
-                            {event.price && event.price > 0 && (
+                            {event.price !== null && event.price > 0 && (
                                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 flex items-start gap-2">
                                     <div className="mt-0.5">ℹ️</div>
                                     <div>

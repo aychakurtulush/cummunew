@@ -156,7 +156,7 @@ export default function AboutPage() {
                                 </Button>
                             </Link>
                             <Link href="/host">
-                                <Button size="lg" variant="outline" className="h-14 px-8 border-moss-400 text-moss-100 hover:bg-moss-800 rounded-full font-bold">
+                                <Button size="lg" variant="outline" className="h-14 px-8 border-white/50 bg-white/5 text-white hover:bg-white hover:text-moss-900 rounded-full font-bold shadow-sm backdrop-blur-sm transition-all">
                                     Become a Host
                                 </Button>
                             </Link>

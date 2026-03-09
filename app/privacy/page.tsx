@@ -13,6 +13,7 @@ export default function PrivacyPage() {
                     <PolicyHighlight>
                         Your privacy is paramount. This document explains how Communew collects, uses, and safeguards
                         the personal information you provide when using our creative community platform.
+                        <strong> As a non-commercial, community-led initiative (not a registered business), we prioritize your data security and transparent practices.</strong>
                     </PolicyHighlight>
 
                     <PolicySection title="1. Information We Collect">

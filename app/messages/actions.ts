@@ -274,3 +274,63 @@ export async function requestToHost(ownerId: string, studioName: string, studioI
 
     return { conversationId };
 }
+
+export async function contactSupport() {
+    const supabase = await createClient();
+    if (!supabase) return { error: "Database unavailable" };
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: 'Session expired. Please log in again.' };
+
+    // Find admin user via service role
+    const { createServiceRoleClient } = await import('@/lib/supabase/service');
+    const adminSupabase = createServiceRoleClient();
+    const { data: { users }, error: userError } = await adminSupabase.auth.admin.listUsers();
+    const adminAuthUser = users?.find(u => u.email === 'admin@communew.com');
+
+    if (!adminAuthUser) {
+        return { error: "Support account not configured." };
+    }
+
+    const adminId = adminAuthUser.id;
+
+    if (user.id === adminId) {
+        return { error: "You are the admin." };
+    }
+
+    // 1. Start Conversation
+    const convResult = await startConversation(adminId, 'inquiry', 'support');
+    if (convResult.error) return { error: convResult.error };
+
+    const conversationId = convResult.conversationId;
+
+    if (!conversationId) return { error: "Failed to start conversation" };
+
+    // 2. See if the admin has already sent a welcome message recently
+    const { data: existingMessages } = await supabase
+        .from('messages')
+        .select('id, content, created_at')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+    if (!existingMessages || existingMessages.length === 0) {
+        // First time opening support channel - send auto-reply from Admin
+        // To send from admin, we must insert directly using the adminSupabase client bypassing RLS, or the regular client if we use service role.
+        await adminSupabase
+            .from('messages')
+            .insert({
+                conversation_id: conversationId,
+                sender_user_id: adminId,
+                content: "Hi there! I'm the Communew Admin. How can I help you today? Please describe your issue and I will reply as soon as possible."
+            });
+
+        // Update conversation time
+        await adminSupabase
+            .from('conversations')
+            .update({ updated_at: new Date().toISOString() })
+            .eq('id', conversationId);
+    }
+
+    return { conversationId };
+}

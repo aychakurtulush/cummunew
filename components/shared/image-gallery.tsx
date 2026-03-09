@@ -86,41 +86,39 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
 
     return (
         <>
-            <div className="w-full rounded-2xl overflow-hidden">
+            <div className="w-full rounded-2xl overflow-hidden shadow-sm border border-stone-200">
                 {validImages.length === 2 ? (
-                    <div className="grid grid-cols-2 gap-1.5 h-64 md:h-[420px]">
-                        {validImages.map((img, i) => (
-                            <GalleryThumb key={i} src={img} alt={`${alt} ${i + 1}`} onClick={() => openLightbox(i)} />
-                        ))}
+                    <div className="grid grid-cols-3 gap-1.5 h-64 md:h-[480px]">
+                        <GalleryThumb src={mainImage} alt={`${alt} 1`} onClick={() => openLightbox(0)} className="col-span-2 relative" />
+                        <GalleryThumb src={sideImages[0]} alt={`${alt} 2`} onClick={() => openLightbox(1)} className="col-span-1 relative" />
                     </div>
                 ) : validImages.length === 3 ? (
-                    <div className="grid grid-cols-2 gap-1.5 h-64 md:h-[420px]">
-                        <GalleryThumb src={mainImage} alt={`${alt} 1`} onClick={() => openLightbox(0)} className="row-span-2" />
-                        {sideImages.slice(0, 2).map((img, i) => (
-                            <GalleryThumb key={i + 1} src={img} alt={`${alt} ${i + 2}`} onClick={() => openLightbox(i + 1)} />
-                        ))}
+                    <div className="grid grid-cols-4 gap-1.5 h-64 md:h-[480px]">
+                        <GalleryThumb src={mainImage} alt={`${alt} 1`} onClick={() => openLightbox(0)} className="col-span-3 row-span-2" />
+                        <div className="col-span-1 grid grid-rows-2 gap-1.5 h-full relative">
+                            {sideImages.map((img, i) => (
+                                <GalleryThumb key={i} src={img} alt={`${alt} ${i + 2}`} onClick={() => openLightbox(i + 1)} className="h-full" />
+                            ))}
+                        </div>
                     </div>
                 ) : (
-                    // 4-5 images: large left + 2 grid right
-                    <div className="grid grid-cols-2 gap-1.5 h-64 md:h-[480px]">
-                        <GalleryThumb src={mainImage} alt={`${alt} 1`} onClick={() => openLightbox(0)} className="row-span-2" />
-                        <div className="grid grid-rows-2 gap-1.5">
-                            {sideImages.slice(0, 2).map((img, i) => (
-                                <div key={i + 1} className="relative overflow-hidden rounded-lg">
+                    <div className="grid grid-cols-4 gap-1.5 h-64 md:h-[480px]">
+                        <GalleryThumb src={mainImage} alt={`${alt} 1`} onClick={() => openLightbox(0)} className="col-span-2 row-span-2" />
+                        <div className="col-span-2 grid grid-cols-2 grid-rows-2 gap-1.5 h-full relative">
+                            {sideImages.slice(0, 4).map((img, i) => (
+                                <div key={i + 1} className="relative overflow-hidden group rounded-sm h-full w-full">
                                     <GalleryThumb
                                         src={img}
                                         alt={`${alt} ${i + 2}`}
                                         onClick={() => openLightbox(i + 1)}
-                                        className="h-full"
+                                        className="h-full w-full"
                                     />
-                                    {/* "See all" overlay on last visible thumb when more photos exist */}
-                                    {i === 1 && validImages.length > 4 && (
+                                    {i === 3 && validImages.length > 5 && (
                                         <button
-                                            onClick={() => openLightbox(3)}
-                                            className="absolute inset-0 bg-black/50 hover:bg-black/60 transition-colors flex flex-col items-center justify-center text-white font-semibold text-xl rounded-lg"
+                                            onClick={() => openLightbox(4)}
+                                            className="absolute inset-0 bg-black/40 hover:bg-black/50 transition-colors flex flex-col items-center justify-center text-white font-semibold text-xl"
                                         >
-                                            <span>+{validImages.length - 3}</span>
-                                            <span className="text-xs font-normal opacity-80 mt-1">more photos</span>
+                                            <span>+{validImages.length - 5}</span>
                                         </button>
                                     )}
                                 </div>
@@ -171,7 +169,7 @@ function GalleryThumb({
         <button
             type="button"
             onClick={onClick}
-            className={`relative overflow-hidden rounded-lg group cursor-zoom-in w-full ${className}`}
+            className={`relative overflow-hidden group cursor-zoom-in w-full h-full ${className}`}
         >
             <img
                 src={src}
@@ -268,8 +266,8 @@ function Lightbox({
                             key={i}
                             onClick={() => setActiveIndex(i)}
                             className={`h-12 w-12 md:h-14 md:w-14 rounded-lg overflow-hidden border-2 transition-all duration-200 shrink-0 ${i === activeIndex
-                                    ? 'border-white scale-110 shadow-lg'
-                                    : 'border-white/30 opacity-50 hover:opacity-80 hover:border-white/60'
+                                ? 'border-white scale-110 shadow-lg'
+                                : 'border-white/30 opacity-50 hover:opacity-80 hover:border-white/60'
                                 }`}
                             aria-label={`View photo ${i + 1}`}
                         >

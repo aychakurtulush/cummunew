@@ -8,9 +8,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { AlertCircle, Shield, Ban, Flag, CheckCircle, XCircle } from "lucide-react"
-import { resolveReport, applyUserPenalty, toggleHostFlag } from "./actions"
+import { resolveReport, applyUserPenalty, toggleHostFlag, requestReportExplanation } from "./actions"
 import { approveEvent, rejectEvent } from "@/app/events/actions"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 export function EventModerationButtons({ eventId }: { eventId: string }) {
     const [isSubmitting, setIsSubmitting] = useState<'approve' | 'reject' | null>(null)
@@ -54,6 +55,7 @@ export function ReportResolutionDialog({ report }: { report: any }) {
     const [enforcement, setEnforcement] = useState<'none' | 'warning' | 'suspension' | 'ban'>('none')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [open, setOpen] = useState(false)
+    const router = useRouter()
 
     const handleResolve = async () => {
         setIsSubmitting(true)
@@ -64,6 +66,19 @@ export function ReportResolutionDialog({ report }: { report: any }) {
         } else {
             toast.success("Report resolved successfully")
             setOpen(false)
+        }
+    }
+
+    const handleRequestExplanation = async () => {
+        setIsSubmitting(true)
+        const res = await requestReportExplanation(report.id, report.target_type, report.target_id)
+        if (res.error) {
+            toast.error(res.error)
+            setIsSubmitting(false)
+        } else {
+            toast.success("Explanation requested. Redirecting to chat...")
+            setOpen(false)
+            router.push(`/messages/${res.conversationId}`)
         }
     }
 
@@ -119,15 +134,20 @@ export function ReportResolutionDialog({ report }: { report: any }) {
                         />
                     </div>
                 </div>
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                    <Button
-                        onClick={handleResolve}
-                        disabled={isSubmitting || !notes}
-                        className="bg-moss-600 hover:bg-moss-700"
-                    >
-                        {isSubmitting ? 'Resolving...' : 'Complete Resolution'}
+                <DialogFooter className="flex justify-between items-center sm:justify-between">
+                    <Button variant="outline" className="text-moss-700 bg-moss-50 border-moss-200 hover:bg-moss-100" onClick={handleRequestExplanation} disabled={isSubmitting}>
+                        Request Explanation
                     </Button>
+                    <div className="flex gap-2">
+                        <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+                        <Button
+                            onClick={handleResolve}
+                            disabled={isSubmitting || !notes}
+                            className="bg-moss-600 hover:bg-moss-700"
+                        >
+                            {isSubmitting ? 'Resolving...' : 'Complete Resolution'}
+                        </Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

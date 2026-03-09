@@ -2,6 +2,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import Link from "next/link";
 import { ChevronRight, ShieldCheck, Scale, Users, Home, UserCheck } from "lucide-react";
+import { ContactSupportButton } from "./contact-support-button";
 
 const policyLinks = [
     {
@@ -80,12 +81,7 @@ export default function PoliciesDirectory() {
                         If you experience harassment, safety issues, or profile fraud,
                         please use the report buttons on the platform.
                     </p>
-                    <Link
-                        href="/messages"
-                        className="inline-flex items-center px-6 py-3 bg-moss-600 hover:bg-moss-500 text-white font-medium rounded-full transition-colors"
-                    >
-                        Contact Support
-                    </Link>
+                    <ContactSupportButton />
                 </div>
             </main>
             <Footer />

@@ -16,11 +16,14 @@ export default function TermsPage() {
                         not a party to any transactions, agreements, or events organized through the site.
                     </PolicyHighlight>
 
-                    <PolicySection title="1. Acceptance of Agreement">
+                    <PolicySection title="1. Acceptance of Agreement & Platform Nature">
                         <p>
-                            These Terms of Service constitute a legally binding agreement between you and Communew regarding your
-                            access to and use of our website and services. By creating an account or browsing the platform,
-                            you agree to be bound by these terms.
+                            These Terms of Service constitute a legally binding agreement between you and Communew.
+                            <strong> Important: Communew is a non-commercial, community-driven initiative built by individuals, not a registered business entity or corporation in Germany.</strong>
+                        </p>
+                        <p>
+                            By creating an account or browsing the platform, you agree to be bound by these terms, understanding that
+                            we are simply providing a digital infrastructure for neighbors to connect.
                         </p>
                     </PolicySection>
 
