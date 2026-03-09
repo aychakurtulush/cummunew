@@ -9,7 +9,7 @@ export async function startConversation(otherUserId: string, contextType: 'event
     if (!supabase) return { error: "Database unavailable" };
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
+    if (!user) return { error: 'Session expired. Please log in again.' };
 
     if (user.id === otherUserId) {
         return { error: "Cannot message yourself" };
@@ -58,7 +58,7 @@ export async function sendMessage(conversationId: string, content: string) {
     if (!supabase) return { error: "Database unavailable" };
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
+    if (!user) return { error: 'Session expired. Please log in again.' };
 
     const { error } = await supabase
         .from('messages')
@@ -239,7 +239,7 @@ export async function requestToHost(ownerId: string, studioName: string, studioI
     if (!supabase) return { error: "Database unavailable" };
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
+    if (!user) return { error: 'Session expired. Please log in again.' };
 
     // 1. Start/Get Conversation
     const convResult = await startConversation(ownerId, 'studio', studioId);

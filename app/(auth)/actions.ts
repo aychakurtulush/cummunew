@@ -33,12 +33,18 @@ export async function signup(formData: FormData) {
         redirect('/signup?error=Demo Mode: Backend not configured')
     }
 
+    const acceptTerms = formData.get('accept_terms') === 'on' || formData.get('accept_terms') === 'true'
+    if (!acceptTerms) {
+        redirect('/signup?error=You must accept the Terms of Service and Privacy Policy to create an account.')
+    }
+
     const signupData = {
         email: (formData.get('email') as string).trim(),
         password: (formData.get('password') as string).trim(),
         options: {
             data: {
-                full_name: formData.get('full_name') as string, // Capture name for profile
+                full_name: formData.get('full_name') as string,
+                terms_accepted_at: new Date().toISOString(),
             }
         }
     }

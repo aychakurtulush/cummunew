@@ -47,7 +47,16 @@ export async function checkHostVerification(userId: string) {
         .eq('user_id', userId)
         .single()
 
-    const { data: { user } } = await supabase.auth.admin.getUserById(userId)
+    // Use Service Role for admin check
+    let user = null;
+    try {
+        const { createServiceRoleClient } = await import('@/lib/supabase/service');
+        const adminSupabase = createServiceRoleClient();
+        const { data } = await adminSupabase.auth.admin.getUserById(userId);
+        user = data.user;
+    } catch (e) {
+        console.error('Error fetching admin user data:', e);
+    }
 
     const reasons: string[] = []
     if (!user?.email_confirmed_at) reasons.push('Email not verified')

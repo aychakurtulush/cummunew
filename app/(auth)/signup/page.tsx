@@ -45,8 +45,20 @@ export default async function SignupPage(props: any) {
                             <label htmlFor="password" className="text-sm font-medium text-stone-700">Password</label>
                             <Input id="password" name="password" type="password" required />
                         </div>
-                        <Button type="submit" className="w-full bg-moss-600 hover:bg-moss-700 text-white">
-                            Sign Up
+                        <div className="flex items-start space-x-3 py-2">
+                            <input
+                                type="checkbox"
+                                id="accept_terms"
+                                name="accept_terms"
+                                required
+                                className="mt-1 h-4 w-4 rounded border-stone-300 text-moss-600 focus:ring-moss-600 cursor-pointer"
+                            />
+                            <label htmlFor="accept_terms" className="text-xs text-stone-600 leading-normal cursor-pointer select-none">
+                                I agree to the <Link href="/terms" className="text-moss-600 font-bold hover:underline">Terms of Service</Link> and <Link href="/privacy" className="text-moss-600 font-bold hover:underline">Privacy Policy</Link>.
+                            </label>
+                        </div>
+                        <Button type="submit" className="w-full bg-moss-600 hover:bg-moss-700 text-white h-11 rounded-xl shadow-sm transition-all">
+                            Create Account
                         </Button>
                     </form>
 

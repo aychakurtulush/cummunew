@@ -1,37 +1,77 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { PolicyContainer, PolicySection, LastUpdated, PolicyHighlight } from "../policy-components";
 
 export default function CommunityGuidelines() {
     return (
         <div className="min-h-screen bg-stone-50 flex flex-col">
             <Navbar />
-            <main className="flex-1 container mx-auto px-4 py-16 max-w-3xl">
-                <h1 className="text-4xl font-serif font-bold text-stone-900 mb-8">Community Guidelines</h1>
-                <div className="prose prose-stone lg:prose-lg">
-                    <p className="lead text-xl text-stone-600 mb-8">
-                        Communew is built on trust, respect, and the joy of shared experiences. To keep our community safe, we require all members to follow these guidelines.
-                    </p>
+            <main className="flex-1">
+                <PolicyContainer title="Community Guidelines">
+                    <LastUpdated date="09/03/2026" />
 
-                    <h2 className="text-2xl font-serif font-bold text-stone-800 mt-8 mb-4">1. Respect and Inclusion</h2>
-                    <p className="text-stone-600 mb-4">
-                        We welcome people of all backgrounds. Discrimination, hate speech, or harassment of any kind will not be tolerated. Treat every host and guest with the same kindness you&apos;d want for yourself.
-                    </p>
+                    <PolicyHighlight>
+                        Communew is a place for creative growth and connection. These guidelines ensure our
+                        community remains a safe, inclusive, and professional environment for everyone.
+                    </PolicyHighlight>
 
-                    <h2 className="text-2xl font-serif font-bold text-stone-800 mt-8 mb-4">2. Authenticity</h2>
-                    <p className="text-stone-600 mb-4">
-                        Be yourself. Use your real name and an accurate profile photo. Hosts must provide truthful descriptions and photos of their events and spaces. Misleading or fraudulent listings are strictly prohibited.
-                    </p>
+                    <PolicySection title="1. Radical Inclusion">
+                        <p>
+                            We welcome individuals of all backgrounds, skill levels, and identities.
+                            Discrimination, hate speech, or exclusionary behavior based on race, gender,
+                            religion, orientation, or disability is strictly prohibited and will result
+                            in immediate account termination.
+                        </p>
+                    </PolicySection>
 
-                    <h2 className="text-2xl font-serif font-bold text-stone-800 mt-8 mb-4">3. Safety First</h2>
-                    <p className="text-stone-600 mb-4">
-                        Hosts are responsible for ensuring their venues are safe and meet local regulations. Guests must follow house rules and safety instructions provided by the host. If you ever feel unsafe, report the situation immediately.
-                    </p>
+                    <PolicySection title="2. Respect for Creative Work">
+                        <p>
+                            Communew is built on the vulnerability of sharing creative processes.
+                            Treat the work, ideas, and spaces of others with the highest respect.
+                            Constructive feedback is welcome; mockery or theft of intellectual property is not.
+                        </p>
+                    </PolicySection>
 
-                    <h2 className="text-2xl font-serif font-bold text-stone-800 mt-8 mb-4">4. Communication</h2>
-                    <p className="text-stone-600 mb-4">
-                        Use the Communew messaging system for coordination. Keep conversations professional and focused on the event. Protect your private information (like bank details) and only share what&apos;s necessary for the booking.
-                    </p>
-                </div>
+                    <PolicySection title="3. Authenticity & Trust">
+                        <p>
+                            To maintain a safe environment, we require all members to be who they say they are.
+                        </p>
+                        <ul className="list-disc space-y-2">
+                            <li>Use your real name and an accurate profile photo.</li>
+                            <li>Provide truthful descriptions of your skills, events, and venues.</li>
+                            <li>Do not use the platform for deceptive marketing or spam.</li>
+                        </ul>
+                    </PolicySection>
+
+                    <PolicySection title="4. Safety & Reporting">
+                        <p>
+                            We rely on our members to help protect the community. If you encounter a listing,
+                            message, or behavior that violates these guidelines or makes you feel unsafe:
+                        </p>
+                        <ol className="list-decimal space-y-2">
+                            <li>Use the &quot;Report&quot; feature on the event or profile page.</li>
+                            <li>Provide as much detail as possible to our moderation team.</li>
+                            <li>Disengage from the situation immediately.</li>
+                        </ol>
+                    </PolicySection>
+
+                    <PolicySection title="5. Platform Integrity">
+                        <p>
+                            Do not attempt to scrape data, bypass our security systems, or use the platform
+                            for purposes other than creative community building. Protect your account credentials
+                            and report any suspicious activity to us.
+                        </p>
+                    </PolicySection>
+
+                    <PolicySection title="6. Enforcement">
+                        <p>
+                            Communew reserves the right to remove content or suspend users who violate either
+                            the spirit or the letter of these guidelines. Our goal is always to protect
+                            the integrity of our creative community.
+                        </p>
+                    </PolicySection>
+
+                </PolicyContainer>
             </main>
             <Footer />
         </div>

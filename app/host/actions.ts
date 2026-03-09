@@ -17,7 +17,7 @@ export async function createEvent(prevState: any, formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-        redirect('/login')
+        return { message: "Session expired. Please log in again." }
     }
 
     // Trust & Safety: Check for suspension/ban
@@ -186,7 +186,7 @@ export async function updateEvent(prevState: any, formData: FormData) {
 
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) redirect('/login')
+    if (!user) return { message: "Session expired. Please log in again." }
 
     // Trust & Safety: Check for suspension/ban
     const { data: profile } = await supabase
@@ -289,7 +289,7 @@ export async function updateEvent(prevState: any, formData: FormData) {
 
     revalidatePath('/host');
     revalidatePath(`/events/${eventId}`);
-    revalidatePath(`/ host / events / ${eventId}/edit`);
+    revalidatePath(`/host/events/${eventId}/edit`);
 
     return { message: 'Success' }
 }
@@ -307,7 +307,7 @@ export async function createStudio(prevState: any, formData: FormData) {
 
     if (!user) {
         console.error('[createStudio] No user');
-        redirect('/login')
+        return { message: "Session expired. Please log in again.", success: false }
     }
 
     // Trust & Safety: Check for suspension/ban

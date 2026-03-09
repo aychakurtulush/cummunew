@@ -15,7 +15,7 @@ export async function createInquiry(data: {
     if (!supabase) return { error: "Database unavailable" };
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
+    if (!user) return { error: "Session expired. Please log in again." };
 
     // Basic Validation
     const start = new Date(data.startTime);

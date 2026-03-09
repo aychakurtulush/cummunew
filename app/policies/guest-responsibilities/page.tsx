@@ -1,37 +1,65 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { PolicyContainer, PolicySection, LastUpdated, PolicyHighlight } from "../policy-components";
 
 export default function GuestResponsibilities() {
     return (
         <div className="min-h-screen bg-stone-50 flex flex-col">
             <Navbar />
-            <main className="flex-1 container mx-auto px-4 py-16 max-w-3xl">
-                <h1 className="text-4xl font-serif font-bold text-stone-900 mb-8">Guest Responsibilities</h1>
-                <div className="prose prose-stone lg:prose-lg">
-                    <p className="lead text-xl text-stone-600 mb-8">
-                        Being a guest on Communew means joining someone&apos;s space and community. We ask you to be respectful, punctual, and responsible during your visit.
-                    </p>
+            <main className="flex-1">
+                <PolicyContainer title="Guest Responsibilities">
+                    <LastUpdated date="09/03/2026" />
 
-                    <h2 className="text-2xl font-serif font-bold text-stone-800 mt-8 mb-4">1. Respect Rules & Space</h2>
-                    <p className="text-stone-600 mb-4">
-                        Treat the host&apos;s space with respect. Follow all house rules provided in the event description or by the host upon arrival. Leave the space as you found it.
-                    </p>
+                    <PolicyHighlight>
+                        Communew is built on mutual respect. When you join someone&apos;s creative space, you become part
+                        of their community. We expect all guests to act with integrity and care.
+                    </PolicyHighlight>
 
-                    <h2 className="text-2xl font-serif font-bold text-stone-800 mt-8 mb-4">2. Punctuality & Attendance</h2>
-                    <p className="text-stone-600 mb-4">
-                        Hosts put significant effort into planning. Arrive on time. If you can no longer attend, notify the host as early as possible. No-shows without notice are disrespectful and may lead to a lower user rating.
-                    </p>
+                    <PolicySection title="1. Respect for Space & Rules">
+                        <p>
+                            Every creative space has its own rhythm. Guests are expected to follow all documented
+                            House Rules and any verbal instructions provided by the Host upon arrival. This includes
+                            rules regarding noise, materials, equipment use, and restricted areas.
+                        </p>
+                    </PolicySection>
 
-                    <h2 className="text-2xl font-serif font-bold text-stone-800 mt-8 mb-4">3. Communication</h2>
-                    <p className="text-stone-600 mb-4">
-                        Keep all communication within the Communew platform. If you have questions about materials, location, or requirements, ask the host through the messaging system before the event starts.
-                    </p>
+                    <PolicySection title="2. Punctuality & Communication">
+                        <p>
+                            Hosts put significant effort into planning and preparation. Please arrive on time.
+                            If you are running late or can no longer attend, notify the Host immediately through
+                            the Communew messaging system. Frequent no-shows or lack of communication
+                            may result in account suspension.
+                        </p>
+                    </PolicySection>
 
-                    <h2 className="text-2xl font-serif font-bold text-stone-800 mt-8 mb-4">4. Personal Safety & Conduct</h2>
-                    <p className="text-stone-600 mb-4">
-                        You are responsible for your own safety and conduct. Communew is only a platform to connect you with hosts. If you encounter any issues or feel unsafe, remove yourself from the situation and report the incident to us.
-                    </p>
-                </div>
+                    <PolicySection title="3. Safety & Personal Conduct">
+                        <p>
+                            You are responsible for your own safety and conduct. Communew is a connection platform
+                            and does not provide on-site supervision.
+                        </p>
+                        <ul className="list-disc space-y-2">
+                            <li><strong>Behavior:</strong> Treat everyone with kindness. Harassment or exclusionary behavior is not tolerated.</li>
+                            <li><strong>Safety:</strong> If you see a hazard or feel unsafe, remove yourself from the situation and report it to us.</li>
+                            <li><strong>Substances:</strong> Follow the Host&apos;s policy regarding alcohol or tobacco. Illegal substances are strictly prohibited.</li>
+                        </ul>
+                    </PolicySection>
+
+                    <PolicySection title="4. Payment Integrity">
+                        <p>
+                            Manual payments require trust. Ensure you follow the Host&apos;s payment instructions
+                            accurately and promptly. Attempting to bypass agreed-upon fees or failing to pay for
+                            an attended event is a serious violation of community trust.
+                        </p>
+                    </PolicySection>
+
+                    <PolicySection title="5. Shared Experiences">
+                        <p>
+                            Many events are collaborative. Contributed positively to the atmosphere.
+                            Clean up after yourself and respect the creative work of others sharing the space.
+                        </p>
+                    </PolicySection>
+
+                </PolicyContainer>
             </main>
             <Footer />
         </div>
