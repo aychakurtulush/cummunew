@@ -30,9 +30,20 @@ interface CreateEventFormProps {
     initialEndTime?: string;
     initialStudioId?: string;
     initialStudioBookingId?: string;
+    verification: {
+        isValid: boolean;
+        reasons: string[];
+    };
 }
 
-export default function CreateEventForm({ studios, initialStartTime, initialEndTime, initialStudioId, initialStudioBookingId }: CreateEventFormProps) {
+export default function CreateEventForm({
+    studios,
+    initialStartTime,
+    initialEndTime,
+    initialStudioId,
+    initialStudioBookingId,
+    verification
+}: CreateEventFormProps) {
     const [state, formAction] = useActionState(createEvent, initialState)
 
     const [locationType, setLocationType] = useState<string>(initialStudioId ? "studio" : "home");
@@ -92,7 +103,30 @@ export default function CreateEventForm({ studios, initialStartTime, initialEndT
                 </div>
             )}
 
-            <form action={formAction} onSubmit={handleSubmit} className="space-y-8">
+            {!verification.isValid && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-8 text-amber-900">
+                    <h3 className="text-lg font-serif font-bold mb-2 flex items-center gap-2">
+                        <span>🛡️</span> Host Verification Required
+                    </h3>
+                    <p className="text-sm mb-4 opacity-90">
+                        To keep Communew safe, we requiring hosts to complete their verification before publishing events.
+                    </p>
+                    <ul className="space-y-2 mb-6">
+                        {verification.reasons.map((reason, i) => (
+                            <li key={i} className="flex items-center gap-2 text-sm font-medium">
+                                <span className="text-amber-500">○</span> {reason}
+                            </li>
+                        ))}
+                    </ul>
+                    <Link href="/host/profile">
+                        <Button className="bg-amber-600 hover:bg-amber-700 text-white w-full sm:w-auto">
+                            Complete My Profile
+                        </Button>
+                    </Link>
+                </div>
+            )}
+
+            <form action={formAction} onSubmit={handleSubmit} className={`space-y-8 ${!verification.isValid ? 'pointer-events-none opacity-50 grayscale' : ''}`}>
                 {/* Basic Info */}
                 <div className="space-y-4">
                     <h3 className="text-lg font-medium text-stone-900">Basic Information</h3>

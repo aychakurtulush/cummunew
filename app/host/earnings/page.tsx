@@ -31,7 +31,10 @@ export default async function EarningsPage() {
 
     if (error) {
         console.error('Error fetching earnings data:', error);
-        return <div>Error loading earnings data.</div>;
+        return <div className="p-8 text-red-500 bg-red-50 rounded-lg border border-red-200">
+            <h2 className="font-bold mb-2 text-lg">Error loading earnings data</h2>
+            <pre className="text-xs whitespace-pre-wrap">{JSON.stringify(error, null, 2)}</pre>
+        </div>;
     }
 
     // Process data for fees

@@ -51,7 +51,6 @@ export async function updateProfile(prevState: any, formData: FormData) {
     }
 
     const updates: any = {
-        user_id: user.id,
         full_name: fullName,
         bio: bio,
         social_links: socialLinks,
@@ -64,12 +63,13 @@ export async function updateProfile(prevState: any, formData: FormData) {
 
     const { error } = await supabase
         .from('profiles')
-        .upsert(updates);
+        .update(updates)
+        .eq('user_id', user.id);
 
     if (error) {
         return { message: `Error updating profile: ${error.message}` };
     }
 
-    revalidatePath('/profile');
+    revalidatePath('/', 'layout');
     return { success: true, message: 'Profile updated successfully!' };
 }

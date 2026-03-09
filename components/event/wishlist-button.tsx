@@ -66,7 +66,7 @@ export function WishlistButton({ eventId, initialIsLiked, className, variant = "
         return (
             <Button
                 variant="outline"
-                className={`w-full gap-2 transition-all ${isLiked ? "text-red-600 border-red-100 bg-red-50 hover:bg-red-100" : "text-stone-600"} ${className}`}
+                className={`flex-1 min-h-[56px] h-auto gap-2 transition-all rounded-xl ${isLiked ? "text-red-600 border-red-100 bg-red-50 hover:bg-red-100" : "text-stone-600 border-stone-200 bg-white"} ${className}`}
                 onClick={handleToggle}
                 disabled={isLoading}
             >

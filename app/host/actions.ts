@@ -20,6 +20,20 @@ export async function createEvent(prevState: any, formData: FormData) {
         redirect('/login')
     }
 
+    // Trust & Safety: Check for suspension/ban
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_banned, is_suspended_until')
+        .eq('user_id', user.id)
+        .single();
+
+    if (profile?.is_banned) {
+        return { message: "Your account has been permanently banned from Communew." }
+    }
+    if (profile?.is_suspended_until && new Date(profile.is_suspended_until) > new Date()) {
+        return { message: `Your account is temporarily suspended until ${new Date(profile.is_suspended_until).toLocaleDateString()}.` }
+    }
+
     const startInput = formData.get('start_time') as string;
     const endInput = formData.get('end_time') as string;
 
@@ -97,6 +111,18 @@ export async function createEvent(prevState: any, formData: FormData) {
     let longitude = null;
 
     if (location_type === 'studio' && studio_id) {
+        // Overbooking protection
+        const { data: overlappingEvents } = await supabase
+            .from('events')
+            .select('id')
+            .eq('studio_id', studio_id)
+            .lt('start_time', endTime.toISOString())
+            .gt('end_time', startTime.toISOString());
+
+        if (overlappingEvents && overlappingEvents.length > 0) {
+            return { message: "This studio is already booked for another event during this time." };
+        }
+
         // 1. Fetch studio location and coordinates
         const { data: studio } = await supabase.from('studios').select('location, latitude, longitude').eq('id', studio_id).single();
         city = studio?.location?.split(',')[0].trim() || "Berlin";
@@ -162,6 +188,16 @@ export async function updateEvent(prevState: any, formData: FormData) {
 
     if (!user) redirect('/login')
 
+    // Trust & Safety: Check for suspension/ban
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_banned, is_suspended_until')
+        .eq('user_id', user.id)
+        .single();
+
+    if (profile?.is_banned) return { message: "Account banned." }
+    if (profile?.is_suspended_until && new Date(profile.is_suspended_until) > new Date()) return { message: "Account suspended." }
+
     const eventId = formData.get('id') as string;
     if (!eventId) return { message: "Event ID missing" };
 
@@ -208,6 +244,19 @@ export async function updateEvent(prevState: any, formData: FormData) {
     let longitude = null;
 
     if (location_type === 'studio' && rawData.studio_id) {
+        // Overbooking protection
+        const { data: overlappingEvents } = await supabase
+            .from('events')
+            .select('id')
+            .eq('studio_id', rawData.studio_id)
+            .neq('id', eventId)
+            .lt('start_time', endTime.toISOString())
+            .gt('end_time', startTime.toISOString());
+
+        if (overlappingEvents && overlappingEvents.length > 0) {
+            return { message: "This studio is already booked for another event during this time." };
+        }
+
         const { data: studio } = await supabase.from('studios').select('latitude, longitude').eq('id', rawData.studio_id).single();
         latitude = studio?.latitude;
         longitude = studio?.longitude;
@@ -260,6 +309,16 @@ export async function createStudio(prevState: any, formData: FormData) {
         console.error('[createStudio] No user');
         redirect('/login')
     }
+
+    // Trust & Safety: Check for suspension/ban
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_banned, is_suspended_until')
+        .eq('user_id', user.id)
+        .single();
+
+    if (profile?.is_banned) return { message: "Account banned." }
+    if (profile?.is_suspended_until && new Date(profile.is_suspended_until) > new Date()) return { message: "Account suspended." }
 
 
     try {
@@ -396,6 +455,17 @@ export async function updateStudio(prevState: any, formData: FormData) {
 
     if (!user) {
         return { message: "Unauthorized", success: false }
+    }
+
+    // Trust & Safety: Check for suspension/ban
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_banned, is_suspended_until')
+        .eq('user_id', user.id)
+        .single();
+
+    if (profile?.is_banned || (profile?.is_suspended_until && new Date(profile.is_suspended_until) > new Date())) {
+        return { message: "Account restricted.", success: false }
     }
 
     const studioId = formData.get('id') as string;

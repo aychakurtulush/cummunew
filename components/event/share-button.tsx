@@ -41,7 +41,7 @@ export function ShareButton({ title, description }: { title: string, description
     return (
         <button
             onClick={handleShare}
-            className="flex flex-col items-center gap-1 text-xs font-medium text-stone-500 hover:text-stone-900 transition-colors"
+            className="flex flex-1 flex-col items-center justify-center min-h-[56px] px-4 py-2 rounded-xl bg-stone-50 hover:bg-stone-100 border border-stone-200 gap-1.5 text-xs font-medium text-stone-600 transition-colors"
         >
             {copied ? (
                 <>

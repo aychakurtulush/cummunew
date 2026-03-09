@@ -86,10 +86,11 @@ export function ReportButton({ targetId, targetType, variant = "ghost", size = "
                                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <option value="">Select a reason</option>
-                                <option value="spam">Spam or misleading</option>
-                                <option value="inappropriate">Inappropriate content</option>
-                                <option value="harassment">Harassment or hate speech</option>
-                                <option value="other">Other issue</option>
+                                <option value="scam">Scam / Fake Event</option>
+                                <option value="harassment">Harassment</option>
+                                <option value="inappropriate">Inappropriate Content</option>
+                                <option value="safety">Safety Concern</option>
+                                <option value="other">Other</option>
                             </select>
                         </div>
                         <div className="grid gap-2">

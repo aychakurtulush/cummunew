@@ -48,8 +48,8 @@ export default async function HostEventsPage() {
                 </Link>
             </div>
 
-            <div className="bg-white rounded-xl border border-stone-200 overflow-hidden shadow-sm">
-                <table className="w-full text-sm text-left text-stone-600">
+            <div className="bg-white rounded-xl border border-stone-200 overflow-x-auto shadow-sm">
+                <table className="w-full text-sm text-left text-stone-600 min-w-[600px]">
                     <thead className="bg-stone-50 text-stone-700 font-medium uppercase text-xs">
                         <tr>
                             <th className="px-6 py-4">Event Name</th>

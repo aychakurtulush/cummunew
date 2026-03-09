@@ -74,6 +74,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
     let isLiked = false;
     let bookingStatus: string | null = null;
     let isOnWaitlist = false;
+    let isHost = false;
 
     let hostProfile: any = null;
 
@@ -136,6 +137,8 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
             }
 
             if (user && event) {
+                isHost = user.id === event.creator_user_id;
+
                 const { data: wishlistEntry } = await supabase
                     .from('wishlist')
                     .select('id')
@@ -271,7 +274,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                 </div>
                             </div>
                             <div className="flex-shrink-0 w-full sm:w-auto">
-                                <ContactHostButton hostId={event.creator_user_id} eventId={event.id} />
+                                {!isHost && <ContactHostButton hostId={event.creator_user_id} eventId={event.id} />}
                             </div>
                         </div>
 
@@ -363,7 +366,13 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                             </div>
 
                             <div className="space-y-3">
-                                {bookingStatus ? (
+                                {isHost ? (
+                                    <Link href={`/host/events/${event.id}/edit`}>
+                                        <Button className="w-full h-12 text-base bg-stone-900 hover:bg-stone-800 text-white shadow-md">
+                                            Manage Event
+                                        </Button>
+                                    </Link>
+                                ) : bookingStatus ? (
                                     <Link href="/bookings">
                                         <Button className="w-full h-12 text-base bg-emerald-600 hover:bg-emerald-700 shadow-md">
                                             {bookingStatus === 'confirmed' ? 'Booking Confirmed' :
@@ -384,12 +393,17 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                         hasAuth={!!supabase && await supabase.auth.getUser().then(r => !!r.data.user)}
                                     />
                                 )}
-                                <p className="text-xs text-center text-stone-500">
-                                    {bookingStatus ? "View your bookings" : (spotsLeft === 0 ? "Event is at full capacity" : "No payment required to request to book.")}
-                                </p>
+                                {!isHost && (
+                                    <p className="text-xs text-center text-stone-500">
+                                        {bookingStatus ? "View your bookings" : (spotsLeft === 0 ? "Event is at full capacity" : "No payment required to request to book.")}
+                                    </p>
+                                )}
                                 <div className="text-xs text-center text-stone-500 bg-stone-50 py-2 rounded-md border border-stone-100 mt-2">
                                     <span className="font-semibold block mb-0.5">Cancellation Policy</span>
                                     Cancel up to 24 hours before for a full refund.
+                                </div>
+                                <div className="text-[10px] text-center text-stone-400 italic leading-tight px-2">
+                                    Communew connects hosts and guests. Hosts are responsible for the events they organize.
                                 </div>
                             </div>
 

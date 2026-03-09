@@ -21,12 +21,13 @@ export async function submitReport(prevState: any, formData: FormData) {
     const reason = formData.get('reason') as string;
     const details = formData.get('details') as string;
 
-    if (!targetType || !targetId || !reason) {
-        return { error: 'Missing required fields.' };
+    const validReasons = ['scam', 'harassment', 'inappropriate', 'safety', 'other'];
+
+    if (!targetType || !targetId || !reason || !validReasons.includes(reason)) {
+        return { error: 'Missing or invalid required fields.' };
     }
 
     try {
-
         const { error } = await supabase
             .from('reports')
             .insert({
@@ -39,9 +40,12 @@ export async function submitReport(prevState: any, formData: FormData) {
             });
 
         if (error) {
-            console.error('Report submission error:', error);
-            return { error: 'Failed to submit report. Please try again.' };
+            console.error('Report submission error details:', error);
+            return { error: `Database Error: ${error.message}` };
         }
+
+        // Potential Admin Notification Trigger here
+        // await createAdminNotification(`New ${targetType} report: ${reason}`);
 
         return { success: 'Report submitted successfully. Thank you for helping keep our community safe.' };
 
