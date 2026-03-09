@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/server";
+import { DeleteAccountButton } from "@/components/settings/delete-account-button";
 
 export default async function SettingsPage(props: { searchParams?: Promise<{ error?: string, success?: string }> }) {
     const searchParams = props.searchParams ? await props.searchParams : {};
@@ -28,9 +29,7 @@ export default async function SettingsPage(props: { searchParams?: Promise<{ err
 
             <div>
                 <h3 className="font-medium text-stone-900 mb-4 text-red-600">Danger Zone</h3>
-                <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
-                    Delete Account
-                </Button>
+                <DeleteAccountButton />
             </div>
 
         </div>
