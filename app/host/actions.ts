@@ -263,9 +263,12 @@ export async function updateEvent(prevState: any, formData: FormData) {
             return { message: "This studio is already booked for another event during this time." };
         }
 
-        const { data: studio } = await supabase.from('studios').select('latitude, longitude').eq('id', rawData.studio_id).single();
+        const { data: studio } = await supabase.from('studios').select('latitude, longitude, location').eq('id', rawData.studio_id).single();
         latitude = studio?.latitude;
         longitude = studio?.longitude;
+        if (!rawData.city && studio?.location) {
+            rawData.city = studio.location.split(',')[0].trim();
+        }
     } else if (location_address) {
         const geoResult = await geocodeAddress(location_address);
         if (geoResult) {

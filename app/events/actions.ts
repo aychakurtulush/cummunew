@@ -65,7 +65,7 @@ export async function bookEvent(formData: FormData) {
                 type: 'booking_request',
                 title: 'New Booking Request',
                 message: `${user.user_metadata?.full_name || 'Someone'} requested to join "${eventData.title}"`,
-                link: '/host/events',
+                link: '/host/inquiries',
                 metadata: { event_id: eventId, booking_id: insertedBooking.id }
             });
 

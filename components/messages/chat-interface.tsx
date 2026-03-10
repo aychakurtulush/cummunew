@@ -46,6 +46,12 @@ export function ChatInterface({ initialMessages, currentUser, conversationId, ot
         }
     }, [messages]);
 
+    // Sync server-side prop updates (e.g. from router.refresh())
+    // into the local state so the active chat window updates when the sidebar does
+    useEffect(() => {
+        setMessages(initialMessages);
+    }, [initialMessages]);
+
     // Realtime Subscription
     useEffect(() => {
         const channel = supabase
