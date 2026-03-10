@@ -194,8 +194,11 @@
     "dashboard": "Host Dashboard",
     "myEvents": "My Events",
     "myStudios": "My Studios",
+    "myStudiosSubtitle": "Manage your venues and creative spaces",
     "createEvent": "Create Event",
     "createStudio": "Add Studio",
+    "listStudio": "List New Studio",
+    "listFirstStudio": "List Your First Studio",
     "editEvent": "Edit Event",
     "editStudio": "Edit Studio",
     "bookingRequests": "Booking Requests",
@@ -203,15 +206,26 @@
     "approve": "Approve",
     "decline": "Decline",
     "noEvents": "You haven't created any events yet.",
+    "noEventsSubtitle": "Host your first gathering, workshop, or event and start building your community today.",
     "noStudios": "You don't have any studios yet.",
+    "noStudiosSubtitle": "List and manage your creative spaces to rent out to the community.",
     "attendees": "Attendees",
     "spotsUsed": "{used} / {total} spots",
     "pendingRequests": "Pending Requests",
+    "inquiriesSubtitle": "Manage incoming booking requests for your studios.",
+    "noInquiries": "No inquiries yet",
+    "noInquiriesSubtitle": "When users request to book your studio, they will appear here.",
     "messages": "Messages"
   },
   "bookings": {
-    "title": "My Bookings",
-    "noBookings": "You haven't booked any events yet.",
+    "title": "Your Bookings",
+    "noBookings": "No bookings yet",
+    "noBookingsSubtitle": "Find your people and discover local events matching your interests.",
+    "browseMoreEvents": "Browse More Events",
+    "exploreEvents": "Explore Events",
+    "attended": "Attended",
+    "requested": "Requested",
+    "viewStudio": "View Studio",
     "status": {
       "confirmed": "Confirmed",
       "pending": "Pending",
@@ -245,6 +259,11 @@
     "explore": "Explore",
     "seeAll": "See all",
     "perHour": "/ hour",
+    "hour": "hour",
+    "event": "Event",
+    "studio": "Studio",
+    "noLocation": "No location set",
+    "priceTbd": "Price TBD",
     "free": "Free",
     "backToExplore": "← Back to Explore"
   },
@@ -264,5 +283,16 @@
       "guidelines": "Community Guidelines"
     },
     "rights": "All rights reserved."
+  },
+  "messages": {
+    "title": "Messages",
+    "search": "Search messages...",
+    "empty": "Contextual conversations with hosts or guests will appear here.",
+    "selectConversation": "Select a conversation to start messaging",
+    "online": "Online",
+    "emptyChat": "No messages yet. Say hello!",
+    "typeMessage": "Type a message...",
+    "browseEvents": "Browse Events",
+    "findStudios": "Find Studios"
   }
 }

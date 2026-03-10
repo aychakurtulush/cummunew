@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Search, Send, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { getConversations } from "@/app/messages/actions";
+import { getTranslations } from "next-intl/server";
 
 import { formatEventDate } from "@/lib/date-utils";
 
@@ -21,6 +22,7 @@ const formatDate = (dateString?: string) => {
 
 export default async function MessagesPage() {
     const conversations = await getConversations();
+    const t = await getTranslations('messages');
 
     return (
         <div className="h-[600px] flex bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
@@ -28,10 +30,10 @@ export default async function MessagesPage() {
             {/* Sidebar List */}
             <div className="w-1/3 border-r border-stone-200 flex flex-col">
                 <div className="p-4 border-b border-stone-100">
-                    <h2 className="text-lg font-serif font-bold text-stone-900 mb-3">Messages</h2>
+                    <h2 className="text-lg font-serif font-bold text-stone-900 mb-3">{t('title')}</h2>
                     <div className="relative">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-stone-400" />
-                        <Input placeholder="Search messages..." className="pl-9 bg-stone-50 border-stone-100" />
+                        <Input placeholder={t('search')} className="pl-9 bg-stone-50 border-stone-100" />
                     </div>
                 </div>
                 <div className="flex-1 overflow-y-auto">
@@ -60,14 +62,14 @@ export default async function MessagesPage() {
                         <div className="p-8 text-center flex flex-col items-center justify-center space-y-4">
                             <MessageCircle className="h-10 w-10 text-stone-200" />
                             <div className="text-stone-500 text-sm">
-                                Contextual conversations with hosts or guests will appear here.
+                                {t('empty')}
                             </div>
                             <div className="flex gap-2">
                                 <Link href="/">
-                                    <Button variant="outline" size="sm">Browse Events</Button>
+                                    <Button variant="outline" size="sm">{t('browseEvents')}</Button>
                                 </Link>
                                 <Link href="/studios">
-                                    <Button variant="outline" size="sm">Find Studios</Button>
+                                    <Button variant="outline" size="sm">{t('findStudios')}</Button>
                                 </Link>
                             </div>
                         </div>
@@ -76,8 +78,8 @@ export default async function MessagesPage() {
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 flex flex-col bg-stone-50/30 items-center justify-center text-stone-400">
-                <p>Select a conversation to start messaging</p>
+            <div className="flex-1 flex flex-col bg-stone-50/30 items-center justify-center text-stone-400 p-8 text-center">
+                <p>{t('selectConversation')}</p>
             </div>
         </div>
     );

@@ -2,15 +2,17 @@ import { getInquiriesForHost } from "./actions";
 import { InquiryCard } from "@/components/host/inquiry-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 export default async function HostInquiriesPage() {
     const inquiries = await getInquiriesForHost();
+    const t = await getTranslations('host');
 
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-serif font-bold text-stone-900">Inquiries</h1>
-                <p className="text-stone-500">Manage incoming booking requests for your studios.</p>
+                <h1 className="text-3xl font-serif font-bold text-stone-900">{t('nav.inquiries')}</h1>
+                <p className="text-stone-500">{t('inquiriesSubtitle')}</p>
             </div>
 
             {inquiries.length === 0 ? (
@@ -19,8 +21,8 @@ export default async function HostInquiriesPage() {
                         <div className="h-12 w-12 bg-stone-100 rounded-full flex items-center justify-center mb-4">
                             <Clock className="h-6 w-6 text-stone-400" />
                         </div>
-                        <h3 className="font-semibold text-lg text-stone-900">No inquiries yet</h3>
-                        <p>When users request to book your studio, they will appear here.</p>
+                        <h3 className="font-semibold text-lg text-stone-900">{t('noInquiries')}</h3>
+                        <p>{t('noInquiriesSubtitle')}</p>
                     </CardContent>
                 </Card>
             ) : (

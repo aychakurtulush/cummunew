@@ -4,6 +4,7 @@ import { MoreHorizontal, Plus, Calendar } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,6 +17,8 @@ import { formatEventDate } from "@/lib/date-utils";
 
 export default async function HostEventsPage() {
     const supabase = await createClient();
+    const t = await getTranslations('host');
+    const tCommon = await getTranslations('common');
     let events: any[] = [];
 
     if (supabase) {
@@ -40,10 +43,10 @@ export default async function HostEventsPage() {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-serif font-bold text-stone-900">Manage Events</h1>
+                <h1 className="text-2xl font-serif font-bold text-stone-900">{t('nav.manageEvents')}</h1>
                 <Link href="/host/events/create">
                     <Button className="bg-moss-600 hover:bg-moss-700 text-white gap-2">
-                        <Plus className="h-4 w-4" /> New Event
+                        <Plus className="h-4 w-4" /> {t('createEvent')}
                     </Button>
                 </Link>
             </div>
@@ -52,7 +55,7 @@ export default async function HostEventsPage() {
                 <table className="w-full text-sm text-left text-stone-600 min-w-[600px]">
                     <thead className="bg-stone-50 text-stone-700 font-medium uppercase text-xs">
                         <tr>
-                            <th className="px-6 py-4">Event Name</th>
+                            <th className="px-6 py-4">{t('nav.manageEvents')}</th>
                             <th className="px-6 py-4">Date</th>
                             <th className="px-6 py-4">Status</th>
                             <th className="px-6 py-4 text-right">Sold / Cap</th>
@@ -105,8 +108,19 @@ export default async function HostEventsPage() {
                     </tbody>
                 </table>
                 {events.length === 0 && (
-                    <div className="p-12 text-center text-stone-500">
-                        No events found. Create your first one!
+                    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                        <div className="h-16 w-16 bg-stone-100 rounded-full flex items-center justify-center mb-4">
+                            <Calendar className="h-8 w-8 text-stone-400" />
+                        </div>
+                        <h3 className="text-lg font-medium text-stone-900 mb-1">{t('noEvents')}</h3>
+                        <p className="text-stone-500 mb-6 max-w-md">
+                            {t('noEventsSubtitle')}
+                        </p>
+                        <Link href="/host/events/create">
+                            <Button className="bg-moss-600 hover:bg-moss-700 text-white gap-2">
+                                <Plus className="h-4 w-4" /> {t('createEvent')}
+                            </Button>
+                        </Link>
                     </div>
                 )}
             </div>

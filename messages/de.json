@@ -194,8 +194,11 @@
         "dashboard": "Gastgeber-Dashboard",
         "myEvents": "Meine Events",
         "myStudios": "Meine Studios",
+        "myStudiosSubtitle": "Verwalte deine Veranstaltungsorte und Räume",
         "createEvent": "Event erstellen",
         "createStudio": "Studio hinzufügen",
+        "listStudio": "Neues Studio inserieren",
+        "listFirstStudio": "Erstes Studio inserieren",
         "editEvent": "Event bearbeiten",
         "editStudio": "Studio bearbeiten",
         "bookingRequests": "Buchungsanfragen",
@@ -203,15 +206,26 @@
         "approve": "Genehmigen",
         "decline": "Ablehnen",
         "noEvents": "Du hast noch keine Events erstellt.",
+        "noEventsSubtitle": "Veranstalte dein erstes Treffen, deinen ersten Workshop oder dein erstes Event und beginne noch heute, deine Community aufzubauen.",
         "noStudios": "Du hast noch keine Studios.",
+        "noStudiosSubtitle": "Liste und verwalte deine kreativen Räume zur Vermietung an die Community.",
         "attendees": "Teilnehmer",
         "spotsUsed": "{used} / {total} Plätze",
         "pendingRequests": "Offene Anfragen",
+        "inquiriesSubtitle": "Verwalte eingehende Buchungsanfragen für deine Studios.",
+        "noInquiries": "Noch keine Anfragen",
+        "noInquiriesSubtitle": "Wenn Nutzer dein Studio buchen möchten, erscheinen sie hier.",
         "messages": "Nachrichten"
     },
     "bookings": {
-        "title": "Meine Buchungen",
-        "noBookings": "Du hast noch keine Events gebucht.",
+        "title": "Deine Buchungen",
+        "noBookings": "Noch keine Buchungen",
+        "noBookingsSubtitle": "Finde deine Leute und entdecke lokale Events, die deinen Interessen entsprechen.",
+        "browseMoreEvents": "Weitere Events entdecken",
+        "exploreEvents": "Events erkunden",
+        "attended": "Teilgenommen",
+        "requested": "Angefragt",
+        "viewStudio": "Studio ansehen",
         "status": {
             "confirmed": "Bestätigt",
             "pending": "Ausstehend",
@@ -245,6 +259,11 @@
         "explore": "Entdecken",
         "seeAll": "Alle ansehen",
         "perHour": "/ Stunde",
+        "hour": "Stunde",
+        "event": "Event",
+        "studio": "Studio",
+        "noLocation": "Kein Standort festgelegt",
+        "priceTbd": "Preis noch offen",
         "free": "Kostenlos",
         "backToExplore": "← Zurück zur Übersicht"
     },
@@ -264,5 +283,16 @@
             "guidelines": "Community-Richtlinien"
         },
         "rights": "Alle Rechte vorbehalten."
+    },
+    "messages": {
+        "title": "Nachrichten",
+        "search": "Nachrichten suchen...",
+        "empty": "Kontextbezogene Gespräche mit Gastgebern oder Gästen erscheinen hier.",
+        "selectConversation": "Wähle eine Unterhaltung aus, um eine Nachricht zu schreiben",
+        "online": "Online",
+        "emptyChat": "Noch keine Nachrichten. Sag hallo!",
+        "typeMessage": "Schreibe eine Nachricht...",
+        "browseEvents": "Events durchsuchen",
+        "findStudios": "Studios finden"
     }
 }

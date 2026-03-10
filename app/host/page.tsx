@@ -1,15 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users, DollarSign, Calendar, TrendingUp, AlertCircle, Check, X } from "lucide-react";
+import { Users, DollarSign, Calendar, TrendingUp, AlertCircle, Check, X, Plus } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { BookingActionButtons } from "@/components/host/booking-action-buttons";
 import { formatEventDate } from "@/lib/date-utils";
 
 export default async function HostDashboardOverview() {
     const supabase = await createClient();
+    const t = await getTranslations('host');
+    const tCommon = await getTranslations('common');
 
     if (!supabase) {
         return redirect("/login");
@@ -103,12 +106,12 @@ export default async function HostDashboardOverview() {
             {/* Welcome */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-serif font-bold text-stone-900">Host Dashboard</h1>
+                    <h1 className="text-2xl font-serif font-bold text-stone-900">{t('dashboard')}</h1>
                     <p className="text-stone-500">Welcome back, {user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'Host'}.</p>
                 </div>
                 <div className="flex gap-2">
                     <Button size="sm" variant="outline" asChild>
-                        <Link href="/host/inquiries">Studio Inquiries</Link>
+                        <Link href="/host/inquiries">{t('studioInquiries')}</Link>
                     </Button>
                     <Button size="sm" variant="outline" asChild>
                         <Link href="/profile">View Public Profile</Link>
@@ -206,7 +209,7 @@ export default async function HostDashboardOverview() {
             {/* Pending Requests List */}
             {pendingBookings.length > 0 && (
                 <div>
-                    <h2 className="text-lg font-serif font-semibold text-stone-900 mb-4">Pending Event Requests</h2>
+                    <h2 className="text-lg font-serif font-semibold text-stone-900 mb-4">{t('pendingRequests')}</h2>
                     <div className="bg-white rounded-xl border border-moss-200 overflow-hidden shadow-sm">
                         <div className="divide-y divide-stone-100">
                             {pendingBookings.map((booking: any) => (
@@ -236,9 +239,9 @@ export default async function HostDashboardOverview() {
             {/* Upcoming Events List */}
             <div>
                 <div className="flex justify-between items-end mb-4">
-                    <h2 className="text-lg font-serif font-semibold text-stone-900">Your Events</h2>
+                    <h2 className="text-lg font-serif font-semibold text-stone-900">{t('myEvents')}</h2>
                     <Button variant="link" asChild className="text-moss-600 p-0 h-auto">
-                        <Link href="/host/events">Manage All</Link>
+                        <Link href="/host/events">{tCommon('viewAll')}</Link>
                     </Button>
                 </div>
 
@@ -257,8 +260,19 @@ export default async function HostDashboardOverview() {
                                 </Button>
                             </div>
                         )) : (
-                            <div className="p-8 text-center text-stone-500">
-                                No events yet. <Link href="/host/events/create" className="text-moss-600 font-medium underline">Create your first event</Link>.
+                            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                                <div className="h-12 w-12 bg-stone-100 rounded-full flex items-center justify-center mb-3">
+                                    <Calendar className="h-6 w-6 text-stone-400" />
+                                </div>
+                                <h3 className="text-base font-medium text-stone-900 mb-1">{t('noEvents')}</h3>
+                                <p className="text-sm text-stone-500 mb-4 max-w-sm">
+                                    {t('noEventsSubtitle')}
+                                </p>
+                                <Link href="/host/events/create">
+                                    <Button size="sm" className="bg-moss-600 hover:bg-moss-700 text-white gap-2">
+                                        <Plus className="h-3 w-3" /> {t('createEvent')}
+                                    </Button>
+                                </Link>
                             </div>
                         )}
                     </div>

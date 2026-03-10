@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,8 @@ import { CancelInquiryButton } from "./components/cancel-inquiry-button";
 
 export default async function BookingsPage() {
     const supabase = await createClient();
+    const t = await getTranslations('bookings');
+    const tCommon = await getTranslations('common');
 
     if (!supabase) {
         return <div className="p-8 text-center text-stone-500">Backend not configured for bookings.</div>;
@@ -86,18 +89,21 @@ export default async function BookingsPage() {
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between mb-8">
-                <h1 className="text-3xl font-serif font-bold text-stone-900">Your Bookings</h1>
+                <h1 className="text-3xl font-serif font-bold text-stone-900">{t('title')}</h1>
                 <Link href="/">
-                    <Button variant="outline">Browse More Events</Button>
+                    <Button variant="outline">{t('browseMoreEvents')}</Button>
                 </Link>
             </div>
 
             {!allBookings || allBookings.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-stone-200">
-                    <h3 className="text-lg font-medium text-stone-900 mb-2">No bookings yet</h3>
-                    <p className="text-stone-500 mb-6">You haven't requested to join any events or studios.</p>
+                <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-stone-200">
+                    <div className="h-16 w-16 bg-stone-50 rounded-full flex items-center justify-center mb-4">
+                        <Calendar className="h-8 w-8 text-stone-400" />
+                    </div>
+                    <h3 className="text-xl font-serif font-bold text-stone-900 mb-2">{t('noBookings')}</h3>
+                    <p className="text-stone-500 mb-6 max-w-sm text-center">{t('noBookingsSubtitle')}</p>
                     <Link href="/">
-                        <Button className="bg-moss-600 hover:bg-moss-700">Explore Events</Button>
+                        <Button className="bg-moss-600 hover:bg-moss-700">{t('exploreEvents')}</Button>
                     </Link>
                 </div>
             ) : (
@@ -140,9 +146,9 @@ export default async function BookingsPage() {
                                             {booking.checked_in ? 'Attended' : booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                                         </Badge>
                                         <Badge variant="outline" className="text-stone-500 border-stone-200">
-                                            {isEvent ? 'Event' : 'Studio'}
+                                            {isEvent ? tCommon('event') : tCommon('studio')}
                                         </Badge>
-                                        <span className="text-xs text-stone-400">Requested {new Date(booking.created_at).toLocaleDateString()}</span>
+                                        <span className="text-xs text-stone-400">{t('requested')} {new Date(booking.created_at).toLocaleDateString()}</span>
                                     </div>
 
                                     <h3 className="text-lg font-bold text-stone-900 mb-1 truncate">{title}</h3>
@@ -162,7 +168,7 @@ export default async function BookingsPage() {
                                 {/* Action */}
                                 <div className="flex flex-col items-end gap-2">
                                     <Link href={linkHref}>
-                                        <Button variant="ghost" size="sm">View {isEvent ? 'Event' : 'Studio'}</Button>
+                                        <Button variant="ghost" size="sm">{isEvent ? t('viewEvent') : t('viewStudio')}</Button>
                                     </Link>
 
                                     {isEvent && booking.status === 'pending' && (

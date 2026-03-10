@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useTranslations } from "next-intl";
 import { Send, Loader2 } from "lucide-react"; // Import Loader2
 import { createClient } from "@/lib/supabase/client";
 import { sendMessage } from "@/app/messages/actions";
@@ -33,6 +34,7 @@ interface ChatInterfaceProps {
 }
 
 export function ChatInterface({ initialMessages, currentUser, conversationId, otherUser }: ChatInterfaceProps) {
+    const t = useTranslations('messages');
     const [messages, setMessages] = useState<Message[]>(initialMessages);
     const [inputValue, setInputValue] = useState("");
     const [isSending, setIsSending] = useState(false);
@@ -116,7 +118,7 @@ export function ChatInterface({ initialMessages, currentUser, conversationId, ot
                     </Avatar>
                     <div>
                         <h3 className="font-bold text-stone-900">{otherUser.name}</h3>
-                        <p className="text-xs text-stone-500">Online</p>
+                        <p className="text-xs text-stone-500">{t('online')}</p>
                     </div>
                 </div>
             </div>
@@ -126,7 +128,7 @@ export function ChatInterface({ initialMessages, currentUser, conversationId, ot
                 <div className="flex flex-col justify-end min-h-full space-y-4">
                     {messages.length === 0 && (
                         <div className="text-center text-stone-400 py-10">
-                            No messages yet. Say hello!
+                            {t('emptyChat')}
                         </div>
                     )}
                     {messages.map((msg) => {
@@ -154,7 +156,7 @@ export function ChatInterface({ initialMessages, currentUser, conversationId, ot
                     <Input
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
-                        placeholder="Type a message..."
+                        placeholder={t('typeMessage')}
                         className="flex-1 bg-stone-50 border-stone-200 focus-visible:ring-moss-500"
                         autoComplete="off"
                         disabled={isSending}

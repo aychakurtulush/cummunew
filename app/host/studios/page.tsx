@@ -4,10 +4,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, MapPin, Building2, Image as ImageIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { getTranslations } from "next-intl/server";
 import { DeleteStudioButton } from "./components/delete-studio-button";
 
 export default async function HostStudiosPage() {
     const supabase = await createClient();
+    const t = await getTranslations('host');
+    const tCommon = await getTranslations('common');
 
     if (!supabase) {
         return redirect("/login");
@@ -28,13 +31,13 @@ export default async function HostStudiosPage() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-serif font-bold text-stone-900">My Studios</h1>
-                    <p className="text-stone-500 text-sm">Manage your venues and spaces</p>
+                    <h1 className="text-2xl font-serif font-bold text-stone-900">{t('myStudios')}</h1>
+                    <p className="text-stone-500 text-sm">{t('myStudiosSubtitle')}</p>
                 </div>
                 <Link href="/host/studios/create">
                     <Button className="bg-moss-600 hover:bg-moss-700 text-white gap-2">
                         <PlusCircle className="h-4 w-4" />
-                        List New Studio
+                        {t('listStudio')}
                     </Button>
                 </Link>
             </div>
@@ -68,20 +71,20 @@ export default async function HostStudiosPage() {
 
                                 <div className="flex items-center gap-2 text-stone-500 text-sm">
                                     <MapPin className="h-3.5 w-3.5" />
-                                    <span className="truncate">{studio.location || "No location set"}</span>
+                                    <span className="truncate">{studio.location || tCommon('noLocation')}</span>
                                 </div>
 
                                 <div className="flex items-center justify-between pt-2 border-t border-stone-100">
                                     <div className="text-sm">
                                         <span className="font-medium text-stone-900">
-                                            {studio.price_per_hour ? `€${studio.price_per_hour}` : "Price TBD"}
+                                            {studio.price_per_hour ? `€${studio.price_per_hour}` : tCommon('priceTbd')}
                                         </span>
-                                        <span className="text-stone-500"> / hour</span>
+                                        <span className="text-stone-500"> / {tCommon('hour')}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Link href={`/host/studios/${studio.id}/edit`}>
                                             <Button variant="ghost" size="sm" className="text-stone-500 hover:text-stone-900">
-                                                Edit
+                                                {tCommon('edit')}
                                             </Button>
                                         </Link>
                                         <DeleteStudioButton studioId={studio.id} />
@@ -92,17 +95,17 @@ export default async function HostStudiosPage() {
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-20 bg-white rounded-xl border border-dashed border-stone-300">
+                <div className="flex flex-col items-center justify-center py-20 px-4 bg-white rounded-xl border border-dashed border-stone-300 text-center">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-stone-50 mb-4">
                         <Building2 className="h-8 w-8 text-stone-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-stone-900">No studios listed yet</h3>
+                    <h3 className="text-lg font-medium text-stone-900">{t('noStudios')}</h3>
                     <p className="text-stone-500 max-w-sm mx-auto mt-2 mb-6">
-                        Start earning by listing your creative space for workshops and events.
+                        {t('noStudiosSubtitle')}
                     </p>
                     <Link href="/host/studios/create">
                         <Button className="bg-moss-600 hover:bg-moss-700 text-white">
-                            List Your First Studio
+                            {t('listFirstStudio')}
                         </Button>
                     </Link>
                 </div>
