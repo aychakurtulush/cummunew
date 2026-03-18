@@ -107,14 +107,14 @@ export default async function HostDashboardOverview() {
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-2xl font-serif font-bold text-stone-900">{t('dashboard')}</h1>
-                    <p className="text-stone-500">Welcome back, {user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'Host'}.</p>
+                    <p className="text-stone-500">{t('welcome', { name: user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'Host' })}</p>
                 </div>
                 <div className="flex gap-2">
                     <Button size="sm" variant="outline" asChild>
                         <Link href="/host/inquiries">{t('studioInquiries')}</Link>
                     </Button>
                     <Button size="sm" variant="outline" asChild>
-                        <Link href="/profile">View Public Profile</Link>
+                        <Link href="/profile">{t('viewPublicProfile')}</Link>
                     </Button>
                 </div>
             </div>
@@ -123,29 +123,29 @@ export default async function HostDashboardOverview() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card className="hover:shadow-sm transition-shadow">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-stone-600">Total Revenue</CardTitle>
+                        <CardTitle className="text-sm font-medium text-stone-600">{t('totalRevenue')}</CardTitle>
                         <DollarSign className="h-4 w-4 text-stone-400" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-stone-900">€{totalRevenue}</div>
-                        <p className="text-xs text-stone-500">Estimated earnings</p>
+                        <p className="text-xs text-stone-500">{t('estimatedEarnings')}</p>
                     </CardContent>
                 </Card>
 
                 <Card className="hover:shadow-sm transition-shadow">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-stone-600">Confirmed Guests</CardTitle>
+                        <CardTitle className="text-sm font-medium text-stone-600">{t('confirmedGuests')}</CardTitle>
                         <Users className="h-4 w-4 text-stone-400" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-stone-900">{totalBookings}</div>
-                        <p className="text-xs text-stone-500">Across all events</p>
+                        <p className="text-xs text-stone-500">{t('acrossAllEvents')}</p>
                     </CardContent>
                 </Card>
 
                 <Card className={`hover:shadow-sm transition-shadow ${totalPendingCount > 0 ? 'border-moss-500 bg-moss-50' : ''}`}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-stone-600">Pending Actions</CardTitle>
+                        <CardTitle className="text-sm font-medium text-stone-600">{t('pendingActions')}</CardTitle>
                         <AlertCircle className={`h-4 w-4 ${totalPendingCount > 0 ? 'text-moss-600' : 'text-stone-400'}`} />
                     </CardHeader>
                     <CardContent>
@@ -153,19 +153,19 @@ export default async function HostDashboardOverview() {
                             {totalPendingCount}
                         </div>
                         <p className={`text-xs ${totalPendingCount > 0 ? 'text-moss-600' : 'text-stone-500'}`}>
-                            {pendingBookings.length} events, {pendingInquiries?.length || 0} studios
+                            {t('pendingCounts', { events: pendingBookings.length, studios: pendingInquiries?.length || 0 })}
                         </p>
                     </CardContent>
                 </Card>
 
                 <Card className="hover:shadow-sm transition-shadow">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-stone-600">Active Events</CardTitle>
+                        <CardTitle className="text-sm font-medium text-stone-600">{t('activeEvents')}</CardTitle>
                         <TrendingUp className="h-4 w-4 text-stone-400" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-stone-900">{upcomingEventsCount}</div>
-                        <p className="text-xs text-stone-500">Upcoming on calendar</p>
+                        <p className="text-xs text-stone-500">{t('upcomingOnCalendar')}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -174,9 +174,9 @@ export default async function HostDashboardOverview() {
             {inquiriesWithNames.length > 0 && (
                 <div>
                     <div className="flex justify-between items-end mb-4">
-                        <h2 className="text-lg font-serif font-semibold text-stone-900">New Studio Requests</h2>
+                        <h2 className="text-lg font-serif font-semibold text-stone-900">{t('newStudioRequests')}</h2>
                         <Button variant="link" asChild className="text-moss-600 p-0 h-auto">
-                            <Link href="/host/inquiries">Manage All ({inquiriesWithNames.length})</Link>
+                            <Link href="/host/inquiries">{t('manageAllWithCount', { count: inquiriesWithNames.length })}</Link>
                         </Button>
                     </div>
                     <div className="bg-white rounded-xl border border-moss-200 overflow-hidden shadow-sm">
@@ -197,7 +197,7 @@ export default async function HostDashboardOverview() {
                                         </div>
                                     </div>
                                     <Button size="sm" asChild className="bg-moss-600 hover:bg-moss-700">
-                                        <Link href="/host/inquiries">Review</Link>
+                                        <Link href="/host/inquiries">{t('review')}</Link>
                                     </Button>
                                 </div>
                             ))}
@@ -219,12 +219,12 @@ export default async function HostDashboardOverview() {
                                             Evt
                                         </div>
                                         <div>
-                                            <h4 className="font-semibold text-stone-900 text-sm">Request for "{booking.events?.title}"</h4>
-                                            <p className="text-xs text-stone-500">Received {formatEventDate(booking.created_at, 'dd/MM/yyyy')}</p>
+                                            <h4 className="font-semibold text-stone-900 text-sm">{t('requestForTitle', { title: booking.events?.title })}</h4>
+                                            <p className="text-xs text-stone-500">{t('receivedDate', { date: formatEventDate(booking.created_at, 'dd/MM/yyyy') })}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <Badge className="bg-amber-100 text-amber-800 border-amber-200">Pending</Badge>
+                                        <Badge className="bg-amber-100 text-amber-800 border-amber-200">{t('pendingBadge')}</Badge>
 
                                         {/* Action Buttons Component */}
                                         <BookingActionButtons bookingId={booking.id} status={booking.status} />
@@ -256,7 +256,7 @@ export default async function HostDashboardOverview() {
                                     </p>
                                 </div>
                                 <Button variant="ghost" size="sm" asChild>
-                                    <Link href={`/host/events/${event.id}`}>Manage</Link>
+                                    <Link href={`/host/events/${event.id}`}>{t('manage')}</Link>
                                 </Button>
                             </div>
                         )) : (

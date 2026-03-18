@@ -263,8 +263,8 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                     </h3>
                                     <p className="text-stone-500 text-sm mb-2">{t('verifiedHost')}</p>
                                     <p className="text-stone-600 leading-relaxed text-sm max-w-lg">
-                                        This event is organized by {hostProfile?.full_name || "a member"}
-                                        {event.studios ? ` and hosted at ${event.studios.name}.` : "."}
+                                        {t('organizedBy')} {hostProfile?.full_name || "a member"}
+                                        {event.studios ? ` ${t('at')} ${event.studios.name}.` : "."}
                                     </p>
                                 </div>
                             </div>
@@ -290,41 +290,41 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                 {event.materials_provided && (
                                     <div className="flex items-center gap-2">
                                         <Check className="h-4 w-4 text-moss-600" />
-                                        <span>All materials provided</span>
+                                        <span>{t('materialsProvided')}</span>
                                     </div>
                                 )}
                                 {event.is_guided && (
                                     <div className="flex items-center gap-2">
                                         <Check className="h-4 w-4 text-moss-600" />
-                                        <span>Guided session</span>
+                                        <span>{t('guidedSession')}</span>
                                     </div>
                                 )}
                                 {event.seating_type && (
                                     <div className="flex items-center gap-2">
                                         <Check className="h-4 w-4 text-moss-600" />
-                                        <span className="capitalize">{event.seating_type} seating</span>
+                                        <span className="capitalize">{t('seating', { type: event.seating_type })}</span>
                                     </div>
                                 )}
                                 {event.difficulty_level && event.difficulty_level !== 'all' && (
                                     <div className="flex items-center gap-2">
                                         <Check className="h-4 w-4 text-moss-600" />
-                                        <span className="capitalize">Level: {event.difficulty_level}</span>
+                                        <span className="capitalize">{t('level', { level: event.difficulty_level })}</span>
                                     </div>
                                 )}
                                 {event.age_range && event.age_range !== 'all' && (
                                     <div className="flex items-center gap-2">
                                         <Check className="h-4 w-4 text-moss-600" />
-                                        <span className="capitalize">Age: {event.age_range.replace('_', ' ')}</span>
+                                        <span className="capitalize">{t('age', { range: event.age_range.replace('_', ' ') })}</span>
                                     </div>
                                 )}
                                 {event.languages && event.languages.length > 0 && (
                                     <div className="flex items-center gap-2">
                                         <Globe className="h-4 w-4 text-moss-600" />
-                                        <span>{event.languages.join(', ')}</span>
+                                        <span>{t('language')}: {event.languages.join(', ')}</span>
                                     </div>
                                 )}
                                 {!event.materials_provided && !event.is_guided && !event.seating_type && !event.difficulty_level && !event.age_range && (!event.languages || event.languages.length === 0) && (
-                                    <span className="text-sm italic text-stone-400">No specific details listed.</span>
+                                    <span className="text-sm italic text-stone-400">{t('noDetails')}</span>
                                 )}
                             </div>
                         </div>
@@ -337,8 +337,8 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <span className="text-2xl font-bold text-stone-900">{event.price !== null && event.price > 0 ? `€${event.price}` : 'Free'}</span>
-                                    {event.price !== null && event.price > 0 && <span className="text-stone-500 text-sm ml-1">per person</span>}
+                                    <span className="text-2xl font-bold text-stone-900">{event.price !== null && event.price > 0 ? `€${event.price}` : t('free')}</span>
+                                    {event.price !== null && event.price > 0 && <span className="text-stone-500 text-sm ml-1">{t('perPerson')}</span>}
                                 </div>
                                 {event.avg_rating && (
                                     <div className="flex items-center gap-1 text-sm font-bold text-amber-600">
@@ -371,7 +371,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                                 <span className="text-xs">{formatEventTime(event.start_time)} - {formatEventTime(event.end_time)}</span>
                                             </div>
                                             <div className="text-xs font-medium text-moss-700">
-                                                {spotsLeft} spots left
+                                                {t('spotsLeft', { n: spotsLeft })}
                                             </div>
                                         </button>
                                     </div>

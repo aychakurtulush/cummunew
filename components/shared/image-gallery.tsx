@@ -103,9 +103,9 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
                     </div>
                 ) : (
                     <div className="grid grid-cols-4 gap-1.5 h-64 md:h-[480px]">
-                        <GalleryThumb src={mainImage} alt={`${alt} 1`} onClick={() => openLightbox(0)} className="col-span-2 row-span-2" />
-                        <div className="col-span-2 grid grid-cols-2 grid-rows-2 gap-1.5 h-full relative">
-                            {sideImages.slice(0, 4).map((img, i) => (
+                        <GalleryThumb src={mainImage} alt={`${alt} 1`} onClick={() => openLightbox(0)} className="col-span-3 row-span-2" />
+                        <div className="col-span-1 grid grid-rows-2 gap-1.5 h-full relative">
+                            {sideImages.slice(0, 2).map((img, i) => (
                                 <div key={i + 1} className="relative overflow-hidden group rounded-sm h-full w-full">
                                     <GalleryThumb
                                         src={img}
@@ -113,12 +113,12 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
                                         onClick={() => openLightbox(i + 1)}
                                         className="h-full w-full"
                                     />
-                                    {i === 3 && validImages.length > 5 && (
+                                    {i === 1 && validImages.length > 3 && (
                                         <button
-                                            onClick={() => openLightbox(4)}
-                                            className="absolute inset-0 bg-black/40 hover:bg-black/50 transition-colors flex flex-col items-center justify-center text-white font-semibold text-xl"
+                                            onClick={() => openLightbox(2)}
+                                            className="absolute inset-0 bg-black/40 hover:bg-black/50 transition-colors flex flex-col items-center justify-center text-white font-semibold text-lg"
                                         >
-                                            <span>+{validImages.length - 5}</span>
+                                            <span>+{validImages.length - 3}</span>
                                         </button>
                                     )}
                                 </div>
@@ -134,7 +134,7 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
                     onClick={() => openLightbox(0)}
                     className="text-sm font-medium text-stone-600 hover:text-stone-900 underline underline-offset-2 transition-colors"
                 >
-                    View all {validImages.length} photos
+                    {alt !== 'studio' ? `View all ${validImages.length} photos` : `View all ${validImages.length} photos`}
                 </button>
             </div>
 

@@ -2,13 +2,15 @@ import { login, signup } from '../actions'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
-import { Label } from "@radix-ui/react-label" // Ensure this is installed or use custom Label but standard is better
+import { Label } from "@radix-ui/react-label"
 import Link from "next/link"
 import { AtmosphereBackground } from "@/components/ui/atmosphere-background"
+import { getTranslations } from "next-intl/server"
 
 export default async function LoginPage(props: any) {
     const searchParams = await props.searchParams;
     const error = searchParams?.error;
+    const t = await getTranslations('auth.login');
 
     // ...
 
@@ -22,9 +24,9 @@ export default async function LoginPage(props: any) {
 
             <Card className="w-full max-w-md border-stone-200 shadow-soft">
                 <CardHeader className="space-y-1 text-center">
-                    <CardTitle className="text-2xl font-serif font-bold text-stone-900">Welcome back</CardTitle>
+                    <CardTitle className="text-2xl font-serif font-bold text-stone-900">{t('title')}</CardTitle>
                     <CardDescription className="text-stone-500">
-                        Enter your email to sign in to your account
+                        {t('subtitle')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -37,35 +39,35 @@ export default async function LoginPage(props: any) {
 
                     <form action={login} className="space-y-4">
                         <div className="space-y-2">
-                            <label htmlFor="email" className="text-sm font-medium text-stone-700">Email</label>
+                            <label htmlFor="email" className="text-sm font-medium text-stone-700">{t('email')}</label>
                             <Input id="email" name="email" type="email" placeholder="m@example.com" required />
                         </div>
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <label htmlFor="password" className="text-sm font-medium text-stone-700">Password</label>
-                                <Link href="#" className="text-xs text-stone-500 hover:text-stone-900">Forgot password?</Link>
+                                <label htmlFor="password" className="text-sm font-medium text-stone-700">{t('password')}</label>
+                                <Link href="#" className="text-xs text-stone-500 hover:text-stone-900">{t('forgotPassword')}</Link>
                             </div>
                             <Input id="password" name="password" type="password" required />
                         </div>
                         <Button type="submit" className="w-full bg-moss-600 hover:bg-moss-700 text-white">
-                            Sign In
+                            {t('submit')}
                         </Button>
                     </form>
 
                     <div className="relative my-6">
                         <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-stone-200" /></div>
-                        <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-stone-500">Or continue with</span></div>
+                        <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-stone-500">{t('orContinueWith')}</span></div>
                     </div>
 
                     <div className="space-y-4">
-                        <Button variant="outline" className="w-full">Google</Button>
+                        <Button variant="outline" className="w-full">{t('continueWithGoogle')}</Button>
                     </div>
 
                 </CardContent>
                 <CardFooter className="flex justify-center text-sm text-stone-500">
-                    Don't have an account?
+                    {t('noAccount')}
                     <Link href="/signup" className="ml-1 font-medium text-stone-900 hover:underline underline-offset-4">
-                        Sign up
+                        {t('signupLink')}
                     </Link>
                 </CardFooter>
             </Card>

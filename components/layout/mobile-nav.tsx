@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useTranslations } from 'next-intl';
 
-export function MobileNav() {
+export function MobileNav({ user }: { user: any }) {
     const pathname = usePathname();
     const [open, setOpen] = useState(false);
     const t = useTranslations('nav');
@@ -53,12 +53,26 @@ export function MobileNav() {
                             </Link>
                         );
                     })}
-                    <div className="mt-4">
-                        <Link href="/host/events/create" onClick={() => setOpen(false)}>
-                            <Button className="w-full bg-moss-600 text-white">
-                                {t('hostAnEvent')}
+                    <div className="mt-4 space-y-3">
+                        <Link href="/host" onClick={() => setOpen(false)}>
+                            <Button variant="outline" className="w-full justify-start gap-2">
+                                {t('hostDashboard')}
                             </Button>
                         </Link>
+                        {!user && (
+                            <div className="grid grid-cols-2 gap-2 mt-4">
+                                <Link href="/login" onClick={() => setOpen(false)}>
+                                    <Button variant="ghost" className="w-full">
+                                        {t('login')}
+                                    </Button>
+                                </Link>
+                                <Link href="/signup" onClick={() => setOpen(false)}>
+                                    <Button className="w-full bg-moss-600 text-white">
+                                        {t('signup')}
+                                    </Button>
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 </nav>
             </SheetContent>

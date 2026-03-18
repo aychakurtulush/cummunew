@@ -17,7 +17,10 @@
         "hero": {
             "badge": "Berlin Community Plattform",
             "title": "Finde deine Leute.",
-            "subtitle": "Entdecke lokale Workshops, Treffen und kreative Räume. Schließe dich Nachbarn an, die deine Leidenschaften teilen."
+            "subtitle": "Entdecke lokale Workshops, Treffen und kreative Räume. Schließe dich Nachbarn an, die deine Leidenschaften teilen.",
+            "searchPlaceholder": "Nach Events, Hobbys, Workshops suchen...",
+            "popular": "Beliebt:",
+            "search": "Suchen"
         },
         "explore": {
             "title": "Events erkunden",
@@ -148,6 +151,8 @@
     "event": {
         "aboutEvent": "Über dieses Event",
         "eventDetails": "Event-Details",
+        "organizedBy": "Dieses Event wird organisiert von",
+        "askHost": "Gastgeber fragen",
         "hostedBy": "Gastgeber:",
         "at": "bei",
         "verifiedHost": "Verifizierter Gastgeber",
@@ -166,10 +171,12 @@
         "onWaitlist": "Auf der Warteliste",
         "bookNow": "Buchung anfragen",
         "eventFull": "Event ist ausgebucht",
-        "allMaterialsProvided": "Alle Materialien inklusive",
+        "materialsProvided": "Alle Materialien inklusive",
         "guidedSession": "Angeleitete Session",
         "seating": "{type} Sitzplätze",
         "level": "Level: {level}",
+        "levelLabel": "Level",
+        "language": "Sprache",
         "age": "Alter: {range}",
         "noDetails": "Keine spezifischen Details angegeben.",
         "reportEvent": "Event melden",
@@ -177,6 +184,7 @@
         "free": "Kostenlos",
         "contactHost": "Gastgeber kontaktieren",
         "viewBookings": "Deine Buchungen ansehen",
+        "signupToBook": "Registriere dich, um eine Buchung anzufragen",
         "communewDisclaimer": "Communew verbindet Gastgeber und Gäste. Gastgeber sind für die von ihnen organisierten Events verantwortlich."
     },
     "host": {
@@ -189,9 +197,27 @@
             "settings": "Einstellungen",
             "studios": "Studios",
             "createEvent": "Event erstellen",
-            "switchToUser": "Zur Nutzeransicht wechseln"
+            "switchToUser": "Zur Nutzeransicht wechseln",
+            "newBadge": "Neu"
         },
         "dashboard": "Gastgeber-Dashboard",
+        "welcome": "Willkommen zurück, {name}.",
+        "viewPublicProfile": "Öffentliches Profil ansehen",
+        "totalRevenue": "Gesamtumsatz",
+        "estimatedEarnings": "Geschätzte Einnahmen",
+        "confirmedGuests": "Bestätigte Gäste",
+        "acrossAllEvents": "Über alle Events hinweg",
+        "pendingActions": "Anstehende Aktionen",
+        "pendingCounts": "{events} Events, {studios} Studios",
+        "activeEvents": "Aktive Events",
+        "upcomingOnCalendar": "Demnächst im Kalender",
+        "newStudioRequests": "Neue Studio-Anfragen",
+        "manageAllWithCount": "Alle verwalten ({count})",
+        "review": "Überprüfen",
+        "requestForTitle": "Anfrage für \"{title}\"",
+        "receivedDate": "Erhalten am {date}",
+        "pendingBadge": "Ausstehend",
+        "manage": "Verwalten",
         "myEvents": "Meine Events",
         "myStudios": "Meine Studios",
         "myStudiosSubtitle": "Verwalte deine Veranstaltungsorte und Räume",
@@ -294,5 +320,57 @@
         "typeMessage": "Schreibe eine Nachricht...",
         "browseEvents": "Events durchsuchen",
         "findStudios": "Studios finden"
+    },
+    "actions": {
+        "events": {
+            "authRequired": "Nicht angemeldet",
+            "alreadyBooked": "Bereits gebucht",
+            "bookingFailed": "Buchung fehlgeschlagen",
+            "unauthorizedHost": "Nicht autorisiert: Du bist nicht der Gastgeber dieses Events",
+            "eventFull": "Bestätigung nicht möglich: Event ist ausgebucht",
+            "adminRequired": "Admin-Rechte erforderlich",
+            "notifications": {
+                "newRequest": {
+                    "title": "Neue Buchungsanfrage",
+                    "message": "{name} möchte an \"{title}\" teilnehmen"
+                },
+                "approved": {
+                    "title": "Buchung bestätigt"
+                },
+                "declined": {
+                    "title": "Buchung abgelehnt"
+                },
+                "statusUpdate": {
+                    "message": "Deine Buchung für \"{title}\" wurde {status}."
+                }
+            },
+            "status": {
+                "confirmed": "bestätigt",
+                "declined": "abgelehnt"
+            }
+        },
+        "host": {
+            "authRequired": "Sitzung abgelaufen. Bitte melde dich erneut an.",
+            "banned": "Dein Konto wurde dauerhaft von Communew gesperrt.",
+            "suspended": "Dein Konto ist vorübergehend bis zum {date} gesperrt.",
+            "invalidStart": "Ungültige Startzeit.",
+            "futureEnd": "Die Endzeit muss nach der Startzeit liegen.",
+            "uploadFailed": "Fehler beim Hochladen des Bildes: {error}",
+            "overbooked": "Dieses Studio ist für diesen Zeitraum bereits für ein anderes Event gebucht.",
+            "createSuccess": "Event erfolgreich erstellt",
+            "updateSuccess": "Event erfolgreich aktualisiert",
+            "deleteSuccess": "Event erfolgreich gelöscht",
+            "studioCreateSuccess": "Studio erfolgreich erstellt",
+            "unauthorized": "Nicht autorisierter Zugriff",
+            "idMissing": "ID fehlt"
+        }
+    },
+    "notifications": {
+        "title": "Benachrichtigungen",
+        "empty": "Noch keine Benachrichtigungen",
+        "markAllRead": "Alle als gelesen markieren",
+        "markAsRead": "Als gelesen markieren",
+        "newNotification": "Neue Benachrichtigung",
+        "view": "Ansehen"
     }
 }

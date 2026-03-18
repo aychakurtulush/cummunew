@@ -80,7 +80,7 @@ export function HostSideNav() {
                     >
                         <Building2 className="h-4 w-4" />
                         {t('studios')}
-                        <Badge className="ml-auto bg-stone-100 text-stone-600 hover:bg-stone-200" variant="secondary">New</Badge>
+                        <Badge className="ml-auto bg-stone-100 text-stone-600 hover:bg-stone-200" variant="secondary">{t('newBadge')}</Badge>
                     </Button>
                 </Link>
             </nav>

@@ -5,8 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 export function HeroSearch() {
+    const t = useTranslations('home.hero');
     const router = useRouter();
     const searchParams = useSearchParams();
     const [query, setQuery] = useState(searchParams.get("q") || "");
@@ -44,7 +46,7 @@ export function HeroSearch() {
                 </div>
                 <Input
                     type="text"
-                    placeholder="Search for events, pottery, yoga..."
+                    placeholder={t('searchPlaceholder')}
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     className="h-16 pl-14 pr-32 bg-white text-stone-900 border-stone-200 rounded-2xl text-lg shadow-xl shadow-stone-200/50 focus:ring-moss-500 focus:border-moss-500 transition-all placeholder:text-stone-400"
@@ -54,14 +56,14 @@ export function HeroSearch() {
                         type="submit"
                         className="bg-stone-900 hover:bg-stone-800 text-white rounded-xl px-6 h-12 font-medium transition-all"
                     >
-                        Search
+                        {t('search')}
                     </Button>
                 </div>
             </div>
 
             {/* Quick Suggestions */}
             <div className="flex flex-wrap gap-2 mt-4">
-                <span className="text-xs font-semibold text-stone-400 uppercase tracking-wider py-1.5">Popular:</span>
+                <span className="text-xs font-semibold text-stone-400 uppercase tracking-wider py-1.5">{t('popular')}</span>
                 {["Workshops", "Community", "Berlin", "Wellness"].map((tag) => (
                     <button
                         key={tag}

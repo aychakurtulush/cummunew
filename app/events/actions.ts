@@ -5,15 +5,19 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
 import { headers } from 'next/headers'
+import { getTranslations } from 'next-intl/server'
 
 export async function bookEvent(formData: FormData) {
     const eventId = formData.get('eventId') as string
 
     const supabase = await createClient()
-    if (!supabase) return { error: "Demo Mode: Backend not configured" }
+    const t = await getTranslations('actions.events');
+    const commonT = await getTranslations('common');
+    
+    if (!supabase) return { error: commonT('error') }
 
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: "Not authenticated" }
+    if (!user) return { error: t('authRequired') }
 
     // Check if already booked
     const { data: existingBooking } = await supabase
@@ -23,7 +27,7 @@ export async function bookEvent(formData: FormData) {
         .eq('user_id', user.id)
         .single()
 
-    if (existingBooking) return { success: true, message: "Already booked" }
+    if (existingBooking) return { success: true, message: t('alreadyBooked') }
 
     // Fetch event details
     const { data: eventData } = await supabase
@@ -46,7 +50,7 @@ export async function bookEvent(formData: FormData) {
         .single()
 
     if (error || !insertedBooking) {
-        return { error: error?.message || "Failed to create booking" }
+        return { error: error?.message || t('bookingFailed') }
     }
 
     const bookingId = insertedBooking.id;
@@ -55,23 +59,27 @@ export async function bookEvent(formData: FormData) {
     // They are saved as 'pending' and we notify the host.
     // The Host will review and if they approve, the participant will receive an email with Payment Instructions.
 
-    // --- Email Notification Start ---
+    // --- Email & Notification Notification Start ---
     try {
-        // 1. Notify Host in-app
-        await supabase
+        const { createServiceRoleClient } = await import('@/lib/supabase/service');
+        const adminSupabase = createServiceRoleClient();
+
+        // 1. Notify Host in-app (Using Admin Client as RLS is now restricted)
+        await adminSupabase
             .from('notifications')
             .insert({
                 user_id: eventData.creator_user_id,
                 type: 'booking_request',
-                title: 'New Booking Request',
-                message: `${user.user_metadata?.full_name || 'Someone'} requested to join "${eventData.title}"`,
+                title: t('notifications.newRequest.title'),
+                message: t('notifications.newRequest.message', { 
+                    name: user.user_metadata?.full_name || 'Someone',
+                    title: eventData.title 
+                }),
                 link: '/host/inquiries',
                 metadata: { event_id: eventId, booking_id: insertedBooking.id }
             });
 
         // 2. Fetch Host email and notify via email
-        const { createServiceRoleClient } = await import('@/lib/supabase/service');
-        const adminSupabase = createServiceRoleClient();
         const { data: hostUser } = await adminSupabase.auth.admin.getUserById(eventData.creator_user_id);
 
         if (hostUser?.user?.email) {
@@ -168,9 +176,10 @@ export async function cancelBooking(bookingId: string) {
 
     if (!supabase) return { error: "Database connection failed" }
 
+    const t = await getTranslations('actions.events');
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) return { error: "Not authenticated" }
+    if (!user) return { error: t('authRequired') }
 
     // Verify ownership and fetch event time
     const { data: booking } = await supabase
@@ -277,8 +286,9 @@ export async function updateBookingStatus(bookingId: string, status: 'confirmed'
     const supabase = await createClient()
 
     if (!supabase) return { error: "Database connection failed" }
+    const t = await getTranslations('actions.events');
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: "Not authenticated" }
+    if (!user) return { error: t('authRequired') }
 
     // Verify host ownership (security check)
     // We need to check if the CURRENT user is the CREATOR of the event associated with this booking
@@ -301,9 +311,12 @@ export async function updateBookingStatus(bookingId: string, status: 'confirmed'
         .single()
 
     if (!booking) return { error: "Booking not found" }
-    // @ts-ignore - Supabase types might be tricky with joins
-    if (booking.events?.creator_user_id !== user.id) {
-        return { error: "Unauthorized: You are not the host of this event" }
+    
+    // booking.events is returned as an array by the query
+    const event = Array.isArray(booking.events) ? booking.events[0] : booking.events;
+    
+    if (!event || event.creator_user_id !== user.id) {
+        return { error: t('unauthorizedHost') }
     }
 
     // Check capacity if confirming
@@ -325,7 +338,7 @@ export async function updateBookingStatus(bookingId: string, status: 'confirmed'
             .eq('status', 'confirmed');
 
         if (event && (count || 0) >= event.capacity) {
-            return { error: "Cannot confirm: Event is at full capacity" };
+            return { error: t('eventFull') };
         }
     }
 
@@ -342,16 +355,22 @@ export async function updateBookingStatus(bookingId: string, status: 'confirmed'
 
     // Notify Participant
     try {
+        const { createServiceRoleClient } = await import('@/lib/supabase/service');
+        const adminSupabase = createServiceRoleClient();
+        
         // @ts-ignore
-        const eventTitle = booking.events?.title || 'your event';
+        const eventTitle = (event as any)?.title || 'your event';
 
-        await supabase
+        await adminSupabase
             .from('notifications')
             .insert({
                 user_id: booking.user_id,
                 type: 'booking_status',
-                title: `Booking ${status === 'confirmed' ? 'Confirmed' : 'Declined'}`,
-                message: `Your booking for "${eventTitle}" has been ${status}.`,
+                title: status === 'confirmed' ? t('notifications.approved.title') : t('notifications.declined.title'),
+                message: t('notifications.statusUpdate.message', { 
+                    title: eventTitle,
+                    status: status === 'confirmed' ? t('status.confirmed') : t('status.declined') 
+                }),
                 link: '/bookings',
                 metadata: { booking_id: bookingId, status: status }
             });
@@ -364,8 +383,6 @@ export async function updateBookingStatus(bookingId: string, status: 'confirmed'
         // Since we are in a server action, `supabase.auth.getUser()` gives US (the Host).
         // We need admin client to get the participant's email by ID.
 
-        const { createServiceRoleClient } = await import('@/lib/supabase/service');
-        const adminSupabase = createServiceRoleClient();
         const { data: participantUser } = await adminSupabase.auth.admin.getUserById(participantUserId);
 
         if (participantUser?.user?.email) {
@@ -388,11 +405,18 @@ export async function updateBookingStatus(bookingId: string, status: 'confirmed'
 
 export async function approveEvent(eventId: string) {
     const supabase = await createClient()
-    if (!supabase) return { error: "Database connection failed" }
-
-    // Auth check (Admin only - for MVP, any user can do this, detailed roles later)
+    const t = await getTranslations('actions.events');
+    const commonT = await getTranslations('common');
+    
+    if (!supabase) return { error: commonT('error') }
+    
+    // Auth check (Admin only)
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: "Not authenticated" }
+    if (!user) return { error: t('authRequired') }
+
+    // Role check
+    const { data: profile } = await supabase.from('profiles').select('role').eq('user_id', user.id).single();
+    if (profile?.role !== 'admin') return { error: t('adminRequired') };
 
     const { error } = await supabase
         .from('events')
@@ -411,10 +435,13 @@ export async function approveEvent(eventId: string) {
 
 export async function rejectEvent(eventId: string) {
     const supabase = await createClient()
-    if (!supabase) return { error: "Database connection failed" }
+    const t = await getTranslations('actions.events');
+    const commonT = await getTranslations('common');
+    
+    if (!supabase) return { error: commonT('error') }
 
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: "Not authenticated" }
+    if (!user) return { error: t('authRequired') }
 
     const { error } = await supabase
         .from('events')
@@ -433,10 +460,13 @@ export async function rejectEvent(eventId: string) {
 
 export async function deleteEvent(eventId: string) {
     const supabase = await createClient()
-    if (!supabase) return { error: "Database connection failed" }
+    const t = await getTranslations('actions.events');
+    const commonT = await getTranslations('common');
+    
+    if (!supabase) return { error: commonT('error') }
 
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: "Not authenticated" }
+    if (!user) return { error: t('authRequired') }
 
     // Verify ownership
     const { data: event } = await supabase
@@ -445,18 +475,16 @@ export async function deleteEvent(eventId: string) {
         .eq('id', eventId)
         .single()
 
-    if (!event) return { error: "Event not found" }
+    if (!event) return { error: t('eventNotFound') || "Event not found" }
 
     if (event.creator_user_id !== user.id) {
-        return { error: "Unauthorized: You do not own this event" }
+        return { error: t('unauthorizedHost') }
     }
 
     try {
         // 1. Try with Service Role (Admin) Client first
-        // This bypasses RLS if the migration wasn't applied
         const { createServiceRoleClient } = await import('@/lib/supabase/service');
         const adminSupabase = createServiceRoleClient();
-
 
         const { error: adminError } = await adminSupabase
             .from('events')
@@ -464,22 +492,17 @@ export async function deleteEvent(eventId: string) {
             .eq('id', eventId)
 
         if (!adminError) {
-
             revalidatePath('/host/events')
             revalidatePath('/')
             return { success: true }
         }
 
         console.error('[deleteEvent] Admin delete failed:', adminError);
-        // If admin delete fails (e.g. key missing/invalid), fall through to standard delete
     } catch (e) {
-        console.error('[deleteEvent] Service role client init failed (likely missing SUPABASE_SERVICE_ROLE_KEY):', e);
-        // Fall through to standard delete
+        console.error('[deleteEvent] Service role client init failed:', e);
     }
 
     // 2. Fallback to Standard User Client
-    // This works if the RLS policy is correctly set (e.g. via migration 012)
-
     const { data, error } = await supabase
         .from('events')
         .delete()
@@ -488,14 +511,12 @@ export async function deleteEvent(eventId: string) {
 
     if (error) {
         console.error('[deleteEvent] Standard delete error:', error)
-        return { error: `Delete failed: ${error.message}` }
+        return { error: error.message }
     }
 
     if (!data || data.length === 0) {
-        console.error('[deleteEvent] No rows deleted. Likely RLS permission issue.');
-        return { error: "Delete failed: Permission denied. Please ensure migration '012_allow_event_deletion.sql' is applied to your database." }
+        return { error: "Delete failed: Permission denied." }
     }
-
 
     revalidatePath('/host/events')
     revalidatePath('/')
@@ -504,10 +525,13 @@ export async function deleteEvent(eventId: string) {
 
 export async function joinWaitlist(eventId: string) {
     const supabase = await createClient()
-    if (!supabase) return { error: "Backend not configured" }
+    const t = await getTranslations('actions.events');
+    const commonT = await getTranslations('common');
+    
+    if (!supabase) return { error: commonT('error') }
 
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: "Not authenticated" }
+    if (!user) return { error: t('authRequired') }
 
     const { error } = await supabase
         .from('waitlist')
@@ -518,7 +542,7 @@ export async function joinWaitlist(eventId: string) {
 
     if (error) {
         if (error.code === '23505') { // Unique violation
-            return { success: true, message: "Already on waitlist" }
+            return { success: true, message: t('alreadyOnWaitlist') || "Already on waitlist" }
         }
         return { error: error.message }
     }
@@ -529,10 +553,13 @@ export async function joinWaitlist(eventId: string) {
 
 export async function leaveWaitlist(eventId: string) {
     const supabase = await createClient()
-    if (!supabase) return { error: "Backend not configured" }
+    const t = await getTranslations('actions.events');
+    const commonT = await getTranslations('common');
+    
+    if (!supabase) return { error: commonT('error') }
 
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: "Not authenticated" }
+    if (!user) return { error: t('authRequired') }
 
     const { error } = await supabase
         .from('waitlist')
@@ -550,10 +577,13 @@ export async function leaveWaitlist(eventId: string) {
 
 export async function sendBroadcastMessage(eventId: string, message: string) {
     const supabase = await createClient();
-    if (!supabase) return { error: "Database connection failed" };
+    const t = await getTranslations('actions.events');
+    const commonT = await getTranslations('common');
+    
+    if (!supabase) return { error: commonT('error') };
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { error: "Not authenticated" };
+    if (!user) return { error: t('authRequired') };
 
     // 1. Verify Ownership
     const { data: event } = await supabase
@@ -563,7 +593,7 @@ export async function sendBroadcastMessage(eventId: string, message: string) {
         .single();
 
     if (!event || event.creator_user_id !== user.id) {
-        return { error: "Unauthorized" };
+        return { error: t('unauthorizedHost') };
     }
 
     // 2. Fetch all confirmed participants
@@ -574,7 +604,7 @@ export async function sendBroadcastMessage(eventId: string, message: string) {
         .eq('status', 'confirmed');
 
     if (!bookings || bookings.length === 0) {
-        return { error: "No confirmed attendees to message" };
+        return { error: t('noConfirmedAttendees') || "No confirmed attendees to message" };
     }
 
     // 3. Get all emails
@@ -584,8 +614,6 @@ export async function sendBroadcastMessage(eventId: string, message: string) {
     const userIds = bookings.map(b => b.user_id);
     const userEmails: string[] = [];
 
-    // Next.js/Supabase doesn't have a bulk 'getUsers' easily, so we loop or use a custom function.
-    // Given the small pilot scale, sequential is fine for now, but we can parallelize.
     const emailPromises = userIds.map(id => adminSupabase.auth.admin.getUserById(id));
     const userResults = await Promise.all(emailPromises);
 
@@ -596,27 +624,27 @@ export async function sendBroadcastMessage(eventId: string, message: string) {
     });
 
     if (userEmails.length === 0) {
-        return { error: "No emails found for attendees" };
+        return { error: t('noEmailsFound') || "No emails found for attendees" };
     }
 
     // 4. Send Broadcast
     const { sendBroadcastEmail } = await import('@/lib/email');
     await sendBroadcastEmail(userEmails, event.title, message);
 
-    // 5. Log the message (optional)
-    // We could create a 'broadcasts' table later if needed.
-
     return { success: true };
 }
 
 export async function toggleFollow(hostId: string) {
     const supabase = await createClient();
-    if (!supabase) return { error: "Database connection failed" };
+    const t = await getTranslations('actions.events');
+    const commonT = await getTranslations('common');
+    
+    if (!supabase) return { error: commonT('error') };
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { error: "Not authenticated" };
+    if (!user) return { error: t('authRequired') };
 
-    if (user.id === hostId) return { error: "You cannot follow yourself" };
+    if (user.id === hostId) return { error: t('cannotFollowSelf') || "You cannot follow yourself" };
 
     // Check if following
     const { data: existing } = await supabase

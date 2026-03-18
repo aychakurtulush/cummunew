@@ -19,7 +19,7 @@ export async function Navbar() {
                         Communew.
                     </Link>
                     <NavLinks />
-                    <MobileNav />
+                    <MobileNav user={user} />
                 </div>
 
                 <div className="flex-1" />

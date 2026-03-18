@@ -17,7 +17,10 @@
     "hero": {
       "badge": "Berlin Community Platform",
       "title": "Find your people.",
-      "subtitle": "Discover local workshops, gatherings, and creative spaces. Join neighbors who share your passions."
+      "subtitle": "Discover local workshops, gatherings, and creative spaces. Join neighbors who share your passions.",
+      "searchPlaceholder": "Search for events, hobbies, workshops...",
+      "popular": "Popular:",
+      "search": "Search"
     },
     "explore": {
       "title": "Explore Events",
@@ -148,6 +151,8 @@
   "event": {
     "aboutEvent": "About this event",
     "eventDetails": "Event Details",
+    "organizedBy": "This event is organized by",
+    "askHost": "Ask Host",
     "hostedBy": "Hosted by",
     "at": "at",
     "verifiedHost": "Verified Host",
@@ -166,10 +171,12 @@
     "onWaitlist": "On Waitlist",
     "bookNow": "Request to Book",
     "eventFull": "Event is at full capacity",
-    "allMaterialsProvided": "All materials provided",
+    "materialsProvided": "All materials provided",
     "guidedSession": "Guided session",
     "seating": "{type} seating",
     "level": "Level: {level}",
+    "levelLabel": "Level",
+    "language": "Language",
     "age": "Age: {range}",
     "noDetails": "No specific details listed.",
     "reportEvent": "Report Event",
@@ -177,6 +184,7 @@
     "free": "Free",
     "contactHost": "Contact Host",
     "viewBookings": "View your bookings",
+    "signupToBook": "Sign up to request a booking",
     "communewDisclaimer": "Communew connects hosts and guests. Hosts are responsible for the events they organize."
   },
   "host": {
@@ -189,9 +197,27 @@
       "settings": "Settings",
       "studios": "Studios",
       "createEvent": "Create Event",
-      "switchToUser": "Switch to User View"
+      "switchToUser": "Switch to User View",
+      "newBadge": "New"
     },
     "dashboard": "Host Dashboard",
+    "welcome": "Welcome back, {name}.",
+    "viewPublicProfile": "View Public Profile",
+    "totalRevenue": "Total Revenue",
+    "estimatedEarnings": "Estimated earnings",
+    "confirmedGuests": "Confirmed Guests",
+    "acrossAllEvents": "Across all events",
+    "pendingActions": "Pending Actions",
+    "pendingCounts": "{events} events, {studios} studios",
+    "activeEvents": "Active Events",
+    "upcomingOnCalendar": "Upcoming on calendar",
+    "newStudioRequests": "New Studio Requests",
+    "manageAllWithCount": "Manage All ({count})",
+    "review": "Review",
+    "requestForTitle": "Request for \"{title}\"",
+    "receivedDate": "Received {date}",
+    "pendingBadge": "Pending",
+    "manage": "Manage",
     "myEvents": "My Events",
     "myStudios": "My Studios",
     "myStudiosSubtitle": "Manage your venues and creative spaces",
@@ -294,5 +320,57 @@
     "typeMessage": "Type a message...",
     "browseEvents": "Browse Events",
     "findStudios": "Find Studios"
+  },
+  "actions": {
+    "events": {
+      "authRequired": "Not authenticated",
+      "alreadyBooked": "Already booked",
+      "bookingFailed": "Failed to create booking",
+      "unauthorizedHost": "Unauthorized: You are not the host of this event",
+      "eventFull": "Cannot confirm: Event is at full capacity",
+      "adminRequired": "Admin privileges required",
+      "notifications": {
+        "newRequest": {
+          "title": "New Booking Request",
+          "message": "{name} requested to join \"{title}\""
+        },
+        "approved": {
+          "title": "Booking Confirmed"
+        },
+        "declined": {
+          "title": "Booking Declined"
+        },
+        "statusUpdate": {
+          "message": "Your booking for \"{title}\" has been {status}."
+        }
+      },
+      "status": {
+        "confirmed": "confirmed",
+        "declined": "declined"
+      }
+    },
+    "host": {
+      "authRequired": "Session expired. Please log in again.",
+      "banned": "Your account has been permanently banned from Communew.",
+      "suspended": "Your account is temporarily suspended until {date}.",
+      "invalidStart": "Invalid start time.",
+      "futureEnd": "End time must be after the start time.",
+      "uploadFailed": "Failed to upload image: {error}",
+      "overbooked": "This studio is already booked for another event during this time.",
+      "createSuccess": "Event created successfully",
+      "updateSuccess": "Event updated successfully",
+      "deleteSuccess": "Event deleted successfully",
+      "studioCreateSuccess": "Studio created successfully",
+      "unauthorized": "Unauthorized access",
+      "idMissing": "ID missing"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "markAllRead": "Mark all read",
+    "markAsRead": "Mark as read",
+    "newNotification": "New notification",
+    "view": "View"
   }
 }

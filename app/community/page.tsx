@@ -76,7 +76,6 @@ export default async function CommunityPage() {
     });
 
     const categoriesCount = categoryCounts?.length || 0;
-    console.log("CommunityPage data:", { finalMemberCount, finalEventsThisWeek, categoriesCount });
 
     const categories = [
         { name: "Workshops", icon: <Sparkles className="h-4 w-4" />, count: catMap["Arts & Crafts"] || 0 },

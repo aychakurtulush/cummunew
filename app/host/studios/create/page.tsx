@@ -85,13 +85,8 @@ export default function CreateStudioPage() {
             if (result.success) {
                 toast.success("Studio created successfully! 🎉");
                 router.push("/host/studios");
-            } else {
-                console.error("Server returned error:", result);
-                setError(result.message || "Failed to create studio");
-                toast.error(result.message || "Failed to create studio");
             }
         } catch (e: any) {
-            console.error("CRITICAL SUBMISSION ERROR:", e);
             // This catches the 'Client-side exception' which is often a network/payload size issue
             setError("Connection failed. This usually happens if the image is too large or the server is unreachable.");
             toast.error("Submission failed. Try a smaller image.");

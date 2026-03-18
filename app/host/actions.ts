@@ -6,18 +6,21 @@ import { createClient } from '@/lib/supabase/server'
 
 import { parseBerlinInput } from '@/lib/date-utils';
 import { geocodeAddress } from '@/lib/geocoding';
+import { getTranslations } from 'next-intl/server';
 
 export async function createEvent(prevState: any, formData: FormData) {
     const supabase = await createClient()
+    const t = await getTranslations('actions.host');
+    const commonT = await getTranslations('common');
 
     if (!supabase) {
-        return { message: "Demo Mode: Backend not configured" }
+        return { message: commonT('error') }
     }
 
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-        return { message: "Session expired. Please log in again." }
+        return { message: t('authRequired') }
     }
 
     // Trust & Safety: Check for suspension/ban
@@ -28,10 +31,10 @@ export async function createEvent(prevState: any, formData: FormData) {
         .single();
 
     if (profile?.is_banned) {
-        return { message: "Your account has been permanently banned from Communew." }
+        return { message: t('banned') }
     }
     if (profile?.is_suspended_until && new Date(profile.is_suspended_until) > new Date()) {
-        return { message: `Your account is temporarily suspended until ${new Date(profile.is_suspended_until).toLocaleDateString()}.` }
+        return { message: t('suspended', { date: new Date(profile.is_suspended_until).toLocaleDateString() }) }
     }
 
     const startInput = formData.get('start_time') as string;
@@ -42,7 +45,7 @@ export async function createEvent(prevState: any, formData: FormData) {
     const endTimeString = endInput ? parseBerlinInput(endInput) : null;
 
     if (!startTimeString) {
-        return { message: "Invalid start time." };
+        return { message: t('invalidStart') };
     }
 
     const startTime = new Date(startTimeString);
@@ -50,7 +53,7 @@ export async function createEvent(prevState: any, formData: FormData) {
 
     // Validation: End time must be after start time
     if (endTime <= startTime) {
-        return { message: "End time must be after the start time." };
+        return { message: t('futureEnd') };
     }
 
     // Handle Image Upload if provided
@@ -68,9 +71,7 @@ export async function createEvent(prevState: any, formData: FormData) {
 
         if (uploadError) {
             console.error('STORAGE ERROR uploading image:', uploadError);
-            // We can choose to fail the whole creation or just proceed without image
-            // Failing is safer for UX clarity
-            return { message: `Failed to upload image: ${uploadError.message}` };
+            return { message: t('uploadFailed', { error: uploadError.message }) };
         }
 
         const { data: { publicUrl } } = supabase.storage
@@ -120,7 +121,7 @@ export async function createEvent(prevState: any, formData: FormData) {
             .gt('end_time', startTime.toISOString());
 
         if (overlappingEvents && overlappingEvents.length > 0) {
-            return { message: "This studio is already booked for another event during this time." };
+            return { message: t('overbooked') };
         }
 
         // 1. Fetch studio location and coordinates
@@ -184,12 +185,14 @@ export async function createEvent(prevState: any, formData: FormData) {
 
 export async function updateEvent(prevState: any, formData: FormData) {
     const supabase = await createClient()
+    const t = await getTranslations('actions.host');
+    const commonT = await getTranslations('common');
 
-    if (!supabase) return { message: "Backend unavailable" }
+    if (!supabase) return { message: commonT('error') }
 
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) return { message: "Session expired. Please log in again." }
+    if (!user) return { message: t('authRequired') }
 
     // Trust & Safety: Check for suspension/ban
     const { data: profile } = await supabase
@@ -198,11 +201,11 @@ export async function updateEvent(prevState: any, formData: FormData) {
         .eq('user_id', user.id)
         .single();
 
-    if (profile?.is_banned) return { message: "Account banned." }
-    if (profile?.is_suspended_until && new Date(profile.is_suspended_until) > new Date()) return { message: "Account suspended." }
+    if (profile?.is_banned) return { message: t('banned') }
+    if (profile?.is_suspended_until && new Date(profile.is_suspended_until) > new Date()) return { message: t('suspended', { date: new Date(profile.is_suspended_until).toLocaleDateString() }) }
 
     const eventId = formData.get('id') as string;
-    if (!eventId) return { message: "Event ID missing" };
+    if (!eventId) return { message: t('invalidEventId') || "Event ID missing" };
 
     const startInput = formData.get('start_time') as string;
     const endInput = formData.get('end_time') as string;
@@ -212,14 +215,14 @@ export async function updateEvent(prevState: any, formData: FormData) {
     const endTimeString = endInput ? parseBerlinInput(endInput) : null;
 
     if (!startTimeString) {
-        return { message: "Invalid start time." };
+        return { message: t('invalidStart') };
     }
 
     const startTime = new Date(startTimeString);
     const endTime = endTimeString ? new Date(endTimeString) : new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
 
     if (endTime <= startTime) {
-        return { message: "End time must be after the start time." };
+        return { message: t('futureEnd') };
     }
 
     const location_type = formData.get('location_type') as 'home' | 'studio' | 'partner_venue';
@@ -260,14 +263,16 @@ export async function updateEvent(prevState: any, formData: FormData) {
             .gt('end_time', startTime.toISOString());
 
         if (overlappingEvents && overlappingEvents.length > 0) {
-            return { message: "This studio is already booked for another event during this time." };
+            return { message: t('overbooked') };
         }
 
         const { data: studio } = await supabase.from('studios').select('latitude, longitude, location').eq('id', rawData.studio_id).single();
         latitude = studio?.latitude;
         longitude = studio?.longitude;
-        if (!rawData.city && studio?.location) {
+        if (studio?.location) {
             rawData.city = studio.location.split(',')[0].trim();
+        } else if (!rawData.city) {
+            rawData.city = "Berlin";
         }
     } else if (location_address) {
         const geoResult = await geocodeAddress(location_address);
@@ -306,17 +311,19 @@ export async function updateEvent(prevState: any, formData: FormData) {
 export async function createStudio(prevState: any, formData: FormData) {
 
     const supabase = await createClient()
+    const t = await getTranslations('actions.host');
+    const commonT = await getTranslations('common');
 
     if (!supabase) {
         console.error('[createStudio] No supabase client');
-        return { message: "Demo Mode: Backend not configured", success: false }
+        return { message: commonT('error'), success: false }
     }
 
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
         console.error('[createStudio] No user');
-        return { message: "Session expired. Please log in again.", success: false }
+        return { message: t('authRequired'), success: false }
     }
 
     // Trust & Safety: Check for suspension/ban
@@ -326,8 +333,10 @@ export async function createStudio(prevState: any, formData: FormData) {
         .eq('user_id', user.id)
         .single();
 
-    if (profile?.is_banned) return { message: "Account banned." }
-    if (profile?.is_suspended_until && new Date(profile.is_suspended_until) > new Date()) return { message: "Account suspended." }
+    if (profile?.is_banned) return { message: t('banned') }
+    if (profile?.is_suspended_until && new Date(profile.is_suspended_until) > new Date()) {
+        return { message: t('suspended', { date: new Date(profile.is_suspended_until).toLocaleDateString() }) }
+    }
 
 
     try {
@@ -458,13 +467,15 @@ export async function createStudio(prevState: any, formData: FormData) {
 
 export async function updateStudio(prevState: any, formData: FormData) {
     const supabase = await createClient()
+    const t = await getTranslations('actions.host');
+    const commonT = await getTranslations('common');
 
-    if (!supabase) return { message: "Backend unavailable", success: false }
+    if (!supabase) return { message: commonT('error'), success: false }
 
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-        return { message: "Unauthorized", success: false }
+        return { message: t('authRequired'), success: false }
     }
 
     // Trust & Safety: Check for suspension/ban
@@ -582,10 +593,13 @@ export async function updateStudio(prevState: any, formData: FormData) {
 
 export async function deleteStudio(studioId: string) {
     const supabase = await createClient()
-    if (!supabase) return { error: "Backend unavailable" }
+    const t = await getTranslations('actions.host');
+    const commonT = await getTranslations('common');
+
+    if (!supabase) return { error: commonT('error') }
 
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: "Unauthorized" }
+    if (!user) return { error: t('unauthorized') }
 
     const { error } = await supabase
         .from('studios')

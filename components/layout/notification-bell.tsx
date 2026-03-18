@@ -15,7 +15,8 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { useRouter } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'
-import { enGB } from 'date-fns/locale'
+import { de, enGB } from 'date-fns/locale'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface Notification {
     id: string
@@ -28,11 +29,16 @@ interface Notification {
 }
 
 export function NotificationBell() {
+    const t = useTranslations('notifications')
+    const locale = useLocale()
     const [notifications, setNotifications] = useState<Notification[]>([])
     const [unreadCount, setUnreadCount] = useState(0)
     const [isOpen, setIsOpen] = useState(false)
     const router = useRouter()
     const supabase = createClient()
+
+    // Map next-intl locale to date-fns locale
+    const dateLocale = locale === 'de' ? de : enGB
 
     useEffect(() => {
         let channel: any;
@@ -153,7 +159,7 @@ export function NotificationBell() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80 p-0 overflow-hidden bg-white/95 backdrop-blur-sm border-stone-200 shadow-xl rounded-xl">
                 <div className="flex items-center justify-between p-4 bg-stone-50/50 border-b border-stone-100">
-                    <span className="font-serif font-semibold text-stone-900">Notifications</span>
+                    <span className="font-serif font-semibold text-stone-900">{t('title')}</span>
                     {notifications.length > 0 && (
                         <Button
                             variant="ghost"
@@ -165,14 +171,14 @@ export function NotificationBell() {
                             }}
                             disabled={unreadCount === 0}
                         >
-                            Mark all read
+                            {t('markAllRead')}
                         </Button>
                     )}
                 </div>
                 <div className="max-h-[70vh] overflow-y-auto">
                     {notifications.length === 0 ? (
                         <div className="p-8 text-center text-stone-500 text-sm">
-                            No notifications yet
+                            {t('empty')}
                         </div>
                     ) : (
                         notifications.map((notification) => (
@@ -194,7 +200,7 @@ export function NotificationBell() {
                                         {notification.message}
                                     </p>
                                     <span className="text-[10px] text-stone-400 font-medium pt-1">
-                                        {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: enGB })}
+                                        {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: dateLocale })}
                                     </span>
                                 </div>
                             </DropdownMenuItem>

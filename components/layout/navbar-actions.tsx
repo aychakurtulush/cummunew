@@ -114,7 +114,7 @@ export function NavbarActions({ user: initialUser }: NavbarActionsProps) {
                     </DropdownMenu>
                 </div>
             ) : (
-                <>
+                <div className="hidden sm:flex items-center gap-2">
                     <Link href="/login">
                         <Button variant="ghost" size="sm" className="font-medium text-stone-900">
                             {t('login')}
@@ -125,7 +125,7 @@ export function NavbarActions({ user: initialUser }: NavbarActionsProps) {
                             {t('signup')}
                         </Button>
                     </Link>
-                </>
+                </div>
             )}
         </div>
     );
