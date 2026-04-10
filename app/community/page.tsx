@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Suspense } from "react";
 import { CommunitySkeleton } from "@/components/community/community-skeleton";
 import { formatEventDate } from "@/lib/date-utils";
+import Image from "next/image";
 
 export default async function CommunityPage() {
     const supabase = await createClient();
@@ -129,8 +130,8 @@ export default async function CommunityPage() {
 
                                                 <Card className="border-none shadow-xl shadow-stone-200/40 overflow-hidden group-hover:shadow-moss-900/10 transition-shadow">
                                                     <CardContent className="p-0 flex flex-col sm:flex-row">
-                                                        <div className="w-full sm:w-48 h-32 sm:h-auto bg-stone-100">
-                                                            {event.image_url && <img src={event.image_url} alt="" className="w-full h-full object-cover" />}
+                                                        <div className="w-full sm:w-48 h-32 sm:h-auto bg-stone-100 relative">
+                                                            {event.image_url && <Image src={event.image_url} alt="" fill className="object-cover" />}
                                                         </div>
                                                         <div className="p-5 flex-1 space-y-3">
                                                             <Link href={`/events/${event.id}`}>

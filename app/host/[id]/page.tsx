@@ -10,6 +10,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { FollowButton } from "@/components/host/follow-button";
 import { HostInquiryButton } from "@/components/host/host-inquiry-button";
+import Image from "next/image";
 import { formatEventDate } from "@/lib/date-utils";
 
 export default async function HostProfilePage({ params }: { params: Promise<{ id: string }> }) {
@@ -195,7 +196,7 @@ export default async function HostProfilePage({ params }: { params: Promise<{ id
                                 <Link key={event.id} href={`/events/${event.id}`}>
                                     <div className="relative aspect-[16/10] rounded-[32px] overflow-hidden group shadow-xl">
                                         {event.image_url ? (
-                                            <img src={event.image_url} alt="" className="absolute inset-0 w-full h-full object-cover grayscale-[0.2] group-hover:scale-110 transition-transform duration-700" />
+                                            <Image src={event.image_url} alt="" fill className="object-cover grayscale-[0.2] group-hover:scale-110 transition-transform duration-700" />
                                         ) : (
                                             <div className="absolute inset-0 bg-stone-900 flex items-center justify-center text-stone-700">
                                                 <Calendar className="h-12 w-12" />
@@ -264,7 +265,7 @@ export default async function HostProfilePage({ params }: { params: Promise<{ id
                                 <Link key={event.id} href={`/events/${event.id}`}>
                                     <div className="aspect-square rounded-2xl overflow-hidden relative group grayscale hover:grayscale-0 transition-all duration-500 border border-stone-100">
                                         {event.image_url ? (
-                                            <img src={event.image_url} alt="" className="w-full h-full object-cover" />
+                                            <Image src={event.image_url} alt="" fill className="object-cover" />
                                         ) : (
                                             <div className="w-full h-full bg-stone-50 flex items-center justify-center text-stone-200">
                                                 <Calendar className="h-6 w-6" />

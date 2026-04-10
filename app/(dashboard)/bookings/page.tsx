@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
@@ -124,7 +125,7 @@ export default async function BookingsPage() {
                                 {/* Image */}
                                 <div className="h-20 w-20 sm:h-24 sm:w-24 bg-stone-100 rounded-lg overflow-hidden flex-shrink-0 relative flex items-center justify-center">
                                     {imageUrl ? (
-                                        <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+                                        <Image src={imageUrl} alt="" fill className="object-cover" />
                                     ) : (
                                         <div className="text-xs text-stone-400 font-medium bg-stone-100 p-2 text-center">
                                             [{category}]

@@ -14,6 +14,7 @@ import { ReportButton } from "@/components/shared/report-button";
 import { formatEventDate } from "@/lib/date-utils";
 import { ImageGallery } from "@/components/shared/image-gallery";
 import { getTranslations } from 'next-intl/server';
+import Image from "next/image";
 
 async function getStudio(id: string) {
     const supabase = await createClient();
@@ -259,7 +260,7 @@ export default async function StudioPage({ params }: { params: Promise<{ id: str
                                         <Card className="h-full cursor-pointer overflow-hidden border-stone-200 bg-white hover:border-moss-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col">
                                             <div className="aspect-[3/2] w-full bg-stone-200 relative overflow-hidden">
                                                 {event.image_url ? (
-                                                    <img src={event.image_url} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                                    <Image src={event.image_url} alt={event.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                                                 ) : (
                                                     <div className="absolute inset-0 flex items-center justify-center text-xs text-stone-500 bg-stone-100">
                                                         Event
